@@ -2,188 +2,664 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>个人主页 | Your Name</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>日常集 · 邓杰 & 王泊宁</title>
     <style>
-        /* 基础样式复位 */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+        /* ========== 全局样式 & 复位 ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             line-height: 1.6;
-            color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            background-color: #f9f9f9;
+            color: #1e2a3e;
+            background: #f1f5f9;
+            min-height: 100vh;
         }
 
-        /* 头部设计 */
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* ========== 索引页 · 三个超链接卡片 (邓杰的日常 / 王泊宁的日常 / 两人的共同日常) ========== */
+        .hero-index {
+            min-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(135deg, #fef9f0 0%, #eef2ff 100%);
+            border-radius: 2.5rem;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem 1.8rem;
+        }
+
+        .greeting-tag {
+            font-size: 1rem;
+            letter-spacing: 3px;
+            color: #4b6589;
+            background: rgba(255,255,240,0.7);
+            backdrop-filter: blur(2px);
+            padding: 0.2rem 1rem;
+            border-radius: 40px;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .main-headline {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(125deg, #1e3c4c, #2c6e9e, #e6a157);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .subhead {
+            color: #5d6f8f;
+            margin-bottom: 3rem;
+            border-bottom: 1px solid #cddfe7;
+            padding-bottom: 0.5rem;
+            display: inline-block;
+            font-weight: 500;
+        }
+
+        /* 三卡片布局  */
+        .triple-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0 1.5rem;
+        }
+
+        .daily-card {
+            background: white;
+            width: 250px;
+            padding: 1.8rem 1.2rem;
+            border-radius: 2rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.8rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(210, 225, 245, 0.6);
+            cursor: pointer;
+        }
+
+        .daily-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 35px -12px rgba(0, 0, 0, 0.2);
+            border-color: #bcd0e6;
+            background: #ffffff;
+        }
+
+        .card-icon {
+            font-size: 3.6rem;
+            background: #f0f4fe;
+            width: 90px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: 0.2s;
+        }
+
+        .daily-card:hover .card-icon {
+            background: #e2ecff;
+            transform: scale(1.02);
+        }
+
+        .card-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1f3b4c;
+        }
+
+        .card-desc {
+            font-size: 0.8rem;
+            color: #5f7f9e;
+            background: #f5f9ff;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-weight: 500;
+        }
+
+        .daily-note {
+            font-size: 0.75rem;
+            color: #a4b7ce;
+            margin-top: 0.2rem;
+        }
+
+        .footer-note {
+            margin-top: 2.5rem;
+            font-size: 0.8rem;
+            color: #7a8aa5;
+        }
+
+        /* ========== 详情页通用样式 (基于原模板提升，适配三人称) ========== */
+        .profile-page {
+            background: #fefefe;
+            border-radius: 1.8rem;
+            padding: 2rem 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .back-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #eef2ff;
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #1e4a76;
+            text-decoration: none;
+            margin-bottom: 1.8rem;
+            transition: 0.2s;
+        }
+
+        .back-home:hover {
+            background: #e1e9fc;
+            transform: translateX(-4px);
+        }
+
         header {
             text-align: center;
-            margin-bottom: 50px;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #ecf3fa;
+            padding-bottom: 1.2rem;
         }
 
         header h1 {
-            font-size: 2.5rem;
-            color: #222;
-            margin-bottom: 10px;
+            font-size: 2.6rem;
+            color: #153e5a;
+            margin-bottom: 0.3rem;
         }
 
         .contact-info {
-            color: #666;
+            color: #5c6f87;
             font-size: 0.9rem;
         }
 
         .contact-info a {
-            color: #007aff;
+            color: #2c6e9e;
             text-decoration: none;
-            margin: 0 10px;
+            margin: 0 8px;
+            font-weight: 500;
         }
 
-        /* 模块通用样式 */
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+
         section {
             background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            margin-bottom: 30px;
+            padding: 1.5rem 1.8rem;
+            border-radius: 1.2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+            margin-bottom: 1.8rem;
+            border: 1px solid #edf2f7;
         }
 
         h2 {
-            border-left: 4px solid #007aff;
+            border-left: 5px solid #e6a157;
             padding-left: 15px;
-            margin-bottom: 20px;
-            font-size: 1.5rem;
-            color: #222;
+            margin-bottom: 1.2rem;
+            font-size: 1.45rem;
+            color: #1f405b;
         }
 
         .item {
-            margin-bottom: 20px;
+            margin-bottom: 1.2rem;
         }
-
-        .item:last-child { margin-bottom: 0; }
 
         .item-header {
             display: flex;
             justify-content: space-between;
-            font-weight: bold;
-            color: #444;
+            font-weight: 700;
+            color: #1c3b50;
         }
 
         .item-sub {
-            color: #888;
+            color: #6f88a2;
             font-size: 0.85rem;
-            margin-bottom: 8px;
+            margin-bottom: 0.5rem;
         }
 
         ul {
-            padding-left: 20px;
-            color: #555;
+            padding-left: 1.3rem;
+            color: #2d4b6e;
         }
 
-        li { margin-bottom: 5px; }
+        li {
+            margin-bottom: 0.3rem;
+        }
 
-        /* 兴趣爱好标签 */
         .hobbies {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 0.7rem;
         }
 
         .hobby-tag {
-            background: #eef2f7;
-            padding: 6px 15px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            color: #555;
+            background: #eff3f8;
+            padding: 5px 16px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            color: #2b5a7a;
+        }
+
+        .daily-quote {
+            background: #fef6e8;
+            padding: 0.8rem 1.2rem;
+            border-radius: 1rem;
+            margin-top: 0.8rem;
+            font-size: 0.85rem;
+            border-left: 4px solid #e6a157;
+            color: #8b6b3a;
         }
 
         footer {
             text-align: center;
-            font-size: 0.8rem;
-            color: #aaa;
-            margin-top: 50px;
+            font-size: 0.75rem;
+            color: #8fa0b5;
+            margin-top: 2rem;
+            padding-top: 0.5rem;
         }
 
-        /* 手机端适配 */
-        @media (max-width: 600px) {
+        @media (max-width: 700px) {
+            .triple-links { gap: 1rem; }
+            .daily-card { width: 210px; padding: 1.2rem; }
+            .card-name { font-size: 1.4rem; }
+            .main-headline { font-size: 2.2rem; }
+            .profile-page { padding: 1.2rem; }
             .item-header { flex-direction: column; }
-            body { padding: 20px 15px; }
         }
     </style>
 </head>
 <body>
+    <div id="app-root" class="container"></div>
 
-    <header>
-        <h1>张三 (Your Name)</h1>
-        <div class="contact-info">
-            <span>📍 北京，中国</span> | 
-            <a href="mailto:yourname@email.com">Email</a> | 
-            <a href="https://github.com/yourusername">GitHub</a> |
-            <a href="#">Blog</a>
-        </div>
-    </header>
+    <script>
+        // ======================= 三人日常数据 =======================
+        // 1. 邓杰的日常
+        const dengjieData = {
+            id: 'dengjie',
+            name: '邓杰',
+            titleNote: '🌿 邓杰的日常',
+            roleDesc: '全栈工程师 · 光影收集者',
+            location: '📍 上海，中国',
+            email: 'deng.jie@daily.cc',
+            github: 'https://github.com/dengjie',
+            blog: '#',
+            bio: '喜欢将代码写成诗，用快门捕捉日常微光。和泊宁一起探索城市角落，坚信好的技术源自生活热情。目前专注于前端架构与跨端方案，业余时间沉迷胶片相机与复古骑行。',
+            education: {
+                school: '复旦大学 · 软件工程',
+                period: '2017 - 2021',
+                degree: '本科 · 学士学位',
+                details: ['主修课程：算法设计、分布式系统、前端工程化。', '校优秀毕业生，开源贡献者，多次在技术社区分享工程化实践。']
+            },
+            experiences: [
+                {
+                    title: '朝夕科技 · 资深前端工程师',
+                    period: '2021 - 至今',
+                    desc: '负责低代码搭建平台与核心组件库',
+                    highlights: ['主导组件库重构，页面渲染性能提升40%。', '设计可视化编排引擎，支撑日均百万级流量。', '与团队推动技术文档标准化，提升协作效率。']
+                },
+                {
+                    title: '双人日常项目「食光机」',
+                    role: '联合创作者',
+                    extra: '与王泊宁共创的探店记录工具',
+                    highlights: ['小程序累计用户1.2w+，记录双人美食地图。', '独立完成前端架构与地图集成，获得2025年创新工具奖。']
+                }
+            ],
+            hobbies: ['📷 胶片摄影', '☕ 手冲咖啡', '🚴 城市骑行', '🎧 科技播客', '✍️ 技术写作', '🍜 深夜食堂'],
+            customDaily: '最近和王泊宁一起研究复古暗房技术，每个周末都会冲洗胶卷，记录属于两人的光影日记。',
+            extraTogether: '一起维护「两人咖啡馆地图」计划，已经探访超过50家独立咖啡馆。'
+        };
 
-    <section>
-        <h2>个人简介</h2>
-        <p>这里写一段简洁的自我介绍。例如：我是一名热衷于技术的开发者，专注于前端开发与用户体验设计。擅长使用简洁的代码解决复杂的问题，并在开源社区保持活跃。</p>
-    </section>
+        // 2. 王泊宁的日常
+        const wangboningData = {
+            id: 'wangboning',
+            name: '王泊宁',
+            titleNote: '🎨 王泊宁的日常',
+            roleDesc: '创意开发 · 设计思维',
+            location: '📍 杭州，中国',
+            email: 'boning.wang@daily.cc',
+            github: 'https://github.com/wangboning',
+            blog: '#',
+            bio: '设计师出身的开发者，用创意连接代码与美学。和邓杰一起创立「两人日常」品牌，相信日常的温度值得被设计。目前深耕前端动画与AI生成艺术，热爱分享与播客。',
+            education: {
+                school: '浙江大学 · 数字媒体技术',
+                period: '2018 - 2022',
+                degree: '本科 · 学士学位',
+                details: ['主修课程：人机交互、计算机图形学、创意编程。', '作品集获中国设计智造大奖，跨学科创新项目负责人。']
+            },
+            experiences: [
+                {
+                    title: '灵感工作室 · 创意前端工程师',
+                    period: '2022 - 至今',
+                    desc: '负责品牌交互网站与动效系统',
+                    highlights: ['打造高交互官网荣获Awwwards提名。', '开发开源动效库，累计下载2k+，与邓杰共建组件生态。', '主导设计系统落地，统一视觉语言。']
+                },
+                {
+                    title: '播客「杰宁漫谈」',
+                    role: '主播 & 视觉设计',
+                    extra: '与邓杰共同主持，分享技术、设计与生活',
+                    highlights: ['全平台播放量15w+，入选苹果播客“新锐推荐”。', '负责封面设计与shownotes，传递两人日常的温度。']
+                }
+            ],
+            hobbies: ['🎨 数字插画', '🎹 键盘即兴', '🏂 单板滑雪', '🎬 vlog剪辑', '🐱 猫奴日常', '🧩 拼图', '📚 科幻小说'],
+            customDaily: '最近痴迷和邓杰一起摆创意市集，贩卖手冲咖啡与自制zine，用设计记录城市故事。',
+            extraTogether: '每个月的最后一个周末会举办「两人日常分享会」，线上线下联动，交换灵感。'
+        };
 
-    <section>
-        <h2>教育经历</h2>
-        <div class="item">
-            <div class="item-header">
-                <span>某某大学 · 计算机科学与技术</span>
-                <span>2018 - 2022</span>
-            </div>
-            <div class="item-sub">本科 · 学士学位</div>
-            <ul>
-                <li>主修课程：数据结构、算法分析、操作系统、计算机网络。</li>
-                <li>曾获得校级一等奖学金。</li>
-            </ul>
-        </div>
-    </section>
+        // 3. 两人共同的日常 (双人合辑 · 共同经历与交集)
+        const togetherData = {
+            id: 'together',
+            name: '邓杰 & 王泊宁',
+            titleNote: '✨ 两人的共同日常 ✨',
+            roleDesc: '生活合伙人 · 创意共同体',
+            location: '🌍 上海 & 杭州 · 双城记',
+            email: 'hello@duodaily.cc',
+            github: 'https://github.com/duodaily',
+            blog: '#',
+            bio: '「两人日常」是一个关于友谊、创造与共生的记录。邓杰与王泊宁相识于大学社团，从技术竞赛搭档到生活灵感伙伴。我们共同探索代码、设计、食物与城市，相信日常的微光就是最好的作品。这里存放我们共同的项目、旅行和那些闪闪发光的协作时刻。',
+            education: {
+                school: '共同经历 · 跨学科协作',
+                period: '2019 - 至今',
+                degree: '日常大学 · 无限可能',
+                details: ['一起完成30+场黑客马拉松，获得两次全国创新奖项。', '共同发起「两人读书会」, 影响超过3000位同好。', '联合出版电子小册《日常构建手册》。']
+            },
+            experiences: [
+                {
+                    title: '「两人食记」生活品牌',
+                    period: '2023 - 至今',
+                    desc: '共同运营的美食探索IP',
+                    highlights: ['开发小程序+小红书账号矩阵，粉丝累计5w+。', '举办线下「街头美食快闪」活动12场。', '将日常探店经验转化为开源数据可视化项目。']
+                },
+                {
+                    title: '开源协作 · Daily Components',
+                    role: '双维护航者',
+                    extra: '一套轻量级 Vue / React 组件库',
+                    highlights: ['GitHub 累计800+ star，被多个团队采用。', '邓杰负责核心架构，王泊宁负责设计语言与文档。', '体现了两人日常的默契与共建精神。']
+                },
+                {
+                    title: '年度企划「24节气日常展」',
+                    period: '2024-2025',
+                    desc: '摄影 + 代码 + 设计联展',
+                    highlights: ['在上海、杭州双城展出，结合互动装置。', '用代码生成对应节气的动态海报，记录两人视角。', '获得城市文化创新项目资助。']
+                }
+            ],
+            hobbies: ['🤝 共创手作', '🎙️ 双人播客录制', '🚗 公路旅行', '🍲 双人厨艺挑战', '🎮 合作独立游戏', '📸 交换相机计划', '🌿 植物养护'],
+            customDaily: '每个月会有一天“离线日”，放下手机，一起徒步、写生、做饭或者只是发呆。我们相信日常里藏着最持久的诗意。',
+            extraTogether: '我们还在持续更新「两人小报」newsletter，记录共同阅读、灵感和日常对话。欢迎订阅～'
+        };
 
-    <section>
-        <h2>工作/项目经验</h2>
-        <div class="item">
-            <div class="item-header">
-                <span>某某科技有限公司 · 前端工程师</span>
-                <span>2022 - 至今</span>
-            </div>
-            <div class="item-sub">主要负责 SaaS 系统的后台研发</div>
-            <ul>
-                <li>主导了 UI 组件库的重构，将页面加载速度提升了 40%。</li>
-                <li>负责核心业务模块的设计与实现，支撑了每日万级活跃用户的访问。</li>
-            </ul>
-        </div>
+        // 映射关系
+        const pagesMap = {
+            dengjie: dengjieData,
+            wangboning: wangboningData,
+            together: togetherData
+        };
 
-        <div class="item">
-            <div class="item-header">
-                <span>开源项目：MyAwesomeProject</span>
-                <span>项目负责人</span>
-            </div>
-            <div class="item-sub">GitHub Star: 500+</div>
-            <p style="font-size: 0.9rem; color: #555;">一个基于 Vue.js 的轻量级数据可视化工具，帮助开发者快速构建仪表盘。</p>
-        </div>
-    </section>
+        // 渲染个人 / 双人详情页 (基于原模板升级，适应不同主体)
+        function renderDetailPage(personKey) {
+            const data = pagesMap[personKey];
+            if (!data) return renderIndexPage();
 
-    <section>
-        <h2>兴趣爱好</h2>
-        <div class="hobbies">
-            <span class="hobby-tag">📷 摄影</span>
-            <span class="hobby-tag">🚴 骑行</span>
-            <span class="hobby-tag">🎸 吉他</span>
-            <span class="hobby-tag">📖 深度阅读</span>
-            <span class="hobby-tag">💻 开源贡献</span>
-            <span class="hobby-tag">🍜 探店</span>
-        </div>
-    </section>
+            // 动态处理头部展示 (双人页面展示两人名)
+            const isTogether = personKey === 'together';
+            const displayName = data.name;
+            const headerSub = isTogether ? '共同日常 · 平行宇宙' : data.roleDesc;
+            
+            // 构建联系方式（共同日常有特别邮箱和github）
+            const contactHtml = `
+                ${data.location} | 
+                <a href="mailto:${data.email}">Email</a> | 
+                <a href="${data.github}" target="_blank">${isTogether ? '共同GitHub' : 'GitHub'}</a> |
+                <a href="${data.blog}">${isTogether ? '日常小报' : '日常碎片'}</a>
+            `;
 
-    <footer>
-        <p>&copy; 2026 张三. Powered by GitHub Pages.</p>
-    </footer>
+            // 教育经历渲染
+            const eduHtml = `
+                <div class="item">
+                    <div class="item-header">
+                        <span>${data.education.school} · ${data.education.degree}</span>
+                        <span>${data.education.period}</span>
+                    </div>
+                    <ul>
+                        ${data.education.details.map(d => `<li>${d}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
 
+            // 经验渲染
+            const expHtml = data.experiences.map(exp => `
+                <div class="item">
+                    <div class="item-header">
+                        <span>${exp.title} ${exp.role ? '· ' + exp.role : ''}</span>
+                        <span>${exp.period}</span>
+                    </div>
+                    <div class="item-sub">${exp.desc || exp.extra || ''}</div>
+                    <ul>
+                        ${exp.highlights.map(h => `<li>${h}</li>`).join('')}
+                    </ul>
+                </div>
+            `).join('');
+
+            // 兴趣爱好
+            const hobbiesHtml = data.hobbies.map(h => `<span class="hobby-tag">${h}</span>`).join('');
+
+            // 如果是共同的日常，额外增加双人特色模块，否则沿用个人伙伴点缀
+            const togetherExtra = isTogether ? `
+                <div class="daily-quote" style="background:#eef2fa; margin-top:12px;">
+                    🌈 双人日常信条：「创造让彼此发光的瞬间，日常即庆典。」
+                </div>
+            ` : `<div class="daily-quote" style="margin-top:12px;">
+                    🤝 与${personKey === 'dengjie' ? '王泊宁' : '邓杰'}的日常联结：${data.extraTogether}
+                </div>`;
+
+            return `
+                <div class="profile-page">
+                    <a href="#" class="back-home" id="back-to-home">← 返回首页 · 三个日常入口</a>
+                    <header>
+                        <h1>${displayName}</h1>
+                        <div style="font-size:0.9rem; color:#d28b46; margin-bottom:6px;">${data.titleNote}</div>
+                        <div class="contact-info">
+                            ${contactHtml}
+                        </div>
+                        <div style="font-size:0.8rem; margin-top:10px; color:#4f6f8f;">${headerSub}</div>
+                    </header>
+
+                    <section>
+                        <h2>📖 日常自述</h2>
+                        <p>${data.bio}</p>
+                        <div class="daily-quote">
+                            ✨ “${data.customDaily}”
+                        </div>
+                        ${!isTogether ? `<div class="daily-quote" style="margin-top:8px;">💞 双人彩蛋：${data.extraTogether}</div>` : ''}
+                        ${isTogether ? `<div class="daily-quote" style="margin-top:8px;">📌 正在进行：「两人日常·第三季」播客录制 & 城市速写本计划</div>` : ''}
+                    </section>
+
+                    <section>
+                        <h2>📚 ${isTogether ? '共同轨迹 / 教育协作' : '教育经历'}</h2>
+                        ${eduHtml}
+                    </section>
+
+                    <section>
+                        <h2>🚀 ${isTogether ? '共同项目 & 里程碑' : '工作 / 项目经验'}</h2>
+                        ${expHtml}
+                    </section>
+
+                    <section>
+                        <h2>🌟 ${isTogether ? '共同的兴趣爱好' : '兴趣爱好 & 日常碎片'}</h2>
+                        <div class="hobbies">
+                            ${hobbiesHtml}
+                        </div>
+                        ${togetherExtra}
+                    </section>
+
+                    <footer>
+                        <p>&copy; 2026  ${isTogether ? '邓杰 & 王泊宁 · 两人日常志' : `${data.name} & 日常伙伴`}  | 记录此刻，日常万岁。</p>
+                    </footer>
+                </div>
+            `;
+        }
+
+        // 首页渲染 (三个超链接: 邓杰的日常 / 王泊宁的日常 / 两人的共同日常)
+        function renderIndexPage() {
+            return `
+                <div class="hero-index">
+                    <div class="greeting-tag">✦ 双人宇宙 ✦</div>
+                    <div class="main-headline">邓杰 · 王泊宁<br>两人的日常</div>
+                    <div class="subhead">独立轨迹 · 交叠星光</div>
+                    <div class="triple-links">
+                        <!-- 超链接1: 邓杰的日常 -->
+                        <a href="#" class="daily-card" data-person="dengjie">
+                            <div class="card-icon">🌿</div>
+                            <div class="card-name">邓杰的日常</div>
+                            <div class="card-desc">全栈 · 光影收集者</div>
+                            <div class="daily-note">📸 探店 & 胶片日记</div>
+                        </a>
+                        <!-- 超链接2: 王泊宁的日常 -->
+                        <a href="#" class="daily-card" data-person="wangboning">
+                            <div class="card-icon">🎨</div>
+                            <div class="card-name">王泊宁的日常</div>
+                            <div class="card-desc">创意开发 · 设计思维</div>
+                            <div class="daily-note">🎙️ 播客 & 动效魔法</div>
+                        </a>
+                        <!-- 超链接3: 两人的共同日常 -->
+                        <a href="#" class="daily-card" data-person="together">
+                            <div class="card-icon">✨🤝✨</div>
+                            <div class="card-name">两人的共同日常</div>
+                            <div class="card-desc">共同项目 · 双城灵感</div>
+                            <div class="daily-note">📖 播客/食记/联合创作</div>
+                        </a>
+                    </div>
+                    <div class="footer-note">
+                        点击任意卡片 · 走进邓杰、王泊宁以及他们共同创造的日常宇宙<br>
+                        每一个瞬间，都是日常的礼物。
+                    </div>
+                </div>
+            `;
+        }
+
+        // 路由状态管理 (支持浏览器前进后退)
+        let currentView = 'index';   // 'index' or 'profile:dengjie' etc.
+
+        function setRoute(personId = null) {
+            if (personId && pagesMap[personId]) {
+                currentView = `profile:${personId}`;
+                window.history.pushState({ view: currentView, person: personId }, '', `#${personId}`);
+                renderApp();
+            } else {
+                currentView = 'index';
+                window.history.pushState({ view: 'index' }, '', window.location.pathname);
+                renderApp();
+            }
+        }
+
+        function renderApp() {
+            const root = document.getElementById('app-root');
+            if (!root) return;
+
+            if (currentView.startsWith('profile:')) {
+                const personKey = currentView.split(':')[1];
+                if (pagesMap[personKey]) {
+                    root.innerHTML = renderDetailPage(personKey);
+                    const backBtn = document.getElementById('back-to-home');
+                    if (backBtn) {
+                        backBtn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            setRoute(null);
+                        });
+                    }
+                } else {
+                    root.innerHTML = renderIndexPage();
+                    attachIndexEvents();
+                }
+            } else {
+                root.innerHTML = renderIndexPage();
+                attachIndexEvents();
+            }
+        }
+
+        // 给首页三个卡片绑定事件 (分别跳转至对应日常)
+        function attachIndexEvents() {
+            const cards = document.querySelectorAll('.daily-card[data-person]');
+            cards.forEach(card => {
+                card.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const personId = card.getAttribute('data-person');
+                    if (personId && pagesMap[personId]) {
+                        currentView = `profile:${personId}`;
+                        window.history.pushState({ view: currentView, person: personId }, '', `#${personId}`);
+                        renderApp();
+                    }
+                });
+            });
+        }
+
+        // 监听popstate (后退/前进)
+        window.addEventListener('popstate', (event) => {
+            if (event.state && event.state.view) {
+                if (event.state.view === 'index') {
+                    currentView = 'index';
+                    renderApp();
+                } else if (event.state.view.startsWith('profile:')) {
+                    currentView = event.state.view;
+                    renderApp();
+                } else {
+                    const hash = window.location.hash.slice(1);
+                    if (hash && pagesMap[hash]) {
+                        currentView = `profile:${hash}`;
+                        renderApp();
+                    } else {
+                        currentView = 'index';
+                        renderApp();
+                    }
+                }
+            } else {
+                const hash = window.location.hash.slice(1);
+                if (hash && pagesMap[hash]) {
+                    currentView = `profile:${hash}`;
+                    renderApp();
+                } else {
+                    currentView = 'index';
+                    renderApp();
+                }
+            }
+        });
+
+        // 初始化: 根据hash加载或首页
+        function init() {
+            const initialHash = window.location.hash.slice(1);
+            if (initialHash && pagesMap[initialHash]) {
+                currentView = `profile:${initialHash}`;
+                window.history.replaceState({ view: currentView, person: initialHash }, '', `#${initialHash}`);
+                renderApp();
+            } else {
+                currentView = 'index';
+                window.history.replaceState({ view: 'index' }, '', window.location.pathname);
+                renderApp();
+            }
+        }
+
+        init();
+    </script>
 </body>
 </html>
