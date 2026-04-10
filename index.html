@@ -1,1 +1,189 @@
-<h1>你好，这是我的个人主页！</h1>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人主页 | Your Name</title>
+    <style>
+        /* 基础样式复位 */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: #f9f9f9;
+        }
+
+        /* 头部设计 */
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: #222;
+            margin-bottom: 10px;
+        }
+
+        .contact-info {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .contact-info a {
+            color: #007aff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        /* 模块通用样式 */
+        section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            border-left: 4px solid #007aff;
+            padding-left: 15px;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            color: #222;
+        }
+
+        .item {
+            margin-bottom: 20px;
+        }
+
+        .item:last-child { margin-bottom: 0; }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            color: #444;
+        }
+
+        .item-sub {
+            color: #888;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+        }
+
+        ul {
+            padding-left: 20px;
+            color: #555;
+        }
+
+        li { margin-bottom: 5px; }
+
+        /* 兴趣爱好标签 */
+        .hobbies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .hobby-tag {
+            background: #eef2f7;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #aaa;
+            margin-top: 50px;
+        }
+
+        /* 手机端适配 */
+        @media (max-width: 600px) {
+            .item-header { flex-direction: column; }
+            body { padding: 20px 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>张三 (Your Name)</h1>
+        <div class="contact-info">
+            <span>📍 北京，中国</span> | 
+            <a href="mailto:yourname@email.com">Email</a> | 
+            <a href="https://github.com/yourusername">GitHub</a> |
+            <a href="#">Blog</a>
+        </div>
+    </header>
+
+    <section>
+        <h2>个人简介</h2>
+        <p>这里写一段简洁的自我介绍。例如：我是一名热衷于技术的开发者，专注于前端开发与用户体验设计。擅长使用简洁的代码解决复杂的问题，并在开源社区保持活跃。</p>
+    </section>
+
+    <section>
+        <h2>教育经历</h2>
+        <div class="item">
+            <div class="item-header">
+                <span>某某大学 · 计算机科学与技术</span>
+                <span>2018 - 2022</span>
+            </div>
+            <div class="item-sub">本科 · 学士学位</div>
+            <ul>
+                <li>主修课程：数据结构、算法分析、操作系统、计算机网络。</li>
+                <li>曾获得校级一等奖学金。</li>
+            </ul>
+        </div>
+    </section>
+
+    <section>
+        <h2>工作/项目经验</h2>
+        <div class="item">
+            <div class="item-header">
+                <span>某某科技有限公司 · 前端工程师</span>
+                <span>2022 - 至今</span>
+            </div>
+            <div class="item-sub">主要负责 SaaS 系统的后台研发</div>
+            <ul>
+                <li>主导了 UI 组件库的重构，将页面加载速度提升了 40%。</li>
+                <li>负责核心业务模块的设计与实现，支撑了每日万级活跃用户的访问。</li>
+            </ul>
+        </div>
+
+        <div class="item">
+            <div class="item-header">
+                <span>开源项目：MyAwesomeProject</span>
+                <span>项目负责人</span>
+            </div>
+            <div class="item-sub">GitHub Star: 500+</div>
+            <p style="font-size: 0.9rem; color: #555;">一个基于 Vue.js 的轻量级数据可视化工具，帮助开发者快速构建仪表盘。</p>
+        </div>
+    </section>
+
+    <section>
+        <h2>兴趣爱好</h2>
+        <div class="hobbies">
+            <span class="hobby-tag">📷 摄影</span>
+            <span class="hobby-tag">🚴 骑行</span>
+            <span class="hobby-tag">🎸 吉他</span>
+            <span class="hobby-tag">📖 深度阅读</span>
+            <span class="hobby-tag">💻 开源贡献</span>
+            <span class="hobby-tag">🍜 探店</span>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 张三. Powered by GitHub Pages.</p>
+    </footer>
+
+</body>
+</html>
