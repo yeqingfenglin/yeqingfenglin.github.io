@@ -41,29 +41,91 @@
         .hobby-list { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.8rem 0; }
         .hobby-badge { background: #eef3fc; padding: 0.2rem 0.8rem; border-radius: 30px; font-size: 0.75rem; }
         
-        /* ========== 全新专栏页面：从上到下展示所有文章 ========== */
-        .column-fullpage { max-width: 900px; margin: 0 auto; }
-        .column-header-section { text-align: center; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid #e2e8f0; }
-        .column-header-section h1 { font-size: 2.2rem; color: #1e3c4c; margin-bottom: 0.5rem; }
-        .column-header-section .column-desc { color: #6c8dae; font-size: 0.9rem; }
-        .column-stats { background: #eef2ff; padding: 0.8rem 1.5rem; border-radius: 40px; display: inline-block; margin-top: 1rem; font-size: 0.85rem; }
-        .articles-list { display: flex; flex-direction: column; gap: 2rem; }
-        .article-item-full {
+        /* ========== 专栏列表页样式（小块卡片） ========== */
+        .column-container { max-width: 1100px; margin: 0 auto; }
+        .column-header { margin-bottom: 2rem; text-align: center; }
+        .posts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.8rem; margin-top: 1.5rem; }
+        .post-card {
             background: white;
             border-radius: 1.5rem;
-            padding: 1.8rem;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
-            transition: all 0.3s ease;
+            padding: 1.5rem;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.05);
+            transition: 0.2s;
             border: 1px solid #eef2ff;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            min-height: 220px;
         }
-        .article-item-full:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,0.1); }
-        .article-title-full { font-size: 1.6rem; font-weight: 700; color: #1e3c4c; margin-bottom: 0.5rem; }
-        .article-meta-full { display: flex; gap: 1.5rem; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px dashed #e2e8f0; color: #8ba0bc; font-size: 0.85rem; }
-        .article-content-full { font-size: 1rem; line-height: 1.7; color: #334e68; }
-        .article-content-full img { max-width: 100%; border-radius: 1rem; margin: 1rem 0; }
-        .article-content-full p { margin-bottom: 1rem; }
-        .empty-column { text-align: center; padding: 3rem; background: #faf9fe; border-radius: 2rem; color: #7c8ba0; }
-        .back-to-home { margin-bottom: 1.5rem; }
+        .post-card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px rgba(0,0,0,0.1); }
+        .post-title { font-size: 1.3rem; font-weight: 700; color: #1e3c4c; margin-bottom: 0.3rem; }
+        .post-meta { font-size: 0.75rem; color: #8ba0bc; margin-bottom: 0.8rem; display: flex; gap: 1rem; }
+        .post-preview { font-size: 0.85rem; color: #334e68; line-height: 1.4; margin-bottom: 1rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+        .read-more-link {
+            position: absolute;
+            bottom: 1.2rem;
+            right: 1.5rem;
+            color: #e6a157;
+            font-weight: 500;
+            text-decoration: none;
+            font-size: 0.85rem;
+            cursor: pointer;
+            background: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            transition: 0.2s;
+        }
+        .read-more-link:hover { background: #e6a157; color: white; }
+        .empty-posts { text-align: center; padding: 3rem; background: #faf9fe; border-radius: 2rem; color: #7c8ba0; }
+        
+        /* ========== 独立文章详情页样式（从上到下） ========== */
+        .article-detail-page {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 2rem;
+            padding: 2.5rem;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1);
+        }
+        .article-detail-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eef2ff;
+        }
+        .article-detail-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #1e3c4c;
+            line-height: 1.3;
+            margin-bottom: 0.8rem;
+        }
+        .article-detail-meta {
+            font-size: 0.85rem;
+            color: #8ba0bc;
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+        .article-detail-content {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: #334e68;
+            margin-top: 1.5rem;
+        }
+        .article-detail-content p { margin-bottom: 1rem; }
+        .article-detail-content img { max-width: 100%; border-radius: 1rem; margin: 1rem 0; }
+        .back-to-column {
+            display: inline-block;
+            margin-bottom: 1.5rem;
+            background: #eef2ff;
+            padding: 0.5rem 1.2rem;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            color: #1e4a76;
+            cursor: pointer;
+            border: none;
+        }
         
         #editor-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; backdrop-filter: blur(5px); }
         .editor-modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 90%; max-width: 650px; padding: 2rem; border-radius: 1.5rem; max-height: 90vh; overflow-y: auto; }
@@ -75,11 +137,13 @@
         .submit-btn.cancel { background: #94a3b8; }
         .loading { text-align: center; padding: 2rem; color: #6c8dae; }
         .upload-guide { background: #e6f7e6; padding: 12px; margin-top: 12px; border-radius: 8px; font-size: 0.8rem; display: none; border-left: 4px solid #2c6e9e; }
+        
         @media (max-width: 780px) {
             .block-split-3 { grid-template-columns: 1fr; gap: 1rem; }
             .shape-triangle-left, .shape-trapezoid-mid, .shape-reverse-triangle { clip-path: none; border-radius: 1.5rem; margin: 0; }
             .block-split-2 { grid-template-columns: 1fr; }
-            .article-title-full { font-size: 1.3rem; }
+            .article-detail-title { font-size: 1.6rem; }
+            .article-detail-page { padding: 1.5rem; }
         }
     </style>
 </head>
@@ -129,14 +193,14 @@
     </div>
 
     <script>
-        // ========== GitHub配置（已为您填好）==========
+        // ========== GitHub配置 ==========
         const GITHUB_CONFIG = {
             owner: "yeqingfenglin",
             repo: "yeqingfenglin.github.io",
             branch: "main"
         };
         
-        // 静态人物数据 (保持原有风格)
+        // 静态人物数据
         const personsData = {
             dengjie: { id: 'dengjie', name: '邓杰', titleNote: '🌿 邓杰的日常', roleDesc: '全栈工程师 · 光影收集者',
                 block1Items: [
@@ -170,7 +234,7 @@
             }
         };
         
-        // 文章存储 (key: blockId, value: 文章数组)
+        // 文章存储
         let postsDB = new Map();
         
         // 从GitHub加载所有文章
@@ -197,7 +261,7 @@
                                         author: postData.meta?.author || postData.author,
                                         content: postData.body || postData.content,
                                         date: postData.meta?.date || postData.date,
-                                        rawContent: postData.body || postData.content
+                                        fullContent: postData.body || postData.content
                                     });
                                 }
                             }
@@ -205,7 +269,7 @@
                     }
                 } catch(e) { console.log(`加载${folder}失败:`, e); }
             }
-            // 按日期排序（新的在前）
+            // 按日期排序
             for (let [key, arr] of allPosts.entries()) {
                 arr.sort((a,b) => (b.date || '').localeCompare(a.date || ''));
             }
@@ -227,7 +291,6 @@
             const date = new Date().toISOString().split('T')[0];
             const slug = title.replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '').slice(0, 20);
             const fileName = `${date}_${slug || 'post'}.json`;
-            const fullPath = `posts/${folder}/${fileName}`;
             
             const articleJSON = {
                 meta: { title, author, date, blockId: target, owner: folder, images: [] },
@@ -245,83 +308,118 @@
             link.click();
             URL.revokeObjectURL(link.href);
             
-            // 显示上传指引
             const guide = document.getElementById('upload-guide');
             guide.style.display = 'block';
-            guide.innerHTML = `
-                <strong>✅ JSON文件已下载！</strong><br><br>
-                📁 <strong>请按以下步骤上传到GitHub：</strong><br><br>
-                1️⃣ 打开 <a href="https://github.com/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/tree/main/posts/${folder}" target="_blank">GitHub仓库 posts/${folder}/ 文件夹</a><br>
-                2️⃣ 点击 <strong>Add file → Upload files</strong><br>
-                3️⃣ 选择刚下载的 <strong>${fileName}</strong> 文件<br>
-                4️⃣ 滚动到底部，点击 <strong>Commit changes</strong><br>
-                5️⃣ 等待几秒后 <strong>刷新本页面</strong> 即可看到新文章！<br><br>
-                💡 图片请放入 <code>assets/images/</code> 目录，正文中用相对路径引用
-            `;
+            guide.innerHTML = `<strong>✅ JSON文件已下载！</strong><br>请上传到 <code>posts/${folder}/</code> 目录，然后刷新页面。`;
             
-            // 清空表单
             document.getElementById('post-title').value = '';
             document.getElementById('post-author').value = '';
             document.getElementById('post-content').value = '';
-            
-            setTimeout(() => { guide.style.display = 'none'; }, 15000);
+            setTimeout(() => { guide.style.display = 'none'; }, 8000);
         }
         
         function getPostsByBlock(blockId) { return postsDB.get(blockId) || []; }
+        
+        // 获取纯文本预览（去掉HTML标签）
+        function getPlainTextPreview(html, maxLen = 80) {
+            if (!html) return '';
+            const text = html.replace(/<[^>]*>/g, '').trim();
+            return text.length > maxLen ? text.substring(0, maxLen) + '...' : text;
+        }
         
         // 路由
         let currentPage = 'index';
         let currentPageDetail = null;
         
-        // ========== 新版专栏页面：从上到下展示所有文章 ==========
-        function renderColumnFullPage(blockId, blockTitle) {
+        // ========== 专栏列表页（小块卡片，右下角阅读原文） ==========
+        function renderColumnListPage(blockId, blockTitle) {
             const posts = getPostsByBlock(blockId);
             const folder = blockId.includes('dengjie') ? 'dengjie' : (blockId.includes('wang') ? 'wangboning' : 'together');
             
             if (posts.length === 0) {
                 return `
-                    <div class="column-fullpage">
-                        <div class="back-to-home">
+                    <div class="column-container">
+                        <div class="back-home-bar">
                             <button class="back-home-btn" onclick="backToDetail()">← 返回主页</button>
                         </div>
-                        <div class="column-header-section">
-                            <h1>📂 ${escapeHtml(blockTitle)}</h1>
-                            <div class="column-desc">记录专属日常，每次创作都是星轨延伸</div>
-                            <div class="column-stats">✨ 暂无文章</div>
+                        <div class="column-header">
+                            <h2 style="color:#1f4b6e;">📂 ${escapeHtml(blockTitle)}</h2>
+                            <p style="color:#6f8daf;">记录专属日常</p>
                         </div>
-                        <div class="empty-column">
-                            ✨ 暂无文章，请点击右下角「创作文章」发布 ✨
-                        </div>
+                        <div class="empty-posts">✨ 暂无文章，请点击右下角「创作文章」发布 ✨</div>
                     </div>
                 `;
             }
             
-            // 从上到下展示所有文章
-            const articlesHtml = posts.map(post => `
-                <div class="article-item-full">
-                    <div class="article-title-full">${escapeHtml(post.title)}</div>
-                    <div class="article-meta-full">
+            const postsHtml = posts.map(post => `
+                <div class="post-card">
+                    <div class="post-title">${escapeHtml(post.title)}</div>
+                    <div class="post-meta">
                         <span>✍️ ${escapeHtml(post.author)}</span>
                         <span>📅 ${post.date || '未知日期'}</span>
                     </div>
-                    <div class="article-content-full">
-                        ${post.content || '内容加载中...'}
-                    </div>
+                    <div class="post-preview">${escapeHtml(getPlainTextPreview(post.content, 100))}</div>
+                    <a class="read-more-link" onclick="viewArticle('${encodeURIComponent(blockId)}', '${encodeURIComponent(post.id)}')">阅读原文 →</a>
                 </div>
             `).join('');
             
             return `
-                <div class="column-fullpage">
-                    <div class="back-to-home">
+                <div class="column-container">
+                    <div class="back-home-bar">
                         <button class="back-home-btn" onclick="backToDetail()">← 返回主页</button>
                     </div>
-                    <div class="column-header-section">
-                        <h1>📂 ${escapeHtml(blockTitle)}</h1>
-                        <div class="column-desc">记录专属日常 · 从上到下阅览全部文章</div>
-                        <div class="column-stats">📄 共 ${posts.length} 篇文章</div>
+                    <div class="column-header">
+                        <h2 style="color:#1f4b6e;">📂 ${escapeHtml(blockTitle)}</h2>
+                        <p style="color:#6f8daf;">共 ${posts.length} 篇文章 · 点击「阅读原文」查看完整内容</p>
                     </div>
-                    <div class="articles-list">
-                        ${articlesHtml}
+                    <div class="posts-grid">
+                        ${postsHtml}
+                    </div>
+                </div>
+            `;
+        }
+        
+        // ========== 独立文章详情页（从上到下布局） ==========
+        function renderArticleDetailPage(blockId, articleId) {
+            const posts = getPostsByBlock(blockId);
+            const article = posts.find(p => p.id === articleId);
+            
+            if (!article) {
+                return `
+                    <div style="text-align:center; padding:3rem;">
+                        <h2>文章不存在</h2>
+                        <button class="back-home-btn" onclick="backToColumnList('${encodeURIComponent(blockId)}')">返回专栏</button>
+                    </div>
+                `;
+            }
+            
+            // 获取板块标题
+            let blockTitle = '';
+            for (const person of Object.values(personsData)) {
+                for (const item of person.block1Items) {
+                    if (item.blockId === blockId) blockTitle = item.title;
+                }
+                if (person.singleBlockId === blockId) blockTitle = person.singleTitle;
+                if (person.leftBlockId === blockId) blockTitle = person.leftTitle;
+                if (person.rightBlockId === blockId) blockTitle = person.rightTitle;
+            }
+            
+            return `
+                <div>
+                    <div style="margin-bottom:1.5rem;">
+                        <button class="back-home-btn" onclick="backToColumnList('${encodeURIComponent(blockId)}')">← 返回专栏</button>
+                    </div>
+                    <div class="article-detail-page">
+                        <div class="article-detail-header">
+                            <h1 class="article-detail-title">${escapeHtml(article.title)}</h1>
+                            <div class="article-detail-meta">
+                                <span>✍️ ${escapeHtml(article.author)}</span>
+                                <span>📅 ${article.date || '发布日期未知'}</span>
+                            </div>
+                        </div>
+                        <div class="article-detail-content">
+                            ${article.content || '暂无内容'}
+                        </div>
                     </div>
                 </div>
             `;
@@ -335,61 +433,16 @@
                     card.addEventListener('click', () => { currentPage = card.dataset.person; currentPageDetail = null; renderApp(); });
                 });
             } 
-            else if (currentPage === 'column') {
-                const blockId = window._tempBlockId;
-                const blockTitle = window._tempBlockTitle;
-                root.innerHTML = renderColumnFullPage(blockId, blockTitle);
-            } 
+            else if (currentPage === 'column_list') {
+                root.innerHTML = renderColumnListPage(window._currentBlockId, window._currentBlockTitle);
+            }
+            else if (currentPage === 'article_detail') {
+                root.innerHTML = renderArticleDetailPage(window._detailBlockId, window._detailArticleId);
+            }
             else {
                 const data = personsData[currentPage];
                 if (data) {
-                    const block1Html = `<div class="block-split-3">${data.block1Items.map((item, i) => `<div class="shape-card ${i===0?'shape-triangle-left':i===1?'shape-trapezoid-mid':'shape-reverse-triangle'}"><a class="section-link" onclick="navigateToColumn('${item.blockId}','${item.title}')">↗</a><div class="block-icon">${item.icon}</div><h3>${item.title}</h3><p>${item.desc}</p></div>`).join('')}</div>`;
-                    const block2Html = `<div class="block-single"><a class="section-link" onclick="navigateToColumn('${data.singleBlockId}','${data.singleTitle}')">↗</a><div class="single-content"><div><h2>${data.singleTitle}</h2><p>${data.singleDesc}</p></div><div class="single-stats">✨ ${data.singleStat}</div></div></div>`;
-                    const block3Html = `<div class="block-split-2"><div class="dual-left"><a class="section-link" onclick="navigateToColumn('${data.leftBlockId}','${data.leftTitle}')">↗</a><h3>${data.leftTitle}</h3><div class="hobby-list">${data.leftHobbies.map(h=>`<span class="hobby-badge">${h}</span>`).join('')}</div><p>“${data.leftQuote}”</p></div><div class="dual-right"><a class="section-link" onclick="navigateToColumn('${data.rightBlockId}','${data.rightTitle}')">↗</a><h3>${data.rightTitle}</h3><div class="hobby-list">${data.rightHobbies.map(h=>`<span class="hobby-badge">${h}</span>`).join('')}</div><p>“${data.rightQuote}”</p></div></div>`;
-                    root.innerHTML = `<div class="detail-page"><div class="back-home-bar"><button class="back-home-btn" id="back-to-index">← 返回首页</button></div><div style="text-align:center;margin-bottom:1rem;"><h1>${data.name}</h1><div>${data.titleNote}</div><div style="color:#6c8dae;">${data.roleDesc}</div></div><div class="irregular-stack">${block1Html}${block2Html}${block3Html}</div><div class="detail-footer" style="text-align:center;margin-top:2rem;font-size:0.75rem;color:#8ba0bc;">点击 ↗ 进入专栏 · 文章从上到下完整展示</div></div>`;
-                    document.getElementById('back-to-index')?.addEventListener('click', () => { currentPage = 'index'; renderApp(); });
-                }
-            }
-        }
-        
-        function navigateToColumn(blockId, blockTitle) { 
-            currentPageDetail = currentPage; 
-            currentPage = 'column'; 
-            window._tempBlockId = blockId; 
-            window._tempBlockTitle = blockTitle; 
-            renderApp(); 
-        }
-        
-        function backToDetail() { 
-            if (currentPageDetail) { 
-                currentPage = currentPageDetail; 
-                currentPageDetail = null; 
-                renderApp(); 
-            } else { 
-                currentPage = 'index'; 
-                renderApp(); 
-            } 
-        }
-        
-        function escapeHtml(str) { 
-            if(!str) return ''; 
-            return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); 
-        }
-        
-        function openEditor() { 
-            document.getElementById('editor-overlay').style.display = 'block'; 
-            document.getElementById('upload-guide').style.display = 'none'; 
-        }
-        
-        function closeEditor() { document.getElementById('editor-overlay').style.display = 'none'; }
-        
-        // 初始化
-        (async function init() {
-            const root = document.getElementById('app-root');
-            root.innerHTML = '<div class="loading">📡 正在从GitHub加载文章...</div>';
-            postsDB = await loadAllPostsFromGitHub();
-            renderApp();
-        })();
-    </script>
-</body>
-</html>
+                    const block1Html = `<div class="block-split-3">${data.block1Items.map((item, i) => `<div class="shape-card ${i===0?'shape-triangle-left':i===1?'shape-trapezoid-mid':'shape-reverse-triangle'}"><a class="section-link" onclick="navigateToColumnList('${item.blockId}','${item.title}')">↗</a><div class="block-icon">${item.icon}</div><h3>${item.title}</h3><p>${item.desc}</p></div>`).join('')}</div>`;
+                    const block2Html = `<div class="block-single"><a class="section-link" onclick="navigateToColumnList('${data.singleBlockId}','${data.singleTitle}')">↗</a><div class="single-content"><div><h2>${data.singleTitle}</h2><p>${data.singleDesc}</p></div><div class="single-stats">✨ ${data.singleStat}</div></div></div>`;
+                    const block3Html = `<div class="block-split-2"><div class="dual-left"><a class="section-link" onclick="navigateToColumnList('${data.leftBlockId}','${data.leftTitle}')">↗</a><h3>${data.leftTitle}</h3><div class="hobby-list">${data.leftHobbies.map(h=>`<span class="hobby-badge">${h}</span>`).join('')}</div><p>“${data.leftQuote}”</p></div><div class="dual-right"><a class="section-link" onclick="navigateToColumnList('${data.rightBlockId}','${data.rightTitle}')">↗</a><h3>${data.rightTitle}</h3><div class="hobby-list">${data.rightHobbies.map(h=>`<span class="hobby-badge">${h}</span>`).join('')}</div><p>“${data.rightQuote}”</p></div></div>`;
+                    root.innerHTML = `<div class="detail-page"><div class="back-home-bar"><button class="back-home-btn" id="back-to-index">← 返回首页</button></div
