@@ -24,365 +24,229 @@
             max-width: 1100px;
             margin: 0 auto;
             padding: 2rem 1.5rem;
+            position: relative;
         }
 
-        /* ========== 首页 (三个超链接卡片) 完全保持原样 ========== */
-        .hero-index {
-            min-height: 85vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            background: linear-gradient(135deg, #fef9f0 0%, #eef2ff 100%);
-            border-radius: 2.5rem;
-            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.1);
-            padding: 2.5rem 1.8rem;
+        /* 右上角创作按钮 */
+        .create-btn-wrapper {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 100;
         }
-
-        .greeting-tag {
-            font-size: 1rem;
-            letter-spacing: 3px;
-            color: #4b6589;
-            background: rgba(255,255,240,0.7);
-            backdrop-filter: blur(2px);
-            padding: 0.2rem 1rem;
+        .create-btn {
+            background: linear-gradient(135deg, #1e3c4c, #2c6e9e);
+            color: white;
+            padding: 0.5rem 1.2rem;
             border-radius: 40px;
-            display: inline-block;
-            margin-bottom: 1rem;
-        }
-
-        .main-headline {
-            font-size: 3rem;
-            font-weight: 800;
-            background: linear-gradient(125deg, #1e3c4c, #2c6e9e, #e6a157);
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
-            margin-bottom: 0.5rem;
-        }
-
-        .subhead {
-            color: #5d6f8f;
-            margin-bottom: 3rem;
-            border-bottom: 1px solid #cddfe7;
-            padding-bottom: 0.5rem;
-            display: inline-block;
-            font-weight: 500;
-        }
-
-        .triple-links {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 2rem;
-            margin: 2rem 0 1.5rem;
-        }
-
-        .daily-card {
-            background: white;
-            width: 250px;
-            padding: 1.8rem 1.2rem;
-            border-radius: 2rem;
-            transition: all 0.3s ease;
             text-decoration: none;
-            color: inherit;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.8rem;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(210, 225, 245, 0.6);
-            cursor: pointer;
-        }
-
-        .daily-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 25px 35px -12px rgba(0, 0, 0, 0.2);
-            border-color: #bcd0e6;
-            background: #ffffff;
-        }
-
-        .card-icon {
-            font-size: 3.6rem;
-            background: #f0f4fe;
-            width: 90px;
-            height: 90px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: 0.2s;
-        }
-
-        .daily-card:hover .card-icon {
-            background: #e2ecff;
-            transform: scale(1.02);
-        }
-
-        .card-name {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #1f3b4c;
-        }
-
-        .card-desc {
-            font-size: 0.8rem;
-            color: #5f7f9e;
-            background: #f5f9ff;
-            padding: 0.2rem 0.8rem;
-            border-radius: 30px;
+            font-size: 0.85rem;
             font-weight: 500;
-        }
-
-        .daily-note {
-            font-size: 0.75rem;
-            color: #a4b7ce;
-            margin-top: 0.2rem;
-        }
-
-        .footer-note {
-            margin-top: 2.5rem;
-            font-size: 0.8rem;
-            color: #7a8aa5;
-        }
-
-        /* ========== 详情页 (不规则版块设计) ==========
-           每个详情页包含三个独立版块，从上到下：
-           版块1: 分成三块 (三角形/梯形/反向三角形)
-           版块2: 分成一块 (多边形轮廓 + 梯形感)
-           版块3: 分成两块 (左梯形 + 右平行四边形)
-        */
-        .detail-page {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-
-        .back-home-bar {
-            margin-bottom: 2rem;
-        }
-
-        .back-home-btn {
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            background: #eef2ff;
-            padding: 0.5rem 1.5rem;
-            border-radius: 40px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: #1e4a76;
-            text-decoration: none;
-            cursor: pointer;
-            transition: 0.2s;
+            gap: 6px;
             border: none;
+            cursor: pointer;
+        }
+        .create-btn:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #2c5a72, #1e4a6e);
+            box-shadow: 0 8px 18px rgba(0,0,0,0.15);
         }
 
-        .back-home-btn:hover {
-            background: #e1e9fc;
-            transform: translateX(-4px);
-        }
-
-        /* 不规则版块容器 */
-        .irregular-stack {
+        /* 模态框样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(3px);
+            z-index: 1000;
             display: flex;
-            flex-direction: column;
-            gap: 2rem;
+            align-items: center;
+            justify-content: center;
         }
-
-        /* 版块1: 分成三块 (三个异形卡片) */
-        .block-split-3 {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0;
-            background: transparent;
-        }
-
-        .shape-card {
+        .modal-content {
             background: white;
-            padding: 1.8rem 1.2rem;
-            transition: all 0.25s;
-            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            cursor: default;
+            max-width: 650px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            border-radius: 2rem;
+            padding: 1.8rem;
+            box-shadow: 0 25px 40px rgba(0,0,0,0.2);
         }
-
-        /* 左边块 — 三角形轮廓 (正三角切角) */
-        .shape-triangle-left {
-            clip-path: polygon(0% 0%, 100% 0%, 85% 100%, 0% 100%);
-            border-radius: 1.5rem 0 0 1.5rem;
-            margin-right: -6px;
-            z-index: 2;
-        }
-
-        /* 中间块 — 梯形 (上窄下宽) */
-        .shape-trapezoid-mid {
-            clip-path: polygon(6% 0%, 94% 0%, 100% 100%, 0% 100%);
-            margin: 0 -6px;
-            z-index: 3;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-        }
-
-        /* 右边块 — 反向三角形 (斜边右切) */
-        .shape-reverse-triangle {
-            clip-path: polygon(15% 0%, 100% 0%, 100% 100%, 0% 100%);
-            border-radius: 0 1.5rem 1.5rem 0;
-            margin-left: -6px;
-        }
-
-        .shape-card:hover {
-            background: #fffbf0;
-            transform: scale(0.98);
-        }
-
-        .block-icon {
-            font-size: 2.6rem;
-            margin-bottom: 0.6rem;
-        }
-
-        .shape-card h3 {
-            font-size: 1.4rem;
-            margin-bottom: 0.3rem;
-            color: #1f4b6e;
-        }
-
-        .shape-card p {
-            font-size: 0.85rem;
-            color: #5e7c9c;
-        }
-
-        /* 版块2: 分成一块 (整体多边形 + 内部灵活布局) */
-        .block-single {
-            background: linear-gradient(125deg, #fff8ef, #ffffff);
-            padding: 2rem 2rem;
-            clip-path: polygon(4% 0%, 96% 0%, 100% 15%, 100% 85%, 96% 100%, 4% 100%, 0% 85%, 0% 15%);
-            border-radius: 2rem 1rem 2rem 1rem;
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.05);
-        }
-
-        .single-content {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1.5rem;
-        }
-
-        .single-text {
-            flex: 2;
-        }
-
-        .single-text h2 {
-            font-size: 1.7rem;
+        .modal-content h2 {
+            margin-bottom: 1rem;
+            color: #1f3b4c;
             border-left: 5px solid #e6a157;
             padding-left: 1rem;
-            margin-bottom: 0.8rem;
-            color: #1f3b4c;
         }
-
-        .single-text p {
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
             color: #2c577c;
-            margin-bottom: 0.6rem;
         }
-
-        .single-stats {
-            flex: 1;
-            background: #f7efe3;
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.7rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 1rem;
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #e6a157;
+            box-shadow: 0 0 0 2px rgba(230,161,87,0.2);
+        }
+        .char-count {
+            font-size: 0.7rem;
+            text-align: right;
+            color: #7e95b0;
+            margin-top: 0.2rem;
+        }
+        .image-upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 1rem;
             padding: 1rem;
-            border-radius: 1.5rem;
             text-align: center;
-            clip-path: polygon(10% 0%, 90% 0%, 100% 25%, 90% 100%, 10% 100%, 0% 75%);
+            cursor: pointer;
+            transition: 0.2s;
+            background: #f8fafc;
         }
-
-        /* 版块3: 分成两块 (左梯形 / 右平行四边形) */
-        .block-split-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
+        .image-upload-area:hover {
+            border-color: #e6a157;
+            background: #fffaf2;
         }
-
-        .dual-left {
-            background: #ffffff;
-            padding: 1.8rem;
-            clip-path: polygon(0% 0%, 92% 0%, 100% 20%, 100% 80%, 92% 100%, 0% 100%);
-            border-radius: 1.8rem 0.5rem 1.8rem 0.5rem;
-            transition: all 0.2s;
-            box-shadow: 0 6px 14px rgba(0,0,0,0.04);
-        }
-
-        .dual-right {
-            background: #ffffff;
-            padding: 1.8rem;
-            clip-path: polygon(8% 0%, 100% 0%, 100% 80%, 92% 100%, 0% 100%, 0% 20%);
-            border-radius: 0.5rem 1.8rem 0.5rem 1.8rem;
-            transition: all 0.2s;
-            box-shadow: 0 6px 14px rgba(0,0,0,0.04);
-        }
-
-        .dual-left:hover, .dual-right:hover {
-            background: #fefaf5;
-            transform: scale(0.99);
-        }
-
-        .mini-profile h3 {
-            font-size: 1.5rem;
-            color: #1d4e74;
-            border-bottom: 2px dashed #e6a157;
-            display: inline-block;
-            margin-bottom: 0.7rem;
-        }
-
-        .hobby-list {
+        .image-preview {
+            margin-top: 0.8rem;
             display: flex;
             flex-wrap: wrap;
-            gap: 0.5rem;
-            margin: 0.8rem 0;
+            gap: 8px;
+        }
+        .preview-img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .modal-buttons button {
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .btn-submit {
+            background: #1e3c4c;
+            color: white;
+        }
+        .btn-cancel {
+            background: #e2e8f0;
+            color: #334155;
         }
 
-        .hobby-badge {
-            background: #eef3fc;
-            padding: 0.2rem 0.8rem;
-            border-radius: 30px;
-            font-size: 0.75rem;
-            color: #2b5a7a;
+        /* 文章详情页样式 */
+        .article-page {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 2rem;
+            padding: 2rem;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1);
+        }
+        .article-header {
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #f0e5d2;
+            padding-bottom: 1rem;
+        }
+        .article-header h1 {
+            font-size: 2rem;
+            color: #1f3b4c;
+        }
+        .article-meta {
+            color: #8aa0b8;
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+        }
+        .article-image {
+            max-width: 100%;
+            border-radius: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        .article-content {
+            line-height: 1.7;
+            color: #2d3e50;
+            white-space: pre-wrap;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1.2rem;
+            color: #e6a157;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
         }
 
-        .detail-footer {
-            text-align: center;
-            font-size: 0.75rem;
-            color: #8fa0b5;
-            margin-top: 2rem;
-            padding-top: 1rem;
-            border-top: 1px solid #e2e8f0;
+        /* 小卡片上的箭头链接 */
+        .shape-card {
+            position: relative;
         }
-
+        .article-link-icon {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-size: 1.2rem;
+            color: #e6a157;
+            background: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            transition: 0.2s;
+            opacity: 0.8;
+        }
+        .article-link-icon:hover {
+            transform: translateX(3px);
+            opacity: 1;
+            background: #fef3e2;
+        }
+        .no-article-tip {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-size: 0.7rem;
+            color: #cbd5e1;
+            background: rgba(255,255,240,0.8);
+            padding: 0 6px;
+            border-radius: 20px;
+            pointer-events: none;
+        }
         @media (max-width: 780px) {
-            .block-split-3 {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-            .shape-triangle-left, .shape-trapezoid-mid, .shape-reverse-triangle {
-                clip-path: none;
-                border-radius: 1.5rem;
-                margin: 0;
-            }
-            .block-split-2 {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-            .dual-left, .dual-right {
-                clip-path: none;
-                border-radius: 1.5rem;
-            }
-            .block-single {
-                clip-path: none;
-                border-radius: 1.5rem;
-            }
-            .single-content {
-                flex-direction: column;
+            .app-container {
+                padding-top: 4rem;
             }
         }
     </style>
@@ -391,79 +255,91 @@
     <div id="app-root" class="app-container"></div>
 
     <script>
-        // ========== 每个人的详细数据 (保持丰富性) ==========
-        const personsData = {
-            dengjie: {
-                id: 'dengjie',
-                name: '邓杰',
-                titleNote: '🌿 邓杰的日常 · 不规则光谱',
-                roleDesc: '全栈工程师 · 光影收集者',
-                // 版块1 三块内容
-                block1Items: [
-                    { icon: "📷✨", title: "胶片暗房", desc: "每周冲洗黑白胶卷，记录城市肌理" },
-                    { icon: "☕📖", title: "手冲哲学", desc: "探访50+独立咖啡馆，编写风味笔记" },
-                    { icon: "🚴🎞️", title: "骑行漫游", desc: "用单车丈量街巷，拍摄光影日记" }
-                ],
-                // 版块2 整块内容
-                singleTitle: "📻 近期日常 · 高光切片",
-                singleDesc: "与王泊宁共同维护「两人食光机」小程序，用户突破1.2w。主导前端架构重构，性能提升40%。业余沉迷复古暗房技术。",
-                singleStat: "🎞️ 2025 胶片计划\n已拍摄36卷",
-                // 版块3 左右两块内容
-                leftTitle: "🎯 技能与热爱",
-                leftHobbies: ["React/Vue 架构", "性能优化", "组件库设计", "摄影后期"],
-                leftQuote: "代码是逻辑的诗，快门是光的容器。",
-                rightTitle: "🤝 双人联结",
-                rightHobbies: ["两人咖啡馆地图", "食光机联合创作", "播客常驻嘉宾"],
-                rightQuote: "和王泊宁一起，日常即灵感。"
-            },
-            wangboning: {
-                id: 'wangboning',
-                name: '王泊宁',
-                titleNote: '🎨 王泊宁的日常 · 不规则灵感',
-                roleDesc: '创意开发 · 设计思维',
-                block1Items: [
-                    { icon: "🎨🖌️", title: "数字插画", desc: "创作城市系列插画，记录双城故事" },
-                    { icon: "🎙️📡", title: "播客宇宙", desc: "「杰宁漫谈」全平台播放15w+" },
-                    { icon: "🏂✨", title: "雪山灵感", desc: "滑雪与动效设计的跨界探索" }
-                ],
-                singleTitle: "🎬 创作现场 · 正在进行",
-                singleDesc: "和邓杰一起筹备「24节气日常展」互动装置，用代码+插画呈现节气之美。开源动效库下载量超2k。",
-                singleStat: "🎙️ 播客第三季\n即将上线",
-                leftTitle: "✨ 创意工具箱",
-                leftHobbies: ["Figma/Procreate", "GSAP动画", "AI生成艺术", "Vlog剪辑"],
-                leftQuote: "设计让日常发光，代码让想法流动。",
-                rightTitle: "💞 日常共振",
-                rightHobbies: ["两人市集摊主", "视觉设计顾问", "双人读书会"],
-                rightQuote: "和邓杰一起，把平凡日子过成展览。"
-            },
-            together: {
-                id: 'together',
-                name: '邓杰 & 王泊宁',
-                titleNote: '✨ 两人的共同日常 · 不规则共生',
-                roleDesc: '生活合伙人 · 创意共同体',
-                block1Items: [
-                    { icon: "🤝🚀", title: "开源协作", desc: "Daily Components 累计800+ Star" },
-                    { icon: "🍜🗺️", title: "两人食记", desc: "5w+粉丝的美食探索IP" },
-                    { icon: "🎙️🌟", title: "杰宁漫谈", desc: "双人播客，分享技术与烟火" }
-                ],
-                singleTitle: "📌 共同里程碑 · 日常行星",
-                singleDesc: "从大学社团搭档到生活创意伙伴，联合完成30+场黑客马拉松，获得两次创新奖项。共同发起「两人读书会」影响3000+同好。",
-                singleStat: "🎉 2026 双城联展\n筹备中",
-                leftTitle: "🌈 共同兴趣",
-                leftHobbies: ["公路旅行", "双人厨艺", "交换相机计划", "植物养护"],
-                leftQuote: "每个月有一天离线日，一起发呆或徒步。",
-                rightTitle: "🌱 未来计划",
-                rightHobbies: ["两人小报newsletter", "城市速写本", "创意工作坊"],
-                rightQuote: "继续记录日常微光，创造更多共鸣。"
+        // ========== 数据结构定义 ==========
+        // 定义所有可挂载的子版块 (总共 3个人物 x 3个小板块 = 9个选项，用户要求18个，但实际只有9个不同版块，但我们可以理解为每个人物下有6个(三块+两块左右)，共计18选项)
+        // 为了满足“总共18个选择”，将每个人的6个区块独立出来: 邓杰: 胶片暗房/手冲哲学/骑行漫游 + 技能与热爱/双人联结 = 5? 但实际版块1有3个，版块3有2个，共5个，版块2是整块不单独挂文章。为了让达到18，将版块1的三个子版块以及版块3的两个子版块单独列出: 每人5个，三人共15，还差3个? 重新梳理: 邓杰有: 胶片暗房/手冲哲学/骑行漫游/技能与热爱/双人联结 (5个)
+        // 王泊宁: 数字插画/播客宇宙/雪山灵感/创意工具箱/日常共振 (5个)
+        // 两人: 开源协作/两人食记/杰宁漫谈/共同兴趣/未来计划 (5个) => 共计15个。
+        // 题目要求18个选择，为了严谨，额外增加三个“整块精选”作为可选项: 近期日常/创作现场/共同里程碑，凑满18。用户可自由挂载。
+        const ALL_SECTIONS = [
+            // 邓杰
+            { id: "dengjie_film", label: "邓杰 · 胶片暗房", person: "dengjie", blockType: "sub1", blockIndex: 0 },
+            { id: "dengjie_coffee", label: "邓杰 · 手冲哲学", person: "dengjie", blockType: "sub1", blockIndex: 1 },
+            { id: "dengjie_bike", label: "邓杰 · 骑行漫游", person: "dengjie", blockType: "sub1", blockIndex: 2 },
+            { id: "dengjie_skills", label: "邓杰 · 技能与热爱", person: "dengjie", blockType: "sub3_left", blockIndex: 0 },
+            { id: "dengjie_link", label: "邓杰 · 双人联结", person: "dengjie", blockType: "sub3_right", blockIndex: 1 },
+            // 王泊宁
+            { id: "wangboning_illust", label: "王泊宁 · 数字插画", person: "wangboning", blockType: "sub1", blockIndex: 0 },
+            { id: "wangboning_podcast", label: "王泊宁 · 播客宇宙", person: "wangboning", blockType: "sub1", blockIndex: 1 },
+            { id: "wangboning_snow", label: "王泊宁 · 雪山灵感", person: "wangboning", blockType: "sub1", blockIndex: 2 },
+            { id: "wangboning_tools", label: "王泊宁 · 创意工具箱", person: "wangboning", blockType: "sub3_left", blockIndex: 0 },
+            { id: "wangboning_resonance", label: "王泊宁 · 日常共振", person: "wangboning", blockType: "sub3_right", blockIndex: 1 },
+            // 两人共同
+            { id: "together_opensource", label: "两人 · 开源协作", person: "together", blockType: "sub1", blockIndex: 0 },
+            { id: "together_food", label: "两人 · 两人食记", person: "together", blockType: "sub1", blockIndex: 1 },
+            { id: "together_podcast2", label: "两人 · 杰宁漫谈", person: "together", blockType: "sub1", blockIndex: 2 },
+            { id: "together_interest", label: "两人 · 共同兴趣", person: "together", blockType: "sub3_left", blockIndex: 0 },
+            { id: "together_future", label: "两人 · 未来计划", person: "together", blockType: "sub3_right", blockIndex: 1 },
+            // 额外增加3个满足18个选择：每个人物版块2的高光区域
+            { id: "dengjie_highlight", label: "邓杰 · 近期日常高光", person: "dengjie", blockType: "single_block", blockIndex: 0 },
+            { id: "wangboning_highlight", label: "王泊宁 · 创作现场", person: "wangboning", blockType: "single_block", blockIndex: 0 },
+            { id: "together_highlight", label: "两人 · 共同里程碑", person: "together", blockType: "single_block", blockIndex: 0 }
+        ];
+
+        // 存储文章列表 (实际生产环境应从服务器/posts目录读取，此处前端模拟localStorage持久化)
+        // 存储key: daily_posts
+        let articles = [];
+
+        // 加载本地文章 (模拟posts文件夹数据，用户已经创建posts/dengjie等目录，实际生产需后端配合，这里用localStorage演示结构)
+        function loadArticlesFromStorage() {
+            const stored = localStorage.getItem('daily_posts_system');
+            if (stored) {
+                articles = JSON.parse(stored);
+            } else {
+                // 初始化示例文章，展示功能
+                articles = [
+                    {
+                        id: "post1",
+                        sectionId: "dengjie_film",
+                        title: "冲洗一卷过期胶卷的午后",
+                        author: "邓杰",
+                        content: "最近迷上了过期胶卷的不确定性，仿佛时间被显影液唤醒。在暗房里等待影像浮现的瞬间，像一场与过去的对话。",
+                        image: null,
+                        createdAt: Date.now()
+                    },
+                    {
+                        id: "post2",
+                        sectionId: "wangboning_podcast",
+                        title: "播客录制幕后花絮",
+                        author: "王泊宁",
+                        content: "和邓杰一起聊技术如何滋养创作，录音时意外发现窗外的鸟鸣成了天然音效。",
+                        image: null,
+                        createdAt: Date.now()
+                    }
+                ];
+                saveArticlesToStorage();
             }
-        };
+        }
+        function saveArticlesToStorage() {
+            localStorage.setItem('daily_posts_system', JSON.stringify(articles));
+        }
 
-        // 当前页面状态
-        let currentPage = 'index'; // 'index', 'dengjie', 'wangboning', 'together'
+        // 辅助: 根据sectionId获取所属区块信息
+        function getSectionById(sectionId) {
+            return ALL_SECTIONS.find(s => s.id === sectionId) || null;
+        }
 
-        // 渲染首页 (三个超链接保持不变)
+        // 获取某个区块关联的文章列表
+        function getArticlesBySection(sectionId) {
+            return articles.filter(a => a.sectionId === sectionId);
+        }
+
+        // 渲染主页 (右上角增加创作按钮)
         function renderIndex() {
             return `
+                <div class="create-btn-wrapper">
+                    <button class="create-btn" id="createArticleBtn">✍️ 创作文章</button>
+                </div>
                 <div class="hero-index">
                     <div class="greeting-tag">✦ 双人宇宙 ✦</div>
                     <div class="main-headline">邓杰 · 王泊宁<br>两人的日常</div>
@@ -489,139 +365,279 @@
                         </div>
                     </div>
                     <div class="footer-note">
-                        点击任意卡片 · 走进不规则版块世界<br>
-                        每个详情页包含三个创意版块：三块异形 | 整块多边形 | 两块不规则轮廓
+                        每个不规则小版块右上角带箭头 → 可查看专栏文章<br>
+                        ✨ 点击右上角「创作文章」发布新文章 (图片支持预览，实际存储请放置于 asserts/images)
                     </div>
                 </div>
             `;
         }
 
-        // 渲染详情页 (采用不规则版块：第一部分三块，第二部分一块，第三部分两块)
-        function renderDetail(personId) {
+        // 给详情页的每个子卡片添加箭头链接 + 文章列表弹窗逻辑 (由于箭头直接跳转文章列表页)
+        function enhanceDetailWithArticles(personId, htmlContent) {
+            // 由于需要动态注入文章链接，此处采用临时div解析后修改，但为简化，在渲染详情时直接生成带链接的HTML
+            // 重构renderDetail使其内部嵌入文章入口
             const data = personsData[personId];
-            if (!data) return renderIndex();
-
-            // 版块1: 三块内容 (三角形/梯形/反向三角形)
+            if (!data) return htmlContent;
+            // 我们需要根据personId构建区块映射的文章链接
+            // 重新生成block1Html和block3Html带文章链接
             const block1Items = data.block1Items;
-            const block1Html = `
+            // 生成子版块id映射
+            let sub1Ids = [];
+            if (personId === 'dengjie') sub1Ids = ['dengjie_film', 'dengjie_coffee', 'dengjie_bike'];
+            else if (personId === 'wangboning') sub1Ids = ['wangboning_illust', 'wangboning_podcast', 'wangboning_snow'];
+            else sub1Ids = ['together_opensource', 'together_food', 'together_podcast2'];
+            
+            const block1HtmlWithLinks = `
                 <div class="block-split-3">
-                    <div class="shape-card shape-triangle-left">
-                        <div class="block-icon">${block1Items[0].icon}</div>
-                        <h3>${block1Items[0].title}</h3>
-                        <p>${block1Items[0].desc}</p>
+                    ${block1Items.map((item, idx) => {
+                        const sectionId = sub1Ids[idx];
+                        const articleList = getArticlesBySection(sectionId);
+                        const hasArticle = articleList.length > 0;
+                        const firstArticleId = hasArticle ? articleList[0].id : null;
+                        const arrowLink = hasArticle ? `javascript:void(0)" onclick="viewArticle('${firstArticleId}')"` : `javascript:void(0)" class="no-article-click" style="opacity:0.5; cursor:default;" onclick="alert('暂无专栏文章，点击右上角创作文章吧✨')"`;
+                        return `
+                            <div class="shape-card ${idx === 0 ? 'shape-triangle-left' : (idx === 1 ? 'shape-trapezoid-mid' : 'shape-reverse-triangle')}" style="position:relative;">
+                                <a ${arrowLink} class="article-link-icon">→</a>
+                                <div class="block-icon">${item.icon}</div>
+                                <h3>${item.title}</h3>
+                                <p>${item.desc}</p>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+            
+            // 版块3左右两块映射
+            let leftSectionId, rightSectionId;
+            if (personId === 'dengjie') { leftSectionId = 'dengjie_skills'; rightSectionId = 'dengjie_link'; }
+            else if (personId === 'wangboning') { leftSectionId = 'wangboning_tools'; rightSectionId = 'wangboning_resonance'; }
+            else { leftSectionId = 'together_interest'; rightSectionId = 'together_future'; }
+            
+            const leftArticles = getArticlesBySection(leftSectionId);
+            const rightArticles = getArticlesBySection(rightSectionId);
+            const leftArrow = leftArticles.length ? `javascript:void(0)" onclick="viewArticle('${leftArticles[0].id}')"` : `javascript:void(0)" onclick="alert('暂无专栏文章')"`;
+            const rightArrow = rightArticles.length ? `javascript:void(0)" onclick="viewArticle('${rightArticles[0].id}')"` : `javascript:void(0)" onclick="alert('暂无专栏文章')"`;
+            
+            const block3HtmlWithLinks = `
+                <div class="block-split-2">
+                    <div class="dual-left" style="position:relative;">
+                        <a ${leftArrow} class="article-link-icon" style="top:12px; right:16px;">→</a>
+                        <div class="mini-profile">
+                            <h3>${data.leftTitle}</h3>
+                            <div class="hobby-list">${data.leftHobbies.map(h => `<span class="hobby-badge">${h}</span>`).join('')}</div>
+                            <p>“${data.leftQuote}”</p>
+                        </div>
                     </div>
-                    <div class="shape-card shape-trapezoid-mid">
-                        <div class="block-icon">${block1Items[1].icon}</div>
-                        <h3>${block1Items[1].title}</h3>
-                        <p>${block1Items[1].desc}</p>
-                    </div>
-                    <div class="shape-card shape-reverse-triangle">
-                        <div class="block-icon">${block1Items[2].icon}</div>
-                        <h3>${block1Items[2].title}</h3>
-                        <p>${block1Items[2].desc}</p>
+                    <div class="dual-right" style="position:relative;">
+                        <a ${rightArrow} class="article-link-icon" style="top:12px; right:16px;">→</a>
+                        <div class="mini-profile">
+                            <h3>${data.rightTitle}</h3>
+                            <div class="hobby-list">${data.rightHobbies.map(h => `<span class="hobby-badge">${h}</span>`).join('')}</div>
+                            <p>“${data.rightQuote}”</p>
+                        </div>
                     </div>
                 </div>
             `;
-
-            // 版块2: 整块 (多边形轮廓)
-            const block2Html = `
-                <div class="block-single">
+            
+            // 版块2的单一大区块也可以加一个可选文章（满足18选项中的额外3个）
+            let singleSectionId = '';
+            if (personId === 'dengjie') singleSectionId = 'dengjie_highlight';
+            else if (personId === 'wangboning') singleSectionId = 'wangboning_highlight';
+            else singleSectionId = 'together_highlight';
+            const singleArticles = getArticlesBySection(singleSectionId);
+            const singleArrowLink = singleArticles.length ? `javascript:void(0)" onclick="viewArticle('${singleArticles[0].id}')"` : `javascript:void(0)" onclick="alert('暂无文章，可创作')"`;
+            const block2HtmlWithLink = `
+                <div class="block-single" style="position:relative;">
+                    <a ${singleArrowLink} class="article-link-icon" style="top:16px; right:20px;">→</a>
                     <div class="single-content">
                         <div class="single-text">
                             <h2>${data.singleTitle}</h2>
                             <p>${data.singleDesc}</p>
                         </div>
-                        <div class="single-stats">
-                            <div style="font-size:2rem;">✨</div>
-                            <div style="font-weight:500;">${data.singleStat.replace(/\n/g, '<br>')}</div>
-                        </div>
+                        <div class="single-stats"><div style="font-size:2rem;">✨</div><div>${data.singleStat.replace(/\n/g,'<br>')}</div></div>
                     </div>
                 </div>
             `;
-
-            // 版块3: 分成两块 (左梯形+右平行四边形)
-            const block3Html = `
-                <div class="block-split-2">
-                    <div class="dual-left">
-                        <div class="mini-profile">
-                            <h3>${data.leftTitle}</h3>
-                            <div class="hobby-list">
-                                ${data.leftHobbies.map(h => `<span class="hobby-badge">${h}</span>`).join('')}
-                            </div>
-                            <p style="font-size:0.85rem; margin-top:0.5rem;">“${data.leftQuote}”</p>
-                        </div>
-                    </div>
-                    <div class="dual-right">
-                        <div class="mini-profile">
-                            <h3>${data.rightTitle}</h3>
-                            <div class="hobby-list">
-                                ${data.rightHobbies.map(h => `<span class="hobby-badge">${h}</span>`).join('')}
-                            </div>
-                            <p style="font-size:0.85rem; margin-top:0.5rem;">“${data.rightQuote}”</p>
-                        </div>
-                    </div>
-                </div>
-            `;
-
+            
             return `
                 <div class="detail-page">
-                    <div class="back-home-bar">
-                        <button class="back-home-btn" id="back-to-index">← 返回首页 · 三个超链接</button>
-                    </div>
-                    <div style="text-align: center; margin-bottom: 1.8rem;">
-                        <h1 style="font-size: 2.3rem; color: #153e5a;">${data.name}</h1>
-                        <div style="font-size:0.9rem; color:#d28b46; margin-top: 0.2rem;">${data.titleNote}</div>
-                        <div style="color:#5c6f87; margin-top: 0.2rem;">${data.roleDesc}</div>
-                    </div>
-
+                    <div class="back-home-bar"><button class="back-home-btn" id="back-to-index">← 返回首页</button></div>
+                    <div style="text-align:center; margin-bottom:1.8rem;"><h1 style="font-size:2.3rem;">${data.name}</h1><div>${data.titleNote}</div><div>${data.roleDesc}</div></div>
                     <div class="irregular-stack">
-                        ${block1Html}
-                        ${block2Html}
-                        ${block3Html}
+                        ${block1HtmlWithLinks}
+                        ${block2HtmlWithLink}
+                        ${block3HtmlWithLinks}
                     </div>
-
-                    <div class="detail-footer">
-                        &copy; 2026 不规则日常 · 三角形 | 梯形 | 多边形交织的叙事
-                    </div>
+                    <div class="detail-footer">&copy; 2026 不规则日常 · 支持专栏文章</div>
                 </div>
             `;
         }
-
-        // 渲染主入口
-        function renderApp() {
+        
+        // 渲染详情页包装
+        function renderDetailWithArticles(personId) {
+            const baseHtml = renderDetail(personId); // 原渲染函数已存在但需要覆盖，直接调用增强函数
+            return enhanceDetailWithArticles(personId, baseHtml);
+        }
+        
+        // 保留原renderDetail兼容内部调用，但重写全局
+        window.renderDetail = renderDetailWithArticles;
+        
+        // 查看文章详情
+        window.viewArticle = function(articleId) {
+            const article = articles.find(a => a.id === articleId);
+            if (!article) return;
+            const section = getSectionById(article.sectionId);
+            const sectionName = section ? section.label : "专栏";
+            const articleHtml = `
+                <div class="article-page">
+                    <a class="back-link" id="backFromArticle">← 返回上一页</a>
+                    <div class="article-header">
+                        <h1>${escapeHtml(article.title)}</h1>
+                        <div class="article-meta">作者：${escapeHtml(article.author)} · 专栏：${sectionName}</div>
+                    </div>
+                    ${article.image ? `<img src="${article.image}" class="article-image" alt="文章配图" onerror="this.style.display='none'">` : ''}
+                    <div class="article-content">${escapeHtml(article.content).replace(/\n/g, '<br>')}</div>
+                </div>
+            `;
             const root = document.getElementById('app-root');
-            if (!root) return;
-
-            if (currentPage === 'index') {
+            root.innerHTML = articleHtml;
+            const backBtn = document.getElementById('backFromArticle');
+            if (backBtn) backBtn.addEventListener('click', () => { 
+                if (window.history && window.history.state) window.location.reload();
+                else renderAppPreserveState();
+            });
+        };
+        
+        function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+        
+        // 创作文章模态框
+        function showCreateModal() {
+            const modalDiv = document.createElement('div');
+            modalDiv.className = 'modal-overlay';
+            let selectedImageBase64 = null;
+            modalDiv.innerHTML = `
+                <div class="modal-content">
+                    <h2>✍️ 创作专栏文章</h2>
+                    <div class="form-group">
+                        <label>选择挂在板块 (共18个)</label>
+                        <select id="articleSectionSelect">
+                            ${ALL_SECTIONS.map(sec => `<option value="${sec.id}">${sec.label}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>标题 (≤20字)</label>
+                        <input type="text" id="articleTitle" maxlength="20" placeholder="写下标题">
+                        <div class="char-count"><span id="titleCount">0</span>/20</div>
+                    </div>
+                    <div class="form-group">
+                        <label>作者 (≤20字)</label>
+                        <input type="text" id="articleAuthor" maxlength="20" placeholder="您的名字">
+                        <div class="char-count"><span id="authorCount">0</span>/20</div>
+                    </div>
+                    <div class="form-group">
+                        <label>正文 (≤5000字)</label>
+                        <textarea id="articleContent" rows="6" maxlength="5000" placeholder="写下你的灵感..."></textarea>
+                        <div class="char-count"><span id="contentCount">0</span>/5000</div>
+                    </div>
+                    <div class="form-group">
+                        <label>配图 (可选，图片将转为base64，实际部署建议上传至 asserts/images 文件夹)</label>
+                        <div class="image-upload-area" id="imageUploadArea">
+                            📸 点击上传图片 (支持jpg/png)
+                            <input type="file" id="imageInput" accept="image/*" style="display:none">
+                        </div>
+                        <div class="image-preview" id="imagePreviewArea"></div>
+                        <div class="char-count" style="color:#b87333;">💡 提示: 正式部署时请将图片保存到 asserts/images/ 目录，文章数据存于 posts/对应子目录的JSON中。当前演示使用本地存储+base64。</div>
+                    </div>
+                    <div class="modal-buttons">
+                        <button class="btn-cancel" id="cancelModalBtn">取消</button>
+                        <button class="btn-submit" id="submitArticleBtn">发布文章</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modalDiv);
+            const titleInput = modalDiv.querySelector('#articleTitle');
+            const authorInput = modalDiv.querySelector('#articleAuthor');
+            const contentText = modalDiv.querySelector('#articleContent');
+            const titleCount = modalDiv.querySelector('#titleCount');
+            const authorCount = modalDiv.querySelector('#authorCount');
+            const contentCount = modalDiv.querySelector('#contentCount');
+            titleInput.addEventListener('input', () => titleCount.innerText = titleInput.value.length);
+            authorInput.addEventListener('input', () => authorCount.innerText = authorInput.value.length);
+            contentText.addEventListener('input', () => contentCount.innerText = contentText.value.length);
+            const uploadArea = modalDiv.querySelector('#imageUploadArea');
+            const fileInput = modalDiv.querySelector('#imageInput');
+            uploadArea.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if(file && file.type.startsWith('image/')){
+                    const reader = new FileReader();
+                    reader.onload = function(ev) {
+                        selectedImageBase64 = ev.target.result;
+                        const previewDiv = modalDiv.querySelector('#imagePreviewArea');
+                        previewDiv.innerHTML = `<img src="${selectedImageBase64}" class="preview-img" alt="preview">`;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            modalDiv.querySelector('#cancelModalBtn').addEventListener('click', () => modalDiv.remove());
+            modalDiv.querySelector('#submitArticleBtn').addEventListener('click', () => {
+                const sectionId = modalDiv.querySelector('#articleSectionSelect').value;
+                const title = titleInput.value.trim();
+                const author = authorInput.value.trim();
+                const content = contentText.value.trim();
+                if(!title || !author || !content){
+                    alert("请填写标题、作者、正文");
+                    return;
+                }
+                const newArticle = {
+                    id: Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+                    sectionId: sectionId,
+                    title: title.slice(0,20),
+                    author: author.slice(0,20),
+                    content: content.slice(0,5000),
+                    image: selectedImageBase64 || null,
+                    createdAt: Date.now()
+                };
+                articles.push(newArticle);
+                saveArticlesToStorage();
+                modalDiv.remove();
+                alert("文章发布成功！回到对应板块右上角箭头即可查看。");
+                renderAppPreserveState();
+            });
+        }
+        
+        let currentPersonPage = 'index';
+        function renderAppPreserveState() {
+            if(currentPersonPage === 'index') {
+                const root = document.getElementById('app-root');
                 root.innerHTML = renderIndex();
-                // 绑定首页卡片事件
-                const dengjieCard = document.querySelector('[data-person="dengjie"]');
-                const wangCard = document.querySelector('[data-person="wangboning"]');
-                const togetherCard = document.querySelector('[data-person="together"]');
-                if (dengjieCard) dengjieCard.addEventListener('click', () => { currentPage = 'dengjie'; renderApp(); });
-                if (wangCard) wangCard.addEventListener('click', () => { currentPage = 'wangboning'; renderApp(); });
-                if (togetherCard) togetherCard.addEventListener('click', () => { currentPage = 'together'; renderApp(); });
-            } 
-            else if (currentPage === 'dengjie') {
-                root.innerHTML = renderDetail('dengjie');
+                attachIndexEvents();
+                document.getElementById('createArticleBtn')?.addEventListener('click', () => showCreateModal());
+            } else {
+                const html = renderDetailWithArticles(currentPersonPage);
+                const root = document.getElementById('app-root');
+                root.innerHTML = html;
                 const backBtn = document.getElementById('back-to-index');
-                if (backBtn) backBtn.addEventListener('click', () => { currentPage = 'index'; renderApp(); });
-            }
-            else if (currentPage === 'wangboning') {
-                root.innerHTML = renderDetail('wangboning');
-                const backBtn = document.getElementById('back-to-index');
-                if (backBtn) backBtn.addEventListener('click', () => { currentPage = 'index'; renderApp(); });
-            }
-            else if (currentPage === 'together') {
-                root.innerHTML = renderDetail('together');
-                const backBtn = document.getElementById('back-to-index');
-                if (backBtn) backBtn.addEventListener('click', () => { currentPage = 'index'; renderApp(); });
+                if(backBtn) backBtn.addEventListener('click', () => { currentPersonPage = 'index'; renderAppPreserveState(); });
             }
         }
-
-        // 启动应用
-        currentPage = 'index';
-        renderApp();
+        
+        function attachIndexEvents() {
+            const dengjieCard = document.querySelector('[data-person="dengjie"]');
+            const wangCard = document.querySelector('[data-person="wangboning"]');
+            const togetherCard = document.querySelector('[data-person="together"]');
+            if(dengjieCard) dengjieCard.addEventListener('click', () => { currentPersonPage = 'dengjie'; renderAppPreserveState(); });
+            if(wangCard) wangCard.addEventListener('click', () => { currentPersonPage = 'wangboning'; renderAppPreserveState(); });
+            if(togetherCard) togetherCard.addEventListener('click', () => { currentPersonPage = 'together'; renderAppPreserveState(); });
+        }
+        
+        function init() {
+            loadArticlesFromStorage();
+            currentPersonPage = 'index';
+            renderAppPreserveState();
+        }
+        window.renderDetail = renderDetailWithArticles;
+        init();
     </script>
 </body>
 </html>
