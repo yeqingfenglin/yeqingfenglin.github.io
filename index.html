@@ -3,266 +3,624 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>日常集 · 动态专栏版 | 邓杰 & 王泊宁</title>
+    <title>日常集 · 不规则版块 | 邓杰 & 王泊宁</title>
     <style>
-        /* ========== 原有样式保持 & 增强 ========== */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* ========== 全局样式 & 复位 ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             line-height: 1.5;
             color: #1e2a3e;
             background: #f1f5f9;
             min-height: 100vh;
         }
-        .app-container { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
 
-        /* 首页样式 */
+        .app-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* ========== 首页 (三个超链接卡片) 完全保持原样 ========== */
         .hero-index {
-            min-height: 85vh; display: flex; flex-direction: column; justify-content: center;
-            align-items: center; text-align: center; border-radius: 2.5rem;
+            min-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
             background: linear-gradient(135deg, #fef9f0 0%, #eef2ff 100%);
-            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.1); padding: 2.5rem 1.8rem;
-        }
-        .main-headline { font-size: 3rem; font-weight: 800; background: linear-gradient(125deg, #1e3c4c, #2c6e9e, #e6a157); -webkit-background-clip: text; color: transparent; }
-
-        /* 创作按钮 */
-        .create-post-btn {
-            position: fixed; top: 20px; right: 20px; z-index: 1000;
-            background: #1e3c4c; color: white; padding: 10px 20px;
-            border-radius: 50px; text-decoration: none; font-size: 0.9rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: 0.3s;
-        }
-        .create-post-btn:hover { background: #e6a157; transform: translateY(-2px); }
-
-        /* 板块链接箭头 */
-        .section-link {
-            position: absolute; top: 15px; right: 15px;
-            text-decoration: none; font-size: 1.2rem; color: #cbd5e1;
-            transition: 0.3s; z-index: 10; font-weight: bold;
-        }
-        .section-link:hover { color: #e6a157; transform: scale(1.2); }
-
-        /* 不规则板块容器增强 */
-        .shape-card, .dual-left, .dual-right { position: relative; background: white; }
-        .irregular-stack { display: flex; flex-direction: column; gap: 2rem; }
-
-        /* 编辑器弹窗样式 */
-        #editor-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); z-index: 2000; backdrop-filter: blur(5px);
-        }
-        .editor-modal {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: white; width: 90%; max-width: 600px; padding: 2rem;
-            border-radius: 1.5rem; max-height: 90vh; overflow-y: auto;
-        }
-        .form-group { margin-bottom: 1.2rem; }
-        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; }
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%; padding: 0.8rem; border: 1px solid #e2e8f0; border-radius: 0.8rem; outline: none;
-        }
-        .form-group textarea { height: 200px; resize: vertical; }
-        .submit-btn {
-            background: #2c6e9e; color: white; border: none; padding: 1rem;
-            width: 100%; border-radius: 0.8rem; cursor: pointer; font-weight: bold;
+            border-radius: 2.5rem;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem 1.8rem;
         }
 
-        /* 详情页原有样式 (省略部分重复，已集成在逻辑中) */
-        .triple-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem; margin: 2rem 0; }
-        .daily-card { background: white; width: 250px; padding: 1.8rem; border-radius: 2rem; cursor: pointer; text-align: center; }
-        .block-split-3 { display: grid; grid-template-columns: repeat(3, 1fr); }
-        .shape-card { padding: 2rem 1rem; text-align: center; }
-        /* ... 其他 CSS 保持原样 ... */
+        .greeting-tag {
+            font-size: 1rem;
+            letter-spacing: 3px;
+            color: #4b6589;
+            background: rgba(255,255,240,0.7);
+            backdrop-filter: blur(2px);
+            padding: 0.2rem 1rem;
+            border-radius: 40px;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .main-headline {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(125deg, #1e3c4c, #2c6e9e, #e6a157);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .subhead {
+            color: #5d6f8f;
+            margin-bottom: 3rem;
+            border-bottom: 1px solid #cddfe7;
+            padding-bottom: 0.5rem;
+            display: inline-block;
+            font-weight: 500;
+        }
+
+        .triple-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0 1.5rem;
+        }
+
+        .daily-card {
+            background: white;
+            width: 250px;
+            padding: 1.8rem 1.2rem;
+            border-radius: 2rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.8rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(210, 225, 245, 0.6);
+            cursor: pointer;
+        }
+
+        .daily-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 35px -12px rgba(0, 0, 0, 0.2);
+            border-color: #bcd0e6;
+            background: #ffffff;
+        }
+
+        .card-icon {
+            font-size: 3.6rem;
+            background: #f0f4fe;
+            width: 90px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: 0.2s;
+        }
+
+        .daily-card:hover .card-icon {
+            background: #e2ecff;
+            transform: scale(1.02);
+        }
+
+        .card-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1f3b4c;
+        }
+
+        .card-desc {
+            font-size: 0.8rem;
+            color: #5f7f9e;
+            background: #f5f9ff;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-weight: 500;
+        }
+
+        .daily-note {
+            font-size: 0.75rem;
+            color: #a4b7ce;
+            margin-top: 0.2rem;
+        }
+
+        .footer-note {
+            margin-top: 2.5rem;
+            font-size: 0.8rem;
+            color: #7a8aa5;
+        }
+
+        /* ========== 详情页 (不规则版块设计) ==========
+           每个详情页包含三个独立版块，从上到下：
+           版块1: 分成三块 (三角形/梯形/反向三角形)
+           版块2: 分成一块 (多边形轮廓 + 梯形感)
+           版块3: 分成两块 (左梯形 + 右平行四边形)
+        */
+        .detail-page {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .back-home-bar {
+            margin-bottom: 2rem;
+        }
+
+        .back-home-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #eef2ff;
+            padding: 0.5rem 1.5rem;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #1e4a76;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.2s;
+            border: none;
+        }
+
+        .back-home-btn:hover {
+            background: #e1e9fc;
+            transform: translateX(-4px);
+        }
+
+        /* 不规则版块容器 */
+        .irregular-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* 版块1: 分成三块 (三个异形卡片) */
+        .block-split-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0;
+            background: transparent;
+        }
+
+        .shape-card {
+            background: white;
+            padding: 1.8rem 1.2rem;
+            transition: all 0.25s;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            cursor: default;
+        }
+
+        /* 左边块 — 三角形轮廓 (正三角切角) */
+        .shape-triangle-left {
+            clip-path: polygon(0% 0%, 100% 0%, 85% 100%, 0% 100%);
+            border-radius: 1.5rem 0 0 1.5rem;
+            margin-right: -6px;
+            z-index: 2;
+        }
+
+        /* 中间块 — 梯形 (上窄下宽) */
+        .shape-trapezoid-mid {
+            clip-path: polygon(6% 0%, 94% 0%, 100% 100%, 0% 100%);
+            margin: 0 -6px;
+            z-index: 3;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+
+        /* 右边块 — 反向三角形 (斜边右切) */
+        .shape-reverse-triangle {
+            clip-path: polygon(15% 0%, 100% 0%, 100% 100%, 0% 100%);
+            border-radius: 0 1.5rem 1.5rem 0;
+            margin-left: -6px;
+        }
+
+        .shape-card:hover {
+            background: #fffbf0;
+            transform: scale(0.98);
+        }
+
+        .block-icon {
+            font-size: 2.6rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .shape-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 0.3rem;
+            color: #1f4b6e;
+        }
+
+        .shape-card p {
+            font-size: 0.85rem;
+            color: #5e7c9c;
+        }
+
+        /* 版块2: 分成一块 (整体多边形 + 内部灵活布局) */
+        .block-single {
+            background: linear-gradient(125deg, #fff8ef, #ffffff);
+            padding: 2rem 2rem;
+            clip-path: polygon(4% 0%, 96% 0%, 100% 15%, 100% 85%, 96% 100%, 4% 100%, 0% 85%, 0% 15%);
+            border-radius: 2rem 1rem 2rem 1rem;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.05);
+        }
+
+        .single-content {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+        }
+
+        .single-text {
+            flex: 2;
+        }
+
+        .single-text h2 {
+            font-size: 1.7rem;
+            border-left: 5px solid #e6a157;
+            padding-left: 1rem;
+            margin-bottom: 0.8rem;
+            color: #1f3b4c;
+        }
+
+        .single-text p {
+            color: #2c577c;
+            margin-bottom: 0.6rem;
+        }
+
+        .single-stats {
+            flex: 1;
+            background: #f7efe3;
+            padding: 1rem;
+            border-radius: 1.5rem;
+            text-align: center;
+            clip-path: polygon(10% 0%, 90% 0%, 100% 25%, 90% 100%, 10% 100%, 0% 75%);
+        }
+
+        /* 版块3: 分成两块 (左梯形 / 右平行四边形) */
+        .block-split-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .dual-left {
+            background: #ffffff;
+            padding: 1.8rem;
+            clip-path: polygon(0% 0%, 92% 0%, 100% 20%, 100% 80%, 92% 100%, 0% 100%);
+            border-radius: 1.8rem 0.5rem 1.8rem 0.5rem;
+            transition: all 0.2s;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.04);
+        }
+
+        .dual-right {
+            background: #ffffff;
+            padding: 1.8rem;
+            clip-path: polygon(8% 0%, 100% 0%, 100% 80%, 92% 100%, 0% 100%, 0% 20%);
+            border-radius: 0.5rem 1.8rem 0.5rem 1.8rem;
+            transition: all 0.2s;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.04);
+        }
+
+        .dual-left:hover, .dual-right:hover {
+            background: #fefaf5;
+            transform: scale(0.99);
+        }
+
+        .mini-profile h3 {
+            font-size: 1.5rem;
+            color: #1d4e74;
+            border-bottom: 2px dashed #e6a157;
+            display: inline-block;
+            margin-bottom: 0.7rem;
+        }
+
+        .hobby-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 0.8rem 0;
+        }
+
+        .hobby-badge {
+            background: #eef3fc;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            color: #2b5a7a;
+        }
+
+        .detail-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #8fa0b5;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        @media (max-width: 780px) {
+            .block-split-3 {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            .shape-triangle-left, .shape-trapezoid-mid, .shape-reverse-triangle {
+                clip-path: none;
+                border-radius: 1.5rem;
+                margin: 0;
+            }
+            .block-split-2 {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            .dual-left, .dual-right {
+                clip-path: none;
+                border-radius: 1.5rem;
+            }
+            .block-single {
+                clip-path: none;
+                border-radius: 1.5rem;
+            }
+            .single-content {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
-
-    <a href="javascript:void(0)" class="create-post-btn" onclick="openEditor()">+ 创作文章</a>
-
     <div id="app-root" class="app-container"></div>
 
-    <div id="editor-overlay">
-        <div class="editor-modal">
-            <h2 style="margin-bottom:1.5rem; color:#1e3c4c;">新建专栏文章</h2>
-            <div class="form-group">
-                <label>选择归属板块 (18路分支)</label>
-                <select id="post-target">
-                    <optgroup label="邓杰的日常">
-                        <option value="dengjie-b1-1">版块1-左 (胶片暗房)</option>
-                        <option value="dengjie-b1-2">版块1-中 (手冲哲学)</option>
-                        <option value="dengjie-b1-3">版块1-右 (骑行漫游)</option>
-                        <option value="dengjie-b2-1">版块2 (近期日常)</option>
-                        <option value="dengjie-b3-L">版块3-左 (技能热爱)</option>
-                        <option value="dengjie-b3-R">版块3-右 (双人联结)</option>
-                    </optgroup>
-                    <optgroup label="王泊宁的日常">
-                        <option value="wang-b1-1">版块1-左 (数字插画)</option>
-                        <option value="wang-b1-2">版块1-中 (播客宇宙)</option>
-                        <option value="wang-b1-3">版块1-右 (雪山灵感)</option>
-                        <option value="wang-b2-1">版块2 (创作现场)</option>
-                        <option value="wang-b3-L">版块3-左 (创意工具)</option>
-                        <option value="wang-b3-R">版块3-右 (日常共振)</option>
-                    </optgroup>
-                    <optgroup label="两人的共同日常">
-                        <option value="both-b1-1">版块1-左 (开源协作)</option>
-                        <option value="both-b1-2">版块1-中 (两人食记)</option>
-                        <option value="both-b1-3">版块1-右 (杰宁漫谈)</option>
-                        <option value="both-b2-1">版块2 (共同里程碑)</option>
-                        <option value="both-b3-L">版块3-左 (共同兴趣)</option>
-                        <option value="both-b3-R">版块3-右 (未来计划)</option>
-                    </optgroup>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>文章标题 (20字以内)</label>
-                <input type="text" id="post-title" maxlength="20" placeholder="请输入标题...">
-            </div>
-            <div class="form-group">
-                <label>作者 (20字以内)</label>
-                <input type="text" id="post-author" maxlength="20" placeholder="署名...">
-            </div>
-            <div class="form-group">
-                <label>正文内容 (支持文字与图片链接)</label>
-                <textarea id="post-content" maxlength="5000" placeholder="在这里开启你的创作... 若要添加图片，请直接粘贴图片在服务器的地址。"></textarea>
-            </div>
-            <button class="submit-btn" onclick="generateFile()">生成文章代码并关闭</button>
-            <button class="submit-btn" style="background:#94a3b8; margin-top:0.5rem;" onclick="closeEditor()">取消</button>
-        </div>
-    </div>
-
     <script>
-        // ========== 数据模型 ==========
+        // ========== 每个人的详细数据 (保持丰富性) ==========
         const personsData = {
             dengjie: {
-                id: 'dengjie', name: '邓杰', titleNote: '🌿 邓杰的日常', roleDesc: '全栈工程师 · 光影收集者',
-                block1Ids: ['dengjie-b1-1', 'dengjie-b1-2', 'dengjie-b1-3'],
+                id: 'dengjie',
+                name: '邓杰',
+                titleNote: '🌿 邓杰的日常 · 不规则光谱',
+                roleDesc: '全栈工程师 · 光影收集者',
+                // 版块1 三块内容
                 block1Items: [
-                    { icon: "📷✨", title: "胶片暗房", desc: "每周冲洗黑白胶卷" },
-                    { icon: "☕📖", title: "手冲哲学", desc: "探访50+独立咖啡馆" },
-                    { icon: "骑行漫游", title: "骑行漫游", desc: "用单车丈量街巷" }
+                    { icon: "📷✨", title: "胶片暗房", desc: "每周冲洗黑白胶卷，记录城市肌理" },
+                    { icon: "☕📖", title: "手冲哲学", desc: "探访50+独立咖啡馆，编写风味笔记" },
+                    { icon: "🚴🎞️", title: "骑行漫游", desc: "用单车丈量街巷，拍摄光影日记" }
                 ],
-                singleId: 'dengjie-b2-1',
+                // 版块2 整块内容
                 singleTitle: "📻 近期日常 · 高光切片",
-                singleDesc: "与王泊宁共同维护「两人食光机」小程序。",
-                singleStat: "🎞️ 2025 胶片计划",
-                leftId: 'dengjie-b3-L', leftTitle: "🎯 技能与热爱", leftHobbies: ["React", "摄影后期"], leftQuote: "代码是逻辑的诗。",
-                rightId: 'dengjie-b3-R', rightTitle: "🤝 双人联结", rightHobbies: ["咖啡地图", "播客"], rightQuote: "日常即灵感。"
+                singleDesc: "与王泊宁共同维护「两人食光机」小程序，用户突破1.2w。主导前端架构重构，性能提升40%。业余沉迷复古暗房技术。",
+                singleStat: "🎞️ 2025 胶片计划\n已拍摄36卷",
+                // 版块3 左右两块内容
+                leftTitle: "🎯 技能与热爱",
+                leftHobbies: ["React/Vue 架构", "性能优化", "组件库设计", "摄影后期"],
+                leftQuote: "代码是逻辑的诗，快门是光的容器。",
+                rightTitle: "🤝 双人联结",
+                rightHobbies: ["两人咖啡馆地图", "食光机联合创作", "播客常驻嘉宾"],
+                rightQuote: "和王泊宁一起，日常即灵感。"
             },
             wangboning: {
-                id: 'wangboning', name: '王泊宁', titleNote: '🎨 王泊宁的日常', roleDesc: '创意开发 · 设计思维',
-                block1Ids: ['wang-b1-1', 'wang-b1-2', 'wang-b1-3'],
+                id: 'wangboning',
+                name: '王泊宁',
+                titleNote: '🎨 王泊宁的日常 · 不规则灵感',
+                roleDesc: '创意开发 · 设计思维',
                 block1Items: [
-                    { icon: "🎨", title: "数字插画", desc: "创作城市系列插画" },
-                    { icon: "🎙️", title: "播客宇宙", desc: "「杰宁漫谈」播放15w+" },
-                    { icon: "🏂", title: "雪山灵感", desc: "滑雪与动效的探索" }
+                    { icon: "🎨🖌️", title: "数字插画", desc: "创作城市系列插画，记录双城故事" },
+                    { icon: "🎙️📡", title: "播客宇宙", desc: "「杰宁漫谈」全平台播放15w+" },
+                    { icon: "🏂✨", title: "雪山灵感", desc: "滑雪与动效设计的跨界探索" }
                 ],
-                singleId: 'wang-b2-1',
                 singleTitle: "🎬 创作现场 · 正在进行",
-                singleDesc: "筹备「24节气日常展」互动装置。",
-                singleStat: "🎙️ 播客第三季",
-                leftId: 'wang-b3-L', leftTitle: "✨ 创意工具箱", leftHobbies: ["Figma", "GSAP"], leftQuote: "设计让日常发光。",
-                rightId: 'wang-b3-R', rightTitle: "💞 日常共振", rightHobbies: ["市集摊主", "读书会"], rightQuote: "平凡日子过成展览。"
+                singleDesc: "和邓杰一起筹备「24节气日常展」互动装置，用代码+插画呈现节气之美。开源动效库下载量超2k。",
+                singleStat: "🎙️ 播客第三季\n即将上线",
+                leftTitle: "✨ 创意工具箱",
+                leftHobbies: ["Figma/Procreate", "GSAP动画", "AI生成艺术", "Vlog剪辑"],
+                leftQuote: "设计让日常发光，代码让想法流动。",
+                rightTitle: "💞 日常共振",
+                rightHobbies: ["两人市集摊主", "视觉设计顾问", "双人读书会"],
+                rightQuote: "和邓杰一起，把平凡日子过成展览。"
             },
             together: {
-                id: 'together', name: '邓杰 & 王泊宁', titleNote: '✨ 两人的共同日常', roleDesc: '生活合伙人 · 创意共同体',
-                block1Ids: ['both-b1-1', 'both-b1-2', 'both-b1-3'],
+                id: 'together',
+                name: '邓杰 & 王泊宁',
+                titleNote: '✨ 两人的共同日常 · 不规则共生',
+                roleDesc: '生活合伙人 · 创意共同体',
                 block1Items: [
-                    { icon: "🤝", title: "开源协作", desc: "Daily Components 800+ Star" },
-                    { icon: "🍜", title: "两人食记", desc: "美食探索IP" },
-                    { icon: "🎙️", title: "杰宁漫谈", desc: "分享技术与烟火" }
+                    { icon: "🤝🚀", title: "开源协作", desc: "Daily Components 累计800+ Star" },
+                    { icon: "🍜🗺️", title: "两人食记", desc: "5w+粉丝的美食探索IP" },
+                    { icon: "🎙️🌟", title: "杰宁漫谈", desc: "双人播客，分享技术与烟火" }
                 ],
-                singleId: 'both-b2-1',
                 singleTitle: "📌 共同里程碑 · 日常行星",
-                singleDesc: "联合完成30+场黑客马拉松。",
-                singleStat: "🎉 2026 双城联展",
-                leftId: 'both-b3-L', leftTitle: "🌈 共同兴趣", leftHobbies: ["公路旅行", "双人厨艺"], leftQuote: "一起发呆或徒步。",
-                rightId: 'both-b3-R', rightTitle: "🌱 未来计划", rightHobbies: ["两人小报", "工作坊"], rightQuote: "记录日常微光。"
+                singleDesc: "从大学社团搭档到生活创意伙伴，联合完成30+场黑客马拉松，获得两次创新奖项。共同发起「两人读书会」影响3000+同好。",
+                singleStat: "🎉 2026 双城联展\n筹备中",
+                leftTitle: "🌈 共同兴趣",
+                leftHobbies: ["公路旅行", "双人厨艺", "交换相机计划", "植物养护"],
+                leftQuote: "每个月有一天离线日，一起发呆或徒步。",
+                rightTitle: "🌱 未来计划",
+                rightHobbies: ["两人小报newsletter", "城市速写本", "创意工作坊"],
+                rightQuote: "继续记录日常微光，创造更多共鸣。"
             }
         };
 
-        let currentPage = 'index';
+        // 当前页面状态
+        let currentPage = 'index'; // 'index', 'dengjie', 'wangboning', 'together'
 
-        // ========== 逻辑渲染 ==========
+        // 渲染首页 (三个超链接保持不变)
+        function renderIndex() {
+            return `
+                <div class="hero-index">
+                    <div class="greeting-tag">✦ 双人宇宙 ✦</div>
+                    <div class="main-headline">邓杰 · 王泊宁<br>两人的日常</div>
+                    <div class="subhead">独立轨迹 · 交叠星光</div>
+                    <div class="triple-links">
+                        <div class="daily-card" data-person="dengjie">
+                            <div class="card-icon">🌿</div>
+                            <div class="card-name">邓杰的日常</div>
+                            <div class="card-desc">全栈 · 光影收集者</div>
+                            <div class="daily-note">📸 探店 & 胶片日记</div>
+                        </div>
+                        <div class="daily-card" data-person="wangboning">
+                            <div class="card-icon">🎨</div>
+                            <div class="card-name">王泊宁的日常</div>
+                            <div class="card-desc">创意开发 · 设计思维</div>
+                            <div class="daily-note">🎙️ 播客 & 动效魔法</div>
+                        </div>
+                        <div class="daily-card" data-person="together">
+                            <div class="card-icon">✨🤝✨</div>
+                            <div class="card-name">两人的共同日常</div>
+                            <div class="card-desc">共同项目 · 双城灵感</div>
+                            <div class="daily-note">📖 播客/食记/联合创作</div>
+                        </div>
+                    </div>
+                    <div class="footer-note">
+                        点击任意卡片 · 走进不规则版块世界<br>
+                        每个详情页包含三个创意版块：三块异形 | 整块多边形 | 两块不规则轮廓
+                    </div>
+                </div>
+            `;
+        }
+
+        // 渲染详情页 (采用不规则版块：第一部分三块，第二部分一块，第三部分两块)
+        function renderDetail(personId) {
+            const data = personsData[personId];
+            if (!data) return renderIndex();
+
+            // 版块1: 三块内容 (三角形/梯形/反向三角形)
+            const block1Items = data.block1Items;
+            const block1Html = `
+                <div class="block-split-3">
+                    <div class="shape-card shape-triangle-left">
+                        <div class="block-icon">${block1Items[0].icon}</div>
+                        <h3>${block1Items[0].title}</h3>
+                        <p>${block1Items[0].desc}</p>
+                    </div>
+                    <div class="shape-card shape-trapezoid-mid">
+                        <div class="block-icon">${block1Items[1].icon}</div>
+                        <h3>${block1Items[1].title}</h3>
+                        <p>${block1Items[1].desc}</p>
+                    </div>
+                    <div class="shape-card shape-reverse-triangle">
+                        <div class="block-icon">${block1Items[2].icon}</div>
+                        <h3>${block1Items[2].title}</h3>
+                        <p>${block1Items[2].desc}</p>
+                    </div>
+                </div>
+            `;
+
+            // 版块2: 整块 (多边形轮廓)
+            const block2Html = `
+                <div class="block-single">
+                    <div class="single-content">
+                        <div class="single-text">
+                            <h2>${data.singleTitle}</h2>
+                            <p>${data.singleDesc}</p>
+                        </div>
+                        <div class="single-stats">
+                            <div style="font-size:2rem;">✨</div>
+                            <div style="font-weight:500;">${data.singleStat.replace(/\n/g, '<br>')}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // 版块3: 分成两块 (左梯形+右平行四边形)
+            const block3Html = `
+                <div class="block-split-2">
+                    <div class="dual-left">
+                        <div class="mini-profile">
+                            <h3>${data.leftTitle}</h3>
+                            <div class="hobby-list">
+                                ${data.leftHobbies.map(h => `<span class="hobby-badge">${h}</span>`).join('')}
+                            </div>
+                            <p style="font-size:0.85rem; margin-top:0.5rem;">“${data.leftQuote}”</p>
+                        </div>
+                    </div>
+                    <div class="dual-right">
+                        <div class="mini-profile">
+                            <h3>${data.rightTitle}</h3>
+                            <div class="hobby-list">
+                                ${data.rightHobbies.map(h => `<span class="hobby-badge">${h}</span>`).join('')}
+                            </div>
+                            <p style="font-size:0.85rem; margin-top:0.5rem;">“${data.rightQuote}”</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            return `
+                <div class="detail-page">
+                    <div class="back-home-bar">
+                        <button class="back-home-btn" id="back-to-index">← 返回首页 · 三个超链接</button>
+                    </div>
+                    <div style="text-align: center; margin-bottom: 1.8rem;">
+                        <h1 style="font-size: 2.3rem; color: #153e5a;">${data.name}</h1>
+                        <div style="font-size:0.9rem; color:#d28b46; margin-top: 0.2rem;">${data.titleNote}</div>
+                        <div style="color:#5c6f87; margin-top: 0.2rem;">${data.roleDesc}</div>
+                    </div>
+
+                    <div class="irregular-stack">
+                        ${block1Html}
+                        ${block2Html}
+                        ${block3Html}
+                    </div>
+
+                    <div class="detail-footer">
+                        &copy; 2026 不规则日常 · 三角形 | 梯形 | 多边形交织的叙事
+                    </div>
+                </div>
+            `;
+        }
+
+        // 渲染主入口
         function renderApp() {
             const root = document.getElementById('app-root');
+            if (!root) return;
+
             if (currentPage === 'index') {
-                root.innerHTML = `
-                    <div class="hero-index">
-                        <div class="main-headline">邓杰 · 王泊宁</div>
-                        <div class="triple-links">
-                            <div class="daily-card" onclick="navTo('dengjie')">🌿 邓杰的日常</div>
-                            <div class="daily-card" onclick="navTo('wangboning')">🎨 王泊宁的日常</div>
-                            <div class="daily-card" onclick="navTo('together')">✨ 共同日常</div>
-                        </div>
-                    </div>`;
-            } else {
-                root.innerHTML = renderDetail(currentPage);
+                root.innerHTML = renderIndex();
+                // 绑定首页卡片事件
+                const dengjieCard = document.querySelector('[data-person="dengjie"]');
+                const wangCard = document.querySelector('[data-person="wangboning"]');
+                const togetherCard = document.querySelector('[data-person="together"]');
+                if (dengjieCard) dengjieCard.addEventListener('click', () => { currentPage = 'dengjie'; renderApp(); });
+                if (wangCard) wangCard.addEventListener('click', () => { currentPage = 'wangboning'; renderApp(); });
+                if (togetherCard) togetherCard.addEventListener('click', () => { currentPage = 'together'; renderApp(); });
+            } 
+            else if (currentPage === 'dengjie') {
+                root.innerHTML = renderDetail('dengjie');
+                const backBtn = document.getElementById('back-to-index');
+                if (backBtn) backBtn.addEventListener('click', () => { currentPage = 'index'; renderApp(); });
+            }
+            else if (currentPage === 'wangboning') {
+                root.innerHTML = renderDetail('wangboning');
+                const backBtn = document.getElementById('back-to-index');
+                if (backBtn) backBtn.addEventListener('click', () => { currentPage = 'index'; renderApp(); });
+            }
+            else if (currentPage === 'together') {
+                root.innerHTML = renderDetail('together');
+                const backBtn = document.getElementById('back-to-index');
+                if (backBtn) backBtn.addEventListener('click', () => { currentPage = 'index'; renderApp(); });
             }
         }
 
-        function renderDetail(id) {
-            const d = personsData[id];
-            return `
-                <div>
-                    <button onclick="navTo('index')" style="margin-bottom:2rem; padding:0.5rem 1rem; border-radius:20px; border:none; cursor:pointer;">← 返回</button>
-                    <div style="text-align:center; margin-bottom:2rem;">
-                        <h1>${d.name}</h1>
-                        <p>${d.titleNote}</p>
-                    </div>
-                    <div class="irregular-stack">
-                        <div class="block-split-3">
-                            ${d.block1Items.map((item, i) => `
-                                <div class="shape-card" style="border:1px solid #eee">
-                                    <a href="column.html?id=${d.block1Ids[i]}" class="section-link">↗</a>
-                                    <div style="font-size:2rem">${item.icon}</div>
-                                    <h3>${item.title}</h3>
-                                    <p>${item.desc}</p>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div class="shape-card" style="padding:2rem; border-radius:2rem;">
-                            <a href="column.html?id=${d.singleId}" class="section-link">↗</a>
-                            <h2>${d.singleTitle}</h2>
-                            <p>${d.singleDesc}</p>
-                        </div>
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
-                            <div class="shape-card" style="padding:1.5rem; border-radius:1rem;">
-                                <a href="column.html?id=${d.leftId}" class="section-link">↗</a>
-                                <h3>${d.leftTitle}</h3>
-                                <p>${d.leftQuote}</p>
-                            </div>
-                            <div class="shape-card" style="padding:1.5rem; border-radius:1rem;">
-                                <a href="column.html?id=${d.rightId}" class="section-link">↗</a>
-                                <h3>${d.rightTitle}</h3>
-                                <p>${d.rightQuote}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
-        }
-
-        function navTo(page) { currentPage = page; renderApp(); }
-
-        // ========== 编辑器逻辑 ==========
-        function openEditor() { document.getElementById('editor-overlay').style.display = 'block'; }
-        function closeEditor() { document.getElementById('editor-overlay').style.display = 'none'; }
-
-        function generateFile() {
-            const target = document.getElementById('post-target').value;
-            const title = document.getElementById('post-title').value;
-            const author = document.getElementById('post-author').value;
-            const content = document.getElementById('post-content').value;
-            const date = new Date().toISOString().split('T')[0];
-
-            const postData = { target, title, author, content, date };
-            const jsonStr = JSON.stringify(postData, null, 2);
-
-            // 模拟文件导出
-            console.log("生成的文章JSON内容如下：\n", jsonStr);
-            alert("文章代码已在控制台生成！\n请在GitHub仓库 posts/ 对应文件夹下创建 .json 文件并粘贴内容。");
-            closeEditor();
-        }
-
+        // 启动应用
+        currentPage = 'index';
         renderApp();
     </script>
 </body>
