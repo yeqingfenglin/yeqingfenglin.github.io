@@ -445,4 +445,73 @@
                     const block1Html = `<div class="block-split-3">${data.block1Items.map((item, i) => `<div class="shape-card ${i===0?'shape-triangle-left':i===1?'shape-trapezoid-mid':'shape-reverse-triangle'}"><a class="section-link" onclick="navigateToColumnList('${item.blockId}','${item.title}')">↗</a><div class="block-icon">${item.icon}</div><h3>${item.title}</h3><p>${item.desc}</p></div>`).join('')}</div>`;
                     const block2Html = `<div class="block-single"><a class="section-link" onclick="navigateToColumnList('${data.singleBlockId}','${data.singleTitle}')">↗</a><div class="single-content"><div><h2>${data.singleTitle}</h2><p>${data.singleDesc}</p></div><div class="single-stats">✨ ${data.singleStat}</div></div></div>`;
                     const block3Html = `<div class="block-split-2"><div class="dual-left"><a class="section-link" onclick="navigateToColumnList('${data.leftBlockId}','${data.leftTitle}')">↗</a><h3>${data.leftTitle}</h3><div class="hobby-list">${data.leftHobbies.map(h=>`<span class="hobby-badge">${h}</span>`).join('')}</div><p>“${data.leftQuote}”</p></div><div class="dual-right"><a class="section-link" onclick="navigateToColumnList('${data.rightBlockId}','${data.rightTitle}')">↗</a><h3>${data.rightTitle}</h3><div class="hobby-list">${data.rightHobbies.map(h=>`<span class="hobby-badge">${h}</span>`).join('')}</div><p>“${data.rightQuote}”</p></div></div>`;
-                    root.innerHTML = `<div class="detail-page"><div class="back-home-bar"><button class="back-home-btn" id="back-to-index">← 返回首页</button></div
+                    root.innerHTML = `<div class="detail-page"><div class="back-home-bar"><button class="back-home-btn" id="back-to-index">← 返回首页</button></div><div style="text-align:center;margin-bottom:1rem;"><h1>${data.name}</h1><div>${data.titleNote}</div><div style="color:#6c8dae;">${data.roleDesc}</div></div><div class="irregular-stack">${block1Html}${block2Html}${block3Html}</div><div class="detail-footer" style="text-align:center;margin-top:2rem;font-size:0.75rem;color:#8ba0bc;">点击 ↗ 进入专栏 · 点击「阅读原文」查看完整文章</div></div>`;
+                    document.getElementById('back-to-index')?.addEventListener('click', () => { currentPage = 'index'; renderApp(); });
+                }
+            }
+        }
+        
+        // 导航到专栏列表页
+        function navigateToColumnList(blockId, blockTitle) {
+            currentPageDetail = currentPage;
+            currentPage = 'column_list';
+            window._currentBlockId = blockId;
+            window._currentBlockTitle = blockTitle;
+            renderApp();
+        }
+        
+        // 查看独立文章详情
+        function viewArticle(blockId, articleId) {
+            currentPage = 'article_detail';
+            window._detailBlockId = decodeURIComponent(blockId);
+            window._detailArticleId = decodeURIComponent(articleId);
+            renderApp();
+        }
+        
+        // 从详情页返回专栏列表
+        function backToColumnList(blockId) {
+            currentPage = 'column_list';
+            window._currentBlockId = decodeURIComponent(blockId);
+            // 需要重新获取板块标题
+            let blockTitle = '';
+            for (const person of Object.values(personsData)) {
+                for (const item of person.block1Items) {
+                    if (item.blockId === window._currentBlockId) blockTitle = item.title;
+                }
+                if (person.singleBlockId === window._currentBlockId) blockTitle = person.singleTitle;
+                if (person.leftBlockId === window._currentBlockId) blockTitle = person.leftTitle;
+                if (person.rightBlockId === window._currentBlockId) blockTitle = person.rightTitle;
+            }
+            window._currentBlockTitle = blockTitle;
+            renderApp();
+        }
+        
+        function backToDetail() { 
+            if (currentPageDetail) { 
+                currentPage = currentPageDetail; 
+                currentPageDetail = null; 
+                renderApp(); 
+            } else { 
+                currentPage = 'index'; 
+                renderApp(); 
+            } 
+        }
+        
+        function escapeHtml(str) { 
+            if(!str) return ''; 
+            return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); 
+        }
+        
+        function openEditor() { document.getElementById('editor-overlay').style.display = 'block'; document.getElementById('upload-guide').style.display = 'none'; }
+        function closeEditor() { document.getElementById('editor-overlay').style.display = 'none'; }
+        
+        // 初始化
+        (async function init() {
+            const root = document.getElementById('app-root');
+            root.innerHTML = '<div class="loading">📡 正在从GitHub加载文章...</div>';
+            postsDB = await loadAllPostsFromGitHub();
+            renderApp();
+        })();
+    </script>
+</body>
+</html>
