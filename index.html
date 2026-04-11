@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>日常集 · 动态专栏版 | 邓杰 & 王泊宁</title>
     <style>
-        /* ========== 样式 ========== */
+        /* ========== 基础样式 ========== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.5; color: #1e2a3e; background: #f1f5f9; min-height: 100vh; }
         .app-container { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
@@ -41,7 +41,7 @@
         .hobby-list { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.8rem 0; }
         .hobby-badge { background: #eef3fc; padding: 0.2rem 0.8rem; border-radius: 30px; font-size: 0.75rem; }
         
-        /* ========== 专栏列表页样式（小块卡片） ========== */
+        /* ========== 专栏列表页样式 ========== */
         .column-container { max-width: 1100px; margin: 0 auto; }
         .column-header { margin-bottom: 2rem; text-align: center; }
         .posts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.8rem; margin-top: 1.5rem; }
@@ -55,12 +55,12 @@
             display: flex;
             flex-direction: column;
             position: relative;
-            min-height: 220px;
+            min-height: 160px;
         }
         .post-card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px rgba(0,0,0,0.1); }
         .post-title { font-size: 1.3rem; font-weight: 700; color: #1e3c4c; margin-bottom: 0.3rem; }
-        .post-meta { font-size: 0.75rem; color: #8ba0bc; margin-bottom: 0.8rem; display: flex; gap: 1rem; }
-        .post-preview { font-size: 0.85rem; color: #334e68; line-height: 1.4; margin-bottom: 1rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+        .post-meta { font-size: 0.75rem; color: #8ba0bc; margin-bottom: 0.5rem; display: flex; gap: 1rem; flex-wrap: wrap; }
+        .post-type-badge { background: #eef2ff; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; color: #2c6e9e; }
         .read-more-link {
             position: absolute;
             bottom: 1.2rem;
@@ -78,7 +78,77 @@
         .read-more-link:hover { background: #e6a157; color: white; }
         .empty-posts { text-align: center; padding: 3rem; background: #faf9fe; border-radius: 2rem; color: #7c8ba0; }
         
-        /* ========== 独立文章详情页样式（从上到下） ========== */
+        /* ========== 图片详情页样式（每行3张图片） ========== */
+        .image-detail-page {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 2rem;
+            padding: 2rem;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1);
+        }
+        .image-detail-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eef2ff;
+        }
+        .image-detail-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1e3c4c;
+            margin-bottom: 0.5rem;
+        }
+        .image-detail-meta {
+            font-size: 0.85rem;
+            color: #8ba0bc;
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.2rem;
+            margin-top: 1.5rem;
+        }
+        .image-grid-item {
+            background: #f8fafc;
+            border-radius: 0.8rem;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .image-grid-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+        .image-grid-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+        .image-caption {
+            padding: 0.6rem;
+            font-size: 0.7rem;
+            color: #6c8dae;
+            text-align: center;
+            background: white;
+            border-top: 1px solid #eef2ff;
+            word-break: break-all;
+        }
+        .image-count-info {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.8rem;
+            color: #8ba0bc;
+            padding-top: 1rem;
+            border-top: 1px solid #eef2ff;
+        }
+        
+        /* ========== 文章详情页样式 ========== */
         .article-detail-page {
             max-width: 800px;
             margin: 0 auto;
@@ -115,45 +185,74 @@
         }
         .article-detail-content p { margin-bottom: 1rem; }
         .article-detail-content img { max-width: 100%; border-radius: 1rem; margin: 1rem 0; }
-        .back-to-column {
-            display: inline-block;
-            margin-bottom: 1.5rem;
-            background: #eef2ff;
-            padding: 0.5rem 1.2rem;
-            border-radius: 30px;
-            font-size: 0.85rem;
-            color: #1e4a76;
+        
+        /* 图片预览模态框 */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 3000;
             cursor: pointer;
-            border: none;
+            justify-content: center;
+            align-items: center;
+        }
+        .lightbox.active { display: flex; }
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
         }
         
         #editor-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; backdrop-filter: blur(5px); }
-        .editor-modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 90%; max-width: 650px; padding: 2rem; border-radius: 1.5rem; max-height: 90vh; overflow-y: auto; }
+        .editor-modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 90%; max-width: 600px; padding: 2rem; border-radius: 1.5rem; max-height: 90vh; overflow-y: auto; }
         .form-group { margin-bottom: 1.2rem; }
         .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
         .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.8rem; border: 1px solid #e2e8f0; border-radius: 0.8rem; }
-        .form-group textarea { height: 180px; resize: vertical; }
+        .form-group textarea { height: 150px; resize: vertical; }
         .submit-btn { background: #2c6e9e; color: white; border: none; padding: 1rem; width: 100%; border-radius: 0.8rem; cursor: pointer; font-weight: bold; margin-top: 0.5rem; }
         .submit-btn.cancel { background: #94a3b8; }
         .loading { text-align: center; padding: 2rem; color: #6c8dae; }
         .upload-guide { background: #e6f7e6; padding: 12px; margin-top: 12px; border-radius: 8px; font-size: 0.8rem; display: none; border-left: 4px solid #2c6e9e; }
+        .folder-hint { font-size: 0.7rem; color: #8ba0bc; margin-top: 4px; }
         
         @media (max-width: 780px) {
             .block-split-3 { grid-template-columns: 1fr; gap: 1rem; }
             .shape-triangle-left, .shape-trapezoid-mid, .shape-reverse-triangle { clip-path: none; border-radius: 1.5rem; margin: 0; }
             .block-split-2 { grid-template-columns: 1fr; }
-            .article-detail-title { font-size: 1.6rem; }
-            .article-detail-page { padding: 1.5rem; }
+            .image-grid { grid-template-columns: repeat(2, 1fr); }
+            .image-grid-item img { height: 160px; }
+        }
+        @media (max-width: 500px) {
+            .image-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
     <button class="create-post-btn" onclick="openEditor()">✍️ 创作文章</button>
     <div id="app-root" class="app-container"><div class="loading">📡 正在加载...</div></div>
+    
+    <!-- 图片预览模态框 -->
+    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+        <span class="lightbox-close">&times;</span>
+        <img id="lightbox-img" src="" alt="">
+    </div>
 
     <div id="editor-overlay">
         <div class="editor-modal">
-            <h2 style="margin-bottom:1.2rem;">📝 新建专栏文章</h2>
+            <h2 style="margin-bottom:1.2rem;">📝 新建专栏</h2>
             <div class="form-group">
                 <label>📌 归属板块</label>
                 <select id="post-target">
@@ -183,9 +282,34 @@
                     </optgroup>
                 </select>
             </div>
-            <div class="form-group"><label>📖 标题 (20字以内)</label><input type="text" id="post-title" maxlength="20" placeholder="例如：暗房冲洗新体验"></div>
-            <div class="form-group"><label>✍️ 作者</label><input type="text" id="post-author" placeholder="邓杰 / 王泊宁"></div>
-            <div class="form-group"><label>📄 正文 (支持HTML/图片)</label><textarea id="post-content" placeholder="支持HTML，图片用 &lt;img src='assets/images/xxx.jpg'&gt;"></textarea></div>
+            <div class="form-group">
+                <label>📖 标题</label>
+                <input type="text" id="post-title" placeholder="例如：布达佩斯之旅">
+            </div>
+            <div class="form-group">
+                <label>✍️ 作者</label>
+                <input type="text" id="post-author" placeholder="邓杰 / 王泊宁">
+            </div>
+            <div class="form-group">
+                <label>🎨 专栏类型</label>
+                <select id="post-type">
+                    <option value="article">📝 文章专栏</option>
+                    <option value="image-gallery">🖼️ 图片专栏</option>
+                </select>
+            </div>
+            <div id="article-fields">
+                <div class="form-group">
+                    <label>📄 正文内容</label>
+                    <textarea id="post-content" placeholder="支持HTML，图片用 &lt;img src='assets/images/xxx.jpg'&gt;"></textarea>
+                </div>
+            </div>
+            <div id="image-fields" style="display:none;">
+                <div class="form-group">
+                    <label>📁 图片文件夹名称</label>
+                    <input type="text" id="image-folder-name" placeholder="例如: budapest 或 paris">
+                    <div class="folder-hint">💡 图片将自动从 <code>assets/images/【你输入的名字】/</code> 加载<br>请在GitHub仓库中创建对应文件夹并上传图片</div>
+                </div>
+            </div>
             <button class="submit-btn" onclick="publishAndDownload()">✨ 发布并下载JSON文件</button>
             <div id="upload-guide" class="upload-guide"></div>
             <button class="submit-btn cancel" onclick="closeEditor()">取消</button>
@@ -237,6 +361,26 @@
         // 文章存储
         let postsDB = new Map();
         
+        // 监听专栏类型切换
+        document.getElementById('post-type').addEventListener('change', function() {
+            const isImageGallery = this.value === 'image-gallery';
+            document.getElementById('article-fields').style.display = isImageGallery ? 'none' : 'block';
+            document.getElementById('image-fields').style.display = isImageGallery ? 'block' : 'none';
+        });
+        
+        // 获取指定文件夹内的所有图片
+        async function getImagesFromFolder(folderPath) {
+            const apiUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${folderPath}?ref=${GITHUB_CONFIG.branch}`;
+            try {
+                const response = await fetch(apiUrl);
+                if (response.ok) {
+                    const files = await response.json();
+                    return files.filter(f => f.name.match(/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i));
+                }
+            } catch(e) { console.log('获取图片失败:', e); }
+            return [];
+        }
+        
         // 从GitHub加载所有文章
         async function loadAllPostsFromGitHub() {
             const folders = ['dengjie', 'wangboning', 'together'];
@@ -252,16 +396,17 @@
                             if (file.name.endsWith('.json')) {
                                 const contentRes = await fetch(file.download_url);
                                 const postData = await contentRes.json();
-                                const blockId = postData.meta?.blockId || postData.targetBlock;
+                                const blockId = postData.blockId;
                                 if (blockId) {
                                     if (!allPosts.has(blockId)) allPosts.set(blockId, []);
                                     allPosts.get(blockId).push({
                                         id: file.name,
-                                        title: postData.meta?.title || postData.title,
-                                        author: postData.meta?.author || postData.author,
-                                        content: postData.body || postData.content,
-                                        date: postData.meta?.date || postData.date,
-                                        fullContent: postData.body || postData.content
+                                        title: postData.title,
+                                        author: postData.author,
+                                        date: postData.date,
+                                        type: postData.type || 'article',
+                                        content: postData.content,
+                                        imageFolder: postData.imageFolder
                                     });
                                 }
                             }
@@ -269,36 +414,65 @@
                     }
                 } catch(e) { console.log(`加载${folder}失败:`, e); }
             }
-            // 按日期排序
             for (let [key, arr] of allPosts.entries()) {
                 arr.sort((a,b) => (b.date || '').localeCompare(a.date || ''));
             }
             return allPosts;
         }
         
-        // 发布文章 - 下载JSON文件
-        function publishAndDownload() {
+        // 发布文章 - 下载JSON文件并复制到剪贴板
+        async function publishAndDownload() {
             const selectEl = document.getElementById('post-target');
             const selectedOption = selectEl.options[selectEl.selectedIndex];
             const target = selectEl.value;
-            const folder = selectedOption.dataset.folder;
+            const targetFolder = selectedOption.dataset.folder;
             const title = document.getElementById('post-title').value.trim();
             const author = document.getElementById('post-author').value.trim();
-            const content = document.getElementById('post-content').value;
+            const type = document.getElementById('post-type').value;
             
-            if (!title || !author || !content) { alert("请填写完整：标题、作者和正文内容"); return; }
+            if (!title || !author) { alert("请填写标题和作者"); return; }
             
             const date = new Date().toISOString().split('T')[0];
             const slug = title.replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '').slice(0, 20);
             const fileName = `${date}_${slug || 'post'}.json`;
             
-            const articleJSON = {
-                meta: { title, author, date, blockId: target, owner: folder, images: [] },
-                body: content,
-                raw: { title, author, content, date, targetBlock: target }
-            };
+            let articleJSON;
+            let imageFolderFull = '';
+            
+            if (type === 'image-gallery') {
+                const folderName = document.getElementById('image-folder-name').value.trim();
+                if (!folderName) { alert("请填写图片文件夹名称"); return; }
+                imageFolderFull = `assets/images/${folderName}`;
+                articleJSON = {
+                    type: "image-gallery",
+                    title: title,
+                    author: author,
+                    date: date,
+                    imageFolder: imageFolderFull,
+                    blockId: target
+                };
+            } else {
+                const content = document.getElementById('post-content').value;
+                if (!content) { alert("文章模式需要填写正文内容"); return; }
+                articleJSON = {
+                    type: "article",
+                    title: title,
+                    author: author,
+                    date: date,
+                    content: content,
+                    blockId: target
+                };
+            }
             
             const jsonStr = JSON.stringify(articleJSON, null, 2);
+            
+            // 复制到剪贴板
+            try {
+                await navigator.clipboard.writeText(jsonStr);
+                console.log("JSON已复制到剪贴板");
+            } catch(err) {
+                console.log("复制失败:", err);
+            }
             
             // 下载文件
             const blob = new Blob([jsonStr], {type: 'application/json'});
@@ -310,99 +484,75 @@
             
             const guide = document.getElementById('upload-guide');
             guide.style.display = 'block';
-            guide.innerHTML = `<strong>✅ JSON文件已下载！</strong><br>请上传到 <code>posts/${folder}/</code> 目录，然后刷新页面。`;
+            if (type === 'image-gallery') {
+                guide.innerHTML = `<strong>✅ JSON文件已下载并复制到剪贴板！</strong><br>
+                    📁 请上传到 <code>posts/${targetFolder}/</code> 目录<br>
+                    🖼️ 请确保图片已上传到 <code>${imageFolderFull}/</code> 目录<br>
+                    📤 <a href="https://github.com/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/upload/main/${imageFolderFull}" target="_blank">点击上传图片</a>`;
+            } else {
+                guide.innerHTML = `<strong>✅ JSON文件已下载并复制到剪贴板！</strong><br>请上传到 <code>posts/${targetFolder}/</code> 目录，然后刷新页面。`;
+            }
             
+            // 清空表单
             document.getElementById('post-title').value = '';
             document.getElementById('post-author').value = '';
             document.getElementById('post-content').value = '';
-            setTimeout(() => { guide.style.display = 'none'; }, 8000);
+            document.getElementById('image-folder-name').value = '';
+            
+            setTimeout(() => { guide.style.display = 'none'; }, 10000);
         }
         
         function getPostsByBlock(blockId) { return postsDB.get(blockId) || []; }
-        
-        // 获取纯文本预览（去掉HTML标签）
-        function getPlainTextPreview(html, maxLen = 80) {
-            if (!html) return '';
-            const text = html.replace(/<[^>]*>/g, '').trim();
-            return text.length > maxLen ? text.substring(0, maxLen) + '...' : text;
-        }
         
         // 路由
         let currentPage = 'index';
         let currentPageDetail = null;
         
-        // ========== 专栏列表页（小块卡片，右下角阅读原文） ==========
-        function renderColumnListPage(blockId, blockTitle) {
-            const posts = getPostsByBlock(blockId);
-            const folder = blockId.includes('dengjie') ? 'dengjie' : (blockId.includes('wang') ? 'wangboning' : 'together');
+        function openLightbox(imgSrc) {
+            document.getElementById('lightbox-img').src = imgSrc;
+            document.getElementById('lightbox').classList.add('active');
+        }
+        function closeLightbox() { document.getElementById('lightbox').classList.remove('active'); }
+        
+        // 图片详情页渲染（每行3张图片）
+        async function renderImageDetailPage(blockId, post) {
+            const images = await getImagesFromFolder(post.imageFolder);
             
-            if (posts.length === 0) {
-                return `
-                    <div class="column-container">
-                        <div class="back-home-bar">
-                            <button class="back-home-btn" onclick="backToDetail()">← 返回主页</button>
-                        </div>
-                        <div class="column-header">
-                            <h2 style="color:#1f4b6e;">📂 ${escapeHtml(blockTitle)}</h2>
-                            <p style="color:#6f8daf;">记录专属日常</p>
-                        </div>
-                        <div class="empty-posts">✨ 暂无文章，请点击右下角「创作文章」发布 ✨</div>
+            const imagesHtml = images.length === 0 ? 
+                `<div class="empty-posts">📭 暂无图片<br>请将图片上传到 <code>${post.imageFolder}/</code> 目录</div>` :
+                `<div class="image-grid">${images.map(img => `
+                    <div class="image-grid-item" onclick="openLightbox('${img.download_url}')">
+                        <img src="${img.download_url}" alt="${img.name}" loading="lazy">
+                        <div class="image-caption">${img.name}</div>
                     </div>
-                `;
-            }
-            
-            const postsHtml = posts.map(post => `
-                <div class="post-card">
-                    <div class="post-title">${escapeHtml(post.title)}</div>
-                    <div class="post-meta">
-                        <span>✍️ ${escapeHtml(post.author)}</span>
-                        <span>📅 ${post.date || '未知日期'}</span>
-                    </div>
-                    <div class="post-preview">${escapeHtml(getPlainTextPreview(post.content, 100))}</div>
-                    <a class="read-more-link" onclick="viewArticle('${encodeURIComponent(blockId)}', '${encodeURIComponent(post.id)}')">阅读原文 →</a>
-                </div>
-            `).join('');
+                `).join('')}</div>`;
             
             return `
-                <div class="column-container">
-                    <div class="back-home-bar">
-                        <button class="back-home-btn" onclick="backToDetail()">← 返回主页</button>
+                <div>
+                    <div style="margin-bottom:1.5rem;">
+                        <button class="back-home-btn" onclick="backToColumnList('${encodeURIComponent(blockId)}')">← 返回专栏</button>
                     </div>
-                    <div class="column-header">
-                        <h2 style="color:#1f4b6e;">📂 ${escapeHtml(blockTitle)}</h2>
-                        <p style="color:#6f8daf;">共 ${posts.length} 篇文章 · 点击「阅读原文」查看完整内容</p>
-                    </div>
-                    <div class="posts-grid">
-                        ${postsHtml}
+                    <div class="image-detail-page">
+                        <div class="image-detail-header">
+                            <h1 class="image-detail-title">${escapeHtml(post.title)}</h1>
+                            <div class="image-detail-meta">
+                                <span>✍️ ${escapeHtml(post.author)}</span>
+                                <span>📅 ${post.date || '未知日期'}</span>
+                            </div>
+                        </div>
+                        ${imagesHtml}
+                        ${images.length > 0 ? `<div class="image-count-info">📸 共 ${images.length} 张图片 · 点击图片可放大</div>` : ''}
                     </div>
                 </div>
             `;
         }
         
-        // ========== 独立文章详情页（从上到下布局） ==========
-        function renderArticleDetailPage(blockId, articleId) {
-            const posts = getPostsByBlock(blockId);
-            const article = posts.find(p => p.id === articleId);
-            
-            if (!article) {
-                return `
-                    <div style="text-align:center; padding:3rem;">
-                        <h2>文章不存在</h2>
-                        <button class="back-home-btn" onclick="backToColumnList('${encodeURIComponent(blockId)}')">返回专栏</button>
-                    </div>
-                `;
-            }
-            
-            // 获取板块标题
-            let blockTitle = '';
-            for (const person of Object.values(personsData)) {
-                for (const item of person.block1Items) {
-                    if (item.blockId === blockId) blockTitle = item.title;
-                }
-                if (person.singleBlockId === blockId) blockTitle = person.singleTitle;
-                if (person.leftBlockId === blockId) blockTitle = person.leftTitle;
-                if (person.rightBlockId === blockId) blockTitle = person.rightTitle;
-            }
+        // 普通文章详情页
+        function renderArticleDetailPage(blockId, post) {
+            let content = post.content || '';
+            content = content.replace(/src="assets\/images\/([^"]+)"/g, (match, filename) => {
+                return `src="https://raw.githubusercontent.com/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/${GITHUB_CONFIG.branch}/assets/images/${filename}"`;
+            });
             
             return `
                 <div>
@@ -411,33 +561,75 @@
                     </div>
                     <div class="article-detail-page">
                         <div class="article-detail-header">
-                            <h1 class="article-detail-title">${escapeHtml(article.title)}</h1>
+                            <h1 class="article-detail-title">${escapeHtml(post.title)}</h1>
                             <div class="article-detail-meta">
-                                <span>✍️ ${escapeHtml(article.author)}</span>
-                                <span>📅 ${article.date || '发布日期未知'}</span>
+                                <span>✍️ ${escapeHtml(post.author)}</span>
+                                <span>📅 ${post.date || '未知日期'}</span>
                             </div>
                         </div>
-                        <div class="article-detail-content">
-                            ${article.content || '暂无内容'}
-                        </div>
+                        <div class="article-detail-content">${content}</div>
                     </div>
                 </div>
             `;
         }
         
+        // 专栏列表页
+        async function renderColumnListPage(blockId, blockTitle) {
+            const posts = getPostsByBlock(blockId);
+            
+            if (posts.length === 0) {
+                return `<div class="column-container"><div class="back-home-bar"><button class="back-home-btn" onclick="backToDetail()">← 返回主页</button></div><div class="column-header"><h2>📂 ${escapeHtml(blockTitle)}</h2></div><div class="empty-posts">✨ 暂无内容，点击右下角「创作文章」发布 ✨</div></div>`;
+            }
+            
+            const postsHtml = posts.map(post => `
+                <div class="post-card">
+                    <div class="post-title">${escapeHtml(post.title)}</div>
+                    <div class="post-meta">
+                        <span>✍️ ${escapeHtml(post.author)}</span>
+                        <span>📅 ${post.date || '未知日期'}</span>
+                        <span class="post-type-badge">${post.type === 'image-gallery' ? '🖼️ 图片专栏' : '📝 文章'}</span>
+                    </div>
+                    <a class="read-more-link" onclick="viewPost('${encodeURIComponent(blockId)}', '${encodeURIComponent(post.id)}', '${post.type}')">阅读原文 →</a>
+                </div>
+            `).join('');
+            
+            return `<div class="column-container"><div class="back-home-bar"><button class="back-home-btn" onclick="backToDetail()">← 返回主页</button></div><div class="column-header"><h2>📂 ${escapeHtml(blockTitle)}</h2><p style="color:#6c8dae;">共 ${posts.length} 个专栏</p></div><div class="posts-grid">${postsHtml}</div></div>`;
+        }
+        
+        // 查看专栏详情
+        async function viewPost(blockId, postId, type) {
+            const posts = getPostsByBlock(decodeURIComponent(blockId));
+            const post = posts.find(p => p.id === postId);
+            if (!post) return;
+            
+            if (type === 'image-gallery') {
+                currentPage = 'image_detail';
+                window._detailBlockId = decodeURIComponent(blockId);
+                window._detailPost = post;
+            } else {
+                currentPage = 'article_detail';
+                window._detailBlockId = decodeURIComponent(blockId);
+                window._detailPost = post;
+            }
+            renderApp();
+        }
+        
         async function renderApp() {
             const root = document.getElementById('app-root');
             if (currentPage === 'index') {
-                root.innerHTML = `<div class="hero-index"><div class="greeting-tag">✦ 双人宇宙 ✦</div><div class="main-headline">邓杰 · 王泊宁<br>两人的日常</div><div class="subhead">独立轨迹 · 交叠星光</div><div class="triple-links"><div class="daily-card" data-person="dengjie"><div class="card-icon">🌿</div><div class="card-name">邓杰的日常</div><div class="card-desc">全栈 · 光影收集者</div></div><div class="daily-card" data-person="wangboning"><div class="card-icon">🎨</div><div class="card-name">王泊宁的日常</div><div class="card-desc">创意开发 · 设计思维</div></div><div class="daily-card" data-person="together"><div class="card-icon">✨🤝✨</div><div class="card-name">两人的共同日常</div><div class="card-desc">共同项目 · 双城灵感</div></div></div><div class="footer-note">点击卡片进入 · 文章自动从GitHub加载 ✨</div></div>`;
+                root.innerHTML = `<div class="hero-index"><div class="greeting-tag">✦ 双人宇宙 ✦</div><div class="main-headline">邓杰 · 王泊宁<br>两人的日常</div><div class="subhead">独立轨迹 · 交叠星光</div><div class="triple-links"><div class="daily-card" data-person="dengjie"><div class="card-icon">🌿</div><div class="card-name">邓杰的日常</div><div class="card-desc">全栈 · 光影收集者</div></div><div class="daily-card" data-person="wangboning"><div class="card-icon">🎨</div><div class="card-name">王泊宁的日常</div><div class="card-desc">创意开发 · 设计思维</div></div><div class="daily-card" data-person="together"><div class="card-icon">✨🤝✨</div><div class="card-name">两人的共同日常</div><div class="card-desc">共同项目 · 双城灵感</div></div></div><div class="footer-note">点击卡片进入 · 支持文章专栏和图片专栏 ✨</div></div>`;
                 document.querySelectorAll('.daily-card').forEach(card => {
                     card.addEventListener('click', () => { currentPage = card.dataset.person; currentPageDetail = null; renderApp(); });
                 });
             } 
             else if (currentPage === 'column_list') {
-                root.innerHTML = renderColumnListPage(window._currentBlockId, window._currentBlockTitle);
+                root.innerHTML = await renderColumnListPage(window._currentBlockId, window._currentBlockTitle);
+            }
+            else if (currentPage === 'image_detail') {
+                root.innerHTML = await renderImageDetailPage(window._detailBlockId, window._detailPost);
             }
             else if (currentPage === 'article_detail') {
-                root.innerHTML = renderArticleDetailPage(window._detailBlockId, window._detailArticleId);
+                root.innerHTML = renderArticleDetailPage(window._detailBlockId, window._detailPost);
             }
             else {
                 const data = personsData[currentPage];
@@ -445,13 +637,12 @@
                     const block1Html = `<div class="block-split-3">${data.block1Items.map((item, i) => `<div class="shape-card ${i===0?'shape-triangle-left':i===1?'shape-trapezoid-mid':'shape-reverse-triangle'}"><a class="section-link" onclick="navigateToColumnList('${item.blockId}','${item.title}')">↗</a><div class="block-icon">${item.icon}</div><h3>${item.title}</h3><p>${item.desc}</p></div>`).join('')}</div>`;
                     const block2Html = `<div class="block-single"><a class="section-link" onclick="navigateToColumnList('${data.singleBlockId}','${data.singleTitle}')">↗</a><div class="single-content"><div><h2>${data.singleTitle}</h2><p>${data.singleDesc}</p></div><div class="single-stats">✨ ${data.singleStat}</div></div></div>`;
                     const block3Html = `<div class="block-split-2"><div class="dual-left"><a class="section-link" onclick="navigateToColumnList('${data.leftBlockId}','${data.leftTitle}')">↗</a><h3>${data.leftTitle}</h3><div class="hobby-list">${data.leftHobbies.map(h=>`<span class="hobby-badge">${h}</span>`).join('')}</div><p>“${data.leftQuote}”</p></div><div class="dual-right"><a class="section-link" onclick="navigateToColumnList('${data.rightBlockId}','${data.rightTitle}')">↗</a><h3>${data.rightTitle}</h3><div class="hobby-list">${data.rightHobbies.map(h=>`<span class="hobby-badge">${h}</span>`).join('')}</div><p>“${data.rightQuote}”</p></div></div>`;
-                    root.innerHTML = `<div class="detail-page"><div class="back-home-bar"><button class="back-home-btn" id="back-to-index">← 返回首页</button></div><div style="text-align:center;margin-bottom:1rem;"><h1>${data.name}</h1><div>${data.titleNote}</div><div style="color:#6c8dae;">${data.roleDesc}</div></div><div class="irregular-stack">${block1Html}${block2Html}${block3Html}</div><div class="detail-footer" style="text-align:center;margin-top:2rem;font-size:0.75rem;color:#8ba0bc;">点击 ↗ 进入专栏 · 点击「阅读原文」查看完整文章</div></div>`;
+                    root.innerHTML = `<div class="detail-page"><div class="back-home-bar"><button class="back-home-btn" id="back-to-index">← 返回首页</button></div><div style="text-align:center;margin-bottom:1rem;"><h1>${data.name}</h1><div>${data.titleNote}</div><div style="color:#6c8dae;">${data.roleDesc}</div></div><div class="irregular-stack">${block1Html}${block2Html}${block3Html}</div><div class="detail-footer" style="text-align:center;margin-top:2rem;font-size:0.75rem;color:#8ba0bc;">点击 ↗ 进入专栏 · 支持文章和图片两种类型</div></div>`;
                     document.getElementById('back-to-index')?.addEventListener('click', () => { currentPage = 'index'; renderApp(); });
                 }
             }
         }
         
-        // 导航到专栏列表页
         function navigateToColumnList(blockId, blockTitle) {
             currentPageDetail = currentPage;
             currentPage = 'column_list';
@@ -460,19 +651,9 @@
             renderApp();
         }
         
-        // 查看独立文章详情
-        function viewArticle(blockId, articleId) {
-            currentPage = 'article_detail';
-            window._detailBlockId = decodeURIComponent(blockId);
-            window._detailArticleId = decodeURIComponent(articleId);
-            renderApp();
-        }
-        
-        // 从详情页返回专栏列表
-        function backToColumnList(blockId) {
+        async function backToColumnList(blockId) {
             currentPage = 'column_list';
             window._currentBlockId = decodeURIComponent(blockId);
-            // 需要重新获取板块标题
             let blockTitle = '';
             for (const person of Object.values(personsData)) {
                 for (const item of person.block1Items) {
@@ -502,13 +683,18 @@
             return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); 
         }
         
-        function openEditor() { document.getElementById('editor-overlay').style.display = 'block'; document.getElementById('upload-guide').style.display = 'none'; }
+        function openEditor() { 
+            document.getElementById('editor-overlay').style.display = 'block'; 
+            document.getElementById('upload-guide').style.display = 'none';
+            // 重置表单显示
+            document.getElementById('post-type').dispatchEvent(new Event('change'));
+        }
         function closeEditor() { document.getElementById('editor-overlay').style.display = 'none'; }
         
         // 初始化
         (async function init() {
             const root = document.getElementById('app-root');
-            root.innerHTML = '<div class="loading">📡 正在从GitHub加载文章...</div>';
+            root.innerHTML = '<div class="loading">📡 正在从GitHub加载专栏...</div>';
             postsDB = await loadAllPostsFromGitHub();
             renderApp();
         })();
