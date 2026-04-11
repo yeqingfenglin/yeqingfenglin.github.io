@@ -40,14 +40,31 @@
         .dual-left, .dual-right { background: white; padding: 1.8rem; position: relative; border-radius: 1rem; }
         .hobby-list { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.8rem 0; }
         .hobby-badge { background: #eef3fc; padding: 0.2rem 0.8rem; border-radius: 30px; font-size: 0.75rem; }
-        .column-container { max-width: 1100px; margin: 0 auto; }
-        .posts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.8rem; margin-top: 1.5rem; }
-        .post-card { background: white; border-radius: 1.5rem; padding: 1.5rem; box-shadow: 0 6px 12px rgba(0,0,0,0.05); border: 1px solid #eef2ff; }
-        .post-title { font-size: 1.4rem; font-weight: 700; color: #1e3c4c; }
-        .post-meta { font-size: 0.75rem; color: #8ba0bc; margin-bottom: 0.8rem; display: flex; gap: 1rem; }
-        .post-content-preview { font-size: 0.85rem; color: #334e68; line-height: 1.4; margin-bottom: 1rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
-        .read-more { color: #e6a157; font-weight: 500; cursor: pointer; }
-        .empty-posts { text-align: center; padding: 3rem; background: #faf9fe; border-radius: 2rem; color: #7c8ba0; }
+        
+        /* ========== 全新专栏页面：从上到下展示所有文章 ========== */
+        .column-fullpage { max-width: 900px; margin: 0 auto; }
+        .column-header-section { text-align: center; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid #e2e8f0; }
+        .column-header-section h1 { font-size: 2.2rem; color: #1e3c4c; margin-bottom: 0.5rem; }
+        .column-header-section .column-desc { color: #6c8dae; font-size: 0.9rem; }
+        .column-stats { background: #eef2ff; padding: 0.8rem 1.5rem; border-radius: 40px; display: inline-block; margin-top: 1rem; font-size: 0.85rem; }
+        .articles-list { display: flex; flex-direction: column; gap: 2rem; }
+        .article-item-full {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.8rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
+            border: 1px solid #eef2ff;
+        }
+        .article-item-full:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,0.1); }
+        .article-title-full { font-size: 1.6rem; font-weight: 700; color: #1e3c4c; margin-bottom: 0.5rem; }
+        .article-meta-full { display: flex; gap: 1.5rem; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px dashed #e2e8f0; color: #8ba0bc; font-size: 0.85rem; }
+        .article-content-full { font-size: 1rem; line-height: 1.7; color: #334e68; }
+        .article-content-full img { max-width: 100%; border-radius: 1rem; margin: 1rem 0; }
+        .article-content-full p { margin-bottom: 1rem; }
+        .empty-column { text-align: center; padding: 3rem; background: #faf9fe; border-radius: 2rem; color: #7c8ba0; }
+        .back-to-home { margin-bottom: 1.5rem; }
+        
         #editor-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; backdrop-filter: blur(5px); }
         .editor-modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 90%; max-width: 650px; padding: 2rem; border-radius: 1.5rem; max-height: 90vh; overflow-y: auto; }
         .form-group { margin-bottom: 1.2rem; }
@@ -62,6 +79,7 @@
             .block-split-3 { grid-template-columns: 1fr; gap: 1rem; }
             .shape-triangle-left, .shape-trapezoid-mid, .shape-reverse-triangle { clip-path: none; border-radius: 1.5rem; margin: 0; }
             .block-split-2 { grid-template-columns: 1fr; }
+            .article-title-full { font-size: 1.3rem; }
         }
     </style>
 </head>
@@ -103,7 +121,7 @@
             </div>
             <div class="form-group"><label>📖 标题 (20字以内)</label><input type="text" id="post-title" maxlength="20" placeholder="例如：暗房冲洗新体验"></div>
             <div class="form-group"><label>✍️ 作者</label><input type="text" id="post-author" placeholder="邓杰 / 王泊宁"></div>
-            <div class="form-group"><label>📄 正文</label><textarea id="post-content" placeholder="支持HTML，图片用 &lt;img src='assets/images/xxx.jpg'&gt;"></textarea></div>
+            <div class="form-group"><label>📄 正文 (支持HTML/图片)</label><textarea id="post-content" placeholder="支持HTML，图片用 &lt;img src='assets/images/xxx.jpg'&gt;"></textarea></div>
             <button class="submit-btn" onclick="publishAndDownload()">✨ 发布并下载JSON文件</button>
             <div id="upload-guide" class="upload-guide"></div>
             <button class="submit-btn cancel" onclick="closeEditor()">取消</button>
@@ -118,7 +136,7 @@
             branch: "main"
         };
         
-        // 静态人物数据
+        // 静态人物数据 (保持原有风格)
         const personsData = {
             dengjie: { id: 'dengjie', name: '邓杰', titleNote: '🌿 邓杰的日常', roleDesc: '全栈工程师 · 光影收集者',
                 block1Items: [
@@ -148,11 +166,11 @@
                 ],
                 singleTitle: "📌 共同里程碑", singleDesc: "完成30+场黑客马拉松", singleStat: "双城联展", singleBlockId: "both-b2-1",
                 leftTitle: "🌈 共同兴趣", leftHobbies: ["公路旅行", "双人厨艺"], leftQuote: "一起发呆或徒步", leftBlockId: "both-b3-L",
-                rightTitle: "🌱 未来计划", rightHobbies: ["两人小报", "工作坊"], leftQuote: "记录日常微光", rightBlockId: "both-b3-R"
+                rightTitle: "🌱 未来计划", rightHobbies: ["两人小报", "工作坊"], rightQuote: "记录日常微光", rightBlockId: "both-b3-R"
             }
         };
         
-        // 文章存储
+        // 文章存储 (key: blockId, value: 文章数组)
         let postsDB = new Map();
         
         // 从GitHub加载所有文章
@@ -178,13 +196,18 @@
                                         title: postData.meta?.title || postData.title,
                                         author: postData.meta?.author || postData.author,
                                         content: postData.body || postData.content,
-                                        date: postData.meta?.date || postData.date
+                                        date: postData.meta?.date || postData.date,
+                                        rawContent: postData.body || postData.content
                                     });
                                 }
                             }
                         }
                     }
                 } catch(e) { console.log(`加载${folder}失败:`, e); }
+            }
+            // 按日期排序（新的在前）
+            for (let [key, arr] of allPosts.entries()) {
+                arr.sort((a,b) => (b.date || '').localeCompare(a.date || ''));
             }
             return allPosts;
         }
@@ -250,6 +273,60 @@
         let currentPage = 'index';
         let currentPageDetail = null;
         
+        // ========== 新版专栏页面：从上到下展示所有文章 ==========
+        function renderColumnFullPage(blockId, blockTitle) {
+            const posts = getPostsByBlock(blockId);
+            const folder = blockId.includes('dengjie') ? 'dengjie' : (blockId.includes('wang') ? 'wangboning' : 'together');
+            
+            if (posts.length === 0) {
+                return `
+                    <div class="column-fullpage">
+                        <div class="back-to-home">
+                            <button class="back-home-btn" onclick="backToDetail()">← 返回主页</button>
+                        </div>
+                        <div class="column-header-section">
+                            <h1>📂 ${escapeHtml(blockTitle)}</h1>
+                            <div class="column-desc">记录专属日常，每次创作都是星轨延伸</div>
+                            <div class="column-stats">✨ 暂无文章</div>
+                        </div>
+                        <div class="empty-column">
+                            ✨ 暂无文章，请点击右下角「创作文章」发布 ✨
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // 从上到下展示所有文章
+            const articlesHtml = posts.map(post => `
+                <div class="article-item-full">
+                    <div class="article-title-full">${escapeHtml(post.title)}</div>
+                    <div class="article-meta-full">
+                        <span>✍️ ${escapeHtml(post.author)}</span>
+                        <span>📅 ${post.date || '未知日期'}</span>
+                    </div>
+                    <div class="article-content-full">
+                        ${post.content || '内容加载中...'}
+                    </div>
+                </div>
+            `).join('');
+            
+            return `
+                <div class="column-fullpage">
+                    <div class="back-to-home">
+                        <button class="back-home-btn" onclick="backToDetail()">← 返回主页</button>
+                    </div>
+                    <div class="column-header-section">
+                        <h1>📂 ${escapeHtml(blockTitle)}</h1>
+                        <div class="column-desc">记录专属日常 · 从上到下阅览全部文章</div>
+                        <div class="column-stats">📄 共 ${posts.length} 篇文章</div>
+                    </div>
+                    <div class="articles-list">
+                        ${articlesHtml}
+                    </div>
+                </div>
+            `;
+        }
+        
         async function renderApp() {
             const root = document.getElementById('app-root');
             if (currentPage === 'index') {
@@ -257,31 +334,53 @@
                 document.querySelectorAll('.daily-card').forEach(card => {
                     card.addEventListener('click', () => { currentPage = card.dataset.person; currentPageDetail = null; renderApp(); });
                 });
-            } else if (currentPage === 'column') {
+            } 
+            else if (currentPage === 'column') {
                 const blockId = window._tempBlockId;
                 const blockTitle = window._tempBlockTitle;
-                const posts = getPostsByBlock(blockId);
-                const folder = blockId.includes('dengjie') ? 'dengjie' : (blockId.includes('wang') ? 'wangboning' : 'together');
-                const postsHtml = posts.length === 0 ? 
-                    '<div class="empty-posts">✨ 暂无文章，请点击右下角「创作文章」发布 ✨</div>' :
-                    `<div class="posts-grid">${posts.map(p => `<div class="post-card"><div class="post-title">${escapeHtml(p.title)}</div><div class="post-meta"><span>✍️ ${escapeHtml(p.author)}</span><span>📅 ${p.date}</span></div><div class="post-content-preview">${escapeHtml(p.content.replace(/<[^>]*>/g, '').substring(0, 100))}...</div><a class="read-more" onclick="alert('完整文章：\\n${escapeHtml(p.content.replace(/<[^>]*>/g, ''))}')">阅读全文 →</a></div>`).join('')}</div>`;
-                root.innerHTML = `<div class="column-container"><div class="back-home-bar"><button class="back-home-btn" onclick="backToDetail()">← 返回主页</button></div><div class="column-header"><h2>📂 专栏 · ${escapeHtml(blockTitle)}</h2><p>📁 文章存储在 <code>posts/${folder}/</code> 目录 | <a href="https://github.com/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/tree/main/posts/${folder}" target="_blank">查看仓库</a></p></div>${postsHtml}</div>`;
-            } else {
+                root.innerHTML = renderColumnFullPage(blockId, blockTitle);
+            } 
+            else {
                 const data = personsData[currentPage];
                 if (data) {
                     const block1Html = `<div class="block-split-3">${data.block1Items.map((item, i) => `<div class="shape-card ${i===0?'shape-triangle-left':i===1?'shape-trapezoid-mid':'shape-reverse-triangle'}"><a class="section-link" onclick="navigateToColumn('${item.blockId}','${item.title}')">↗</a><div class="block-icon">${item.icon}</div><h3>${item.title}</h3><p>${item.desc}</p></div>`).join('')}</div>`;
                     const block2Html = `<div class="block-single"><a class="section-link" onclick="navigateToColumn('${data.singleBlockId}','${data.singleTitle}')">↗</a><div class="single-content"><div><h2>${data.singleTitle}</h2><p>${data.singleDesc}</p></div><div class="single-stats">✨ ${data.singleStat}</div></div></div>`;
                     const block3Html = `<div class="block-split-2"><div class="dual-left"><a class="section-link" onclick="navigateToColumn('${data.leftBlockId}','${data.leftTitle}')">↗</a><h3>${data.leftTitle}</h3><div class="hobby-list">${data.leftHobbies.map(h=>`<span class="hobby-badge">${h}</span>`).join('')}</div><p>“${data.leftQuote}”</p></div><div class="dual-right"><a class="section-link" onclick="navigateToColumn('${data.rightBlockId}','${data.rightTitle}')">↗</a><h3>${data.rightTitle}</h3><div class="hobby-list">${data.rightHobbies.map(h=>`<span class="hobby-badge">${h}</span>`).join('')}</div><p>“${data.rightQuote}”</p></div></div>`;
-                    root.innerHTML = `<div class="detail-page"><div class="back-home-bar"><button class="back-home-btn" id="back-to-index">← 返回首页</button></div><div style="text-align:center;margin-bottom:1rem;"><h1>${data.name}</h1><div>${data.titleNote}</div><div style="color:#6c8dae;">${data.roleDesc}</div></div><div class="irregular-stack">${block1Html}${block2Html}${block3Html}</div><div class="detail-footer" style="text-align:center;margin-top:2rem;font-size:0.75rem;color:#8ba0bc;">点击 ↗ 查看专栏文章 · 数据来自GitHub</div></div>`;
+                    root.innerHTML = `<div class="detail-page"><div class="back-home-bar"><button class="back-home-btn" id="back-to-index">← 返回首页</button></div><div style="text-align:center;margin-bottom:1rem;"><h1>${data.name}</h1><div>${data.titleNote}</div><div style="color:#6c8dae;">${data.roleDesc}</div></div><div class="irregular-stack">${block1Html}${block2Html}${block3Html}</div><div class="detail-footer" style="text-align:center;margin-top:2rem;font-size:0.75rem;color:#8ba0bc;">点击 ↗ 进入专栏 · 文章从上到下完整展示</div></div>`;
                     document.getElementById('back-to-index')?.addEventListener('click', () => { currentPage = 'index'; renderApp(); });
                 }
             }
         }
         
-        function navigateToColumn(blockId, blockTitle) { currentPageDetail = currentPage; currentPage = 'column'; window._tempBlockId = blockId; window._tempBlockTitle = blockTitle; renderApp(); }
-        function backToDetail() { if (currentPageDetail) { currentPage = currentPageDetail; currentPageDetail = null; renderApp(); } else { currentPage = 'index'; renderApp(); } }
-        function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
-        function openEditor() { document.getElementById('editor-overlay').style.display = 'block'; document.getElementById('upload-guide').style.display = 'none'; }
+        function navigateToColumn(blockId, blockTitle) { 
+            currentPageDetail = currentPage; 
+            currentPage = 'column'; 
+            window._tempBlockId = blockId; 
+            window._tempBlockTitle = blockTitle; 
+            renderApp(); 
+        }
+        
+        function backToDetail() { 
+            if (currentPageDetail) { 
+                currentPage = currentPageDetail; 
+                currentPageDetail = null; 
+                renderApp(); 
+            } else { 
+                currentPage = 'index'; 
+                renderApp(); 
+            } 
+        }
+        
+        function escapeHtml(str) { 
+            if(!str) return ''; 
+            return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); 
+        }
+        
+        function openEditor() { 
+            document.getElementById('editor-overlay').style.display = 'block'; 
+            document.getElementById('upload-guide').style.display = 'none'; 
+        }
+        
         function closeEditor() { document.getElementById('editor-overlay').style.display = 'none'; }
         
         // 初始化
