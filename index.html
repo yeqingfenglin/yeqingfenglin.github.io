@@ -120,18 +120,19 @@
         .post-title { font-size: 1.4rem; font-weight: 700; color: #1e3c4c; margin-bottom: 0.3rem; }
         .post-meta { font-size: 0.75rem; color: #8ba0bc; margin-bottom: 0.8rem; display: flex; gap: 1rem; }
         .post-content-preview { font-size: 0.85rem; color: #334e68; line-height: 1.4; margin-bottom: 1rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
-        .read-more { color: #e6a157; font-weight: 500; text-decoration: none; font-size: 0.8rem; }
+        .read-more { color: #e6a157; font-weight: 500; text-decoration: none; font-size: 0.8rem; cursor: pointer; }
         .empty-posts { text-align: center; padding: 3rem; background: #faf9fe; border-radius: 2rem; color: #7c8ba0; }
 
         /* 编辑器弹窗 */
         #editor-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; backdrop-filter: blur(5px); }
-        .editor-modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 90%; max-width: 620px; padding: 2rem; border-radius: 1.5rem; max-height: 90vh; overflow-y: auto; }
+        .editor-modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 90%; max-width: 650px; padding: 2rem; border-radius: 1.5rem; max-height: 90vh; overflow-y: auto; }
         .form-group { margin-bottom: 1.2rem; }
         .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; }
         .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.8rem; border: 1px solid #e2e8f0; border-radius: 0.8rem; outline: none; font-family: inherit; }
         .form-group textarea { height: 180px; resize: vertical; }
         .submit-btn { background: #2c6e9e; color: white; border: none; padding: 1rem; width: 100%; border-radius: 0.8rem; cursor: pointer; font-weight: bold; margin-top: 0.5rem; }
         .submit-btn.cancel { background: #94a3b8; }
+        .copy-notice { background: #e6f7e6; border-left: 4px solid #2c6e9e; padding: 10px; font-size: 0.8rem; margin-top: 12px; border-radius: 8px; display: none; }
 
         @media (max-width: 780px) {
             .block-split-3 { grid-template-columns: 1fr; gap: 1rem; }
@@ -151,31 +152,31 @@
         <div class="editor-modal">
             <h2 style="margin-bottom:1.2rem; color:#1e3c4c;">📝 新建专栏文章</h2>
             <div class="form-group">
-                <label>📌 归属板块 (18路分支)</label>
+                <label>📌 归属板块 (决定存储路径)</label>
                 <select id="post-target">
-                    <optgroup label="邓杰的日常">
-                        <option value="dengjie-b1-1">版块1-左 (胶片暗房)</option>
-                        <option value="dengjie-b1-2">版块1-中 (手冲哲学)</option>
-                        <option value="dengjie-b1-3">版块1-右 (骑行漫游)</option>
-                        <option value="dengjie-b2-1">版块2 (近期日常)</option>
-                        <option value="dengjie-b3-L">版块3-左 (技能热爱)</option>
-                        <option value="dengjie-b3-R">版块3-右 (双人联结)</option>
+                    <optgroup label="邓杰的日常 → posts/dengjie/">
+                        <option value="dengjie-b1-1" data-owner="dengjie">版块1-左 (胶片暗房)</option>
+                        <option value="dengjie-b1-2" data-owner="dengjie">版块1-中 (手冲哲学)</option>
+                        <option value="dengjie-b1-3" data-owner="dengjie">版块1-右 (骑行漫游)</option>
+                        <option value="dengjie-b2-1" data-owner="dengjie">版块2 (近期日常)</option>
+                        <option value="dengjie-b3-L" data-owner="dengjie">版块3-左 (技能热爱)</option>
+                        <option value="dengjie-b3-R" data-owner="dengjie">版块3-右 (双人联结)</option>
                     </optgroup>
-                    <optgroup label="王泊宁的日常">
-                        <option value="wang-b1-1">版块1-左 (数字插画)</option>
-                        <option value="wang-b1-2">版块1-中 (播客宇宙)</option>
-                        <option value="wang-b1-3">版块1-右 (雪山灵感)</option>
-                        <option value="wang-b2-1">版块2 (创作现场)</option>
-                        <option value="wang-b3-L">版块3-左 (创意工具)</option>
-                        <option value="wang-b3-R">版块3-右 (日常共振)</option>
+                    <optgroup label="王泊宁的日常 → posts/wangboning/">
+                        <option value="wang-b1-1" data-owner="wangboning">版块1-左 (数字插画)</option>
+                        <option value="wang-b1-2" data-owner="wangboning">版块1-中 (播客宇宙)</option>
+                        <option value="wang-b1-3" data-owner="wangboning">版块1-右 (雪山灵感)</option>
+                        <option value="wang-b2-1" data-owner="wangboning">版块2 (创作现场)</option>
+                        <option value="wang-b3-L" data-owner="wangboning">版块3-左 (创意工具)</option>
+                        <option value="wang-b3-R" data-owner="wangboning">版块3-右 (日常共振)</option>
                     </optgroup>
-                    <optgroup label="两人的共同日常">
-                        <option value="both-b1-1">版块1-左 (开源协作)</option>
-                        <option value="both-b1-2">版块1-中 (两人食记)</option>
-                        <option value="both-b1-3">版块1-右 (杰宁漫谈)</option>
-                        <option value="both-b2-1">版块2 (共同里程碑)</option>
-                        <option value="both-b3-L">版块3-左 (共同兴趣)</option>
-                        <option value="both-b3-R">版块3-右 (未来计划)</option>
+                    <optgroup label="两人的共同日常 → posts/together/">
+                        <option value="both-b1-1" data-owner="together">版块1-左 (开源协作)</option>
+                        <option value="both-b1-2" data-owner="together">版块1-中 (两人食记)</option>
+                        <option value="both-b1-3" data-owner="together">版块1-右 (杰宁漫谈)</option>
+                        <option value="both-b2-1" data-owner="together">版块2 (共同里程碑)</option>
+                        <option value="both-b3-L" data-owner="together">版块3-左 (共同兴趣)</option>
+                        <option value="both-b3-R" data-owner="together">版块3-右 (未来计划)</option>
                     </optgroup>
                 </select>
             </div>
@@ -188,17 +189,22 @@
                 <input type="text" id="post-author" maxlength="20" placeholder="邓杰 / 王泊宁 / 杰宁联合">
             </div>
             <div class="form-group">
-                <label>📄 正文 (支持图片链接或纯文本)</label>
-                <textarea id="post-content" placeholder="写下你的专栏内容，可以粘贴图片链接如：&lt;img src='图片url' style='max-width:100%'&gt;"></textarea>
+                <label>🖼️ 图片资源 (可选，将放入 assets/images/)</label>
+                <input type="text" id="post-images" placeholder="图片URL，多个用逗号分隔，例如: https://example.com/photo.jpg">
+                <small style="color:#6c8dae;">提示：图片将自动引用 assets/images/ 下的文件，请在 GitHub 仓库中手动存放</small>
             </div>
-            <button class="submit-btn" onclick="generatePostAndStore()">✨ 发布文章 & 保存</button>
+            <div class="form-group">
+                <label>📄 正文 (支持HTML及图片标签)</label>
+                <textarea id="post-content" placeholder="写下你的专栏内容，可以引用图片如：&lt;img src='assets/images/你的图片.jpg'&gt;"></textarea>
+            </div>
+            <button class="submit-btn" onclick="generateAndCopyPost()">✨ 生成JSON并复制到剪贴板</button>
+            <div id="copy-notice" class="copy-notice">✅ 文章代码已复制！请前往 GitHub 仓库对应目录创建 .json 文件并粘贴内容。</div>
             <button class="submit-btn cancel" onclick="closeEditor()">取消</button>
         </div>
     </div>
 
     <script>
         // ========== 完整数据模型 (包含版块静态信息 + 动态文章库) ==========
-        // 每个人的基础详情 (不规则版块文案)
         const personsData = {
             dengjie: {
                 id: 'dengjie', name: '邓杰', titleNote: '🌿 邓杰的日常 · 不规则光谱', roleDesc: '全栈工程师 · 光影收集者',
@@ -235,12 +241,11 @@
             }
         };
 
-        // 全局文章存储 (key: 板块id, value: 文章数组)
+        // 存储文章 (同时用于本地展示)
         let postsDB = new Map();
 
-        // 从 localStorage 加载已有文章
         function loadPostsFromStorage() {
-            const stored = localStorage.getItem("daily_columns_posts");
+            const stored = localStorage.getItem("daily_columns_posts_v2");
             if(stored) {
                 try {
                     const parsed = JSON.parse(stored);
@@ -249,37 +254,21 @@
                     }
                 } catch(e) {}
             }
-            // 初始化一些示例文章 (让页面不空旷)
-            if(!postsDB.has("dengjie-b1-1")) {
-                postsDB.set("dengjie-b1-1", []);
-                postsDB.set("wang-b1-2", []);
-                postsDB.set("both-b2-1", []);
-            }
-            // 加几篇演示示例
-            const demoPost = {
-                id: Date.now()+"_demo",
-                title: "📸 胶片里的夏日记忆",
-                author: "邓杰",
-                content: "最近用rolleiflex拍了一组老城区的黄昏，光影在暗房里慢慢浮现的感觉太奇妙了。<br><img src='https://picsum.photos/id/1015/400/200' style='max-width:100%; border-radius:12px; margin:8px 0'><br>胶片不死，只是慢慢显影。",
-                date: new Date().toISOString().split('T')[0],
-                target: "dengjie-b1-1"
-            };
-            const demoPost2 = {
-                id: Date.now()+"_demo2",
-                title: "🎙️ 播客新企划启动",
-                author: "王泊宁",
-                content: "新一季「杰宁漫谈」聚焦独立创作者，第一期邀请到开源插画师聊聊日常灵感。敬请期待！",
-                date: new Date().toISOString().split('T')[0],
-                target: "wang-b1-2"
-            };
-            if(postsDB.get("dengjie-b1-1")?.length === 0) postsDB.get("dengjie-b1-1").push(demoPost);
-            if(postsDB.get("wang-b1-2")?.length === 0) postsDB.get("wang-b1-2").push(demoPost2);
+            if(!postsDB.has("dengjie-b1-1")) postsDB.set("dengjie-b1-1", []);
+            if(!postsDB.has("wang-b1-2")) postsDB.set("wang-b1-2", []);
+            if(!postsDB.has("both-b2-1")) postsDB.set("both-b2-1", []);
+            
+            // 演示文章
+            const demo1 = { id: "demo_1", title: "📸 胶片里的夏日记忆", author: "邓杰", content: "最近用rolleiflex拍了一组老城区的黄昏，光影在暗房里慢慢浮现。<br><img src='assets/images/film-demo.jpg' style='max-width:100%; border-radius:12px;'><br>胶片不死。", date: "2025-06-01", target: "dengjie-b1-1", images: ["assets/images/film-demo.jpg"] };
+            const demo2 = { id: "demo_2", title: "🎙️ 播客新企划启动", author: "王泊宁", content: "新一季「杰宁漫谈」聚焦独立创作者，敬请期待！", date: "2025-06-05", target: "wang-b1-2", images: [] };
+            if(postsDB.get("dengjie-b1-1")?.length === 0) postsDB.get("dengjie-b1-1").push(demo1);
+            if(postsDB.get("wang-b1-2")?.length === 0) postsDB.get("wang-b1-2").push(demo2);
             saveToLocalStorage();
         }
         function saveToLocalStorage() {
             const obj = {};
             for(let [k,v] of postsDB.entries()) obj[k] = v;
-            localStorage.setItem("daily_columns_posts", JSON.stringify(obj));
+            localStorage.setItem("daily_columns_posts_v2", JSON.stringify(obj));
         }
 
         function addPostToDB(targetId, postObj) {
@@ -288,40 +277,138 @@
             saveToLocalStorage();
         }
 
-        // 获取某板块文章列表
         function getPostsByBlock(blockId) {
             return postsDB.get(blockId) || [];
         }
 
-        // 编辑器逻辑
-        function openEditor() { document.getElementById('editor-overlay').style.display = 'block'; }
-        function closeEditor() { document.getElementById('editor-overlay').style.display = 'none'; }
-        function generatePostAndStore() {
+        // ========== 核心：根据板块id获取所属角色目录 ==========
+        function getOwnerAndPathFromTarget(targetId) {
+            const selectEl = document.getElementById('post-target');
+            const selectedOption = selectEl.querySelector(`option[value="${targetId}"]`);
+            if(selectedOption && selectedOption.dataset.owner) {
+                const owner = selectedOption.dataset.owner; // 'dengjie', 'wangboning', 'together'
+                let folder = '';
+                if(owner === 'dengjie') folder = 'dengjie';
+                else if(owner === 'wangboning') folder = 'wangboning';
+                else folder = 'together';
+                return { owner, folderPath: `posts/${folder}/` };
+            }
+            // fallback 根据前缀识别
+            if(targetId.startsWith('dengjie')) return { owner: 'dengjie', folderPath: 'posts/dengjie/' };
+            if(targetId.startsWith('wang')) return { owner: 'wangboning', folderPath: 'posts/wangboning/' };
+            if(targetId.startsWith('both')) return { owner: 'together', folderPath: 'posts/together/' };
+            return { owner: 'unknown', folderPath: 'posts/others/' };
+        }
+
+        // 生成文件名 (日期+标题slug)
+        function generateFileName(title, date) {
+            const slug = title.replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '').slice(0, 20);
+            return `${date}_${slug || 'post'}.json`;
+        }
+
+        // 发布文章：构建完整json对象，复制到剪贴板，同时存入本地DB用于展示
+        async function generateAndCopyPost() {
             const target = document.getElementById('post-target').value;
             const title = document.getElementById('post-title').value.trim();
             const author = document.getElementById('post-author').value.trim();
             let content = document.getElementById('post-content').value;
+            const imagesRaw = document.getElementById('post-images').value;
             if(!title || !author || !content) { alert("请填写完整：标题、作者和正文内容"); return; }
+            
             const date = new Date().toISOString().split('T')[0];
-            const postId = Date.now() + "_" + Math.random().toString(36).substr(2, 6);
-            const newPost = { id: postId, title, author, content, date, target };
-            addPostToDB(target, newPost);
-            alert(`✅ 文章「${title}」已发布到板块！可在对应详情页点击↗查看专栏文章。`);
-            closeEditor();
+            const postId = Date.now() + "_" + Math.random().toString(36).substr(2, 8);
+            
+            // 处理图片列表: 转为 assets/images 下的相对路径
+            let imageList = [];
+            if(imagesRaw.trim()) {
+                imageList = imagesRaw.split(',').map(url => {
+                    let trimmed = url.trim();
+                    if(trimmed && !trimmed.startsWith('assets/images/')) {
+                        // 如果用户输入完整url，提取文件名? 建议用户手动放到assets/images 并引用相对路径
+                        // 这里提示用户规范, 但我们仍保存原始url提醒
+                        if(trimmed.startsWith('http')) {
+                            console.warn('请将图片放入 assets/images/ 并使用相对路径');
+                        }
+                        return trimmed;
+                    }
+                    return trimmed;
+                }).filter(u => u);
+            }
+            
+            // 构建完整文章对象 (符合专栏格式)
+            const articleObj = {
+                id: postId,
+                title: title,
+                author: author,
+                content: content,
+                date: date,
+                targetBlock: target,
+                images: imageList,
+                createdAt: new Date().toISOString()
+            };
+            
+            // 获取存储路径信息
+            const { owner, folderPath } = getOwnerAndPathFromTarget(target);
+            const fileName = generateFileName(title, date);
+            const fullGitPath = `${folderPath}${fileName}`;
+            
+            // 额外生成用于GitHub存储的代码块信息
+            const githubFileContent = {
+                // 按照标准的专栏文章格式存储
+                meta: {
+                    title: title,
+                    author: author,
+                    date: date,
+                    blockId: target,
+                    owner: owner,
+                    images: imageList
+                },
+                body: content,
+                raw: articleObj
+            };
+            
+            const jsonString = JSON.stringify(githubFileContent, null, 2);
+            
+            // 复制到剪贴板
+            try {
+                await navigator.clipboard.writeText(jsonString);
+                const noticeDiv = document.getElementById('copy-notice');
+                noticeDiv.style.display = 'block';
+                noticeDiv.innerHTML = `✅ 文章JSON已复制！<br>📁 请前往GitHub仓库创建文件：<strong>${fullGitPath}</strong><br>🖼️ 图片请放入 <strong>assets/images/</strong> 目录下，并在正文中使用相对路径引用。<br>📌 当前文章已暂存至本地预览。`;
+                setTimeout(() => { noticeDiv.style.display = 'none'; }, 5000);
+            } catch(err) {
+                alert("复制失败，请手动复制下方内容：\n" + jsonString);
+                console.log(jsonString);
+            }
+            
+            // 同时保存到本地数据库用于前端展示
+            const localPost = { id: postId, title, author, content, date, target, images: imageList };
+            addPostToDB(target, localPost);
+            
+            // 清空表单部分字段
             document.getElementById('post-title').value = '';
             document.getElementById('post-author').value = '';
             document.getElementById('post-content').value = '';
-            // 如果当前处于某个详情页，刷新页面保持同步
-            if(currentPage !== 'index' && currentPageDetail) {
+            document.getElementById('post-images').value = '';
+            
+            // 如果当前在专栏页，刷新显示
+            if(currentPage === 'column') {
                 renderApp();
+            } else if(currentPage !== 'index' && currentPageDetail) {
+                // 详情页无需自动跳转，但数据已更新
             }
         }
+        
+        function openEditor() { 
+            document.getElementById('editor-overlay').style.display = 'block'; 
+            document.getElementById('copy-notice').style.display = 'none';
+        }
+        function closeEditor() { document.getElementById('editor-overlay').style.display = 'none'; }
 
-        // 路由状态
+        // 路由与渲染 (保留原有完整逻辑)
         let currentPage = 'index';
-        let currentPageDetail = null; // 存储当前显示的person id
-
-        // 渲染专栏聚合页 (展示某个板块所有文章)
+        let currentPageDetail = null;
+        
         function renderColumnPage(blockId, blockTitle) {
             const posts = getPostsByBlock(blockId);
             const postsHtml = posts.length === 0 ? 
@@ -331,23 +418,22 @@
                         <div class="post-title">${escapeHtml(post.title)}</div>
                         <div class="post-meta"><span>✍️ ${escapeHtml(post.author)}</span> <span>📅 ${post.date}</span></div>
                         <div class="post-content-preview">${post.content.replace(/<[^>]*>/g, '').substring(0, 100)}...</div>
-                        <a href="javascript:void(0)" onclick="alert('完整文章：\\n${escapeHtml(post.content.replace(/<[^>]*>/g, ''))}')" class="read-more">阅读全文 →</a>
+                        <a class="read-more" onclick="alert('完整文章：\\n${escapeHtml(post.content.replace(/<[^>]*>/g, ''))}')">阅读全文 →</a>
                     </div>
                 `).join('')}</div>`;
             return `
                 <div class="column-container">
-                    <div class="back-home-bar">
-                        <button class="back-home-btn" onclick="backToDetail()">← 返回 ${getCurrentPersonName()} 主页</button>
-                    </div>
-                    <div class="column-header">
-                        <h2 style="color:#1f4b6e;">📂 专栏文章 · ${escapeHtml(blockTitle)}</h2>
-                        <p style="color:#6f8daf;">记录专属日常，每次创作都是星轨延伸</p>
-                    </div>
+                    <div class="back-home-bar"><button class="back-home-btn" onclick="backToDetail()">← 返回 ${getCurrentPersonName()} 主页</button></div>
+                    <div class="column-header"><h2 style="color:#1f4b6e;">📂 专栏文章 · ${escapeHtml(blockTitle)}</h2><p style="color:#6f8daf;">文章文件存储于: posts/${getOwnerFolderFromBlockId(blockId)}/ 目录，图片存放 assets/images/</p></div>
                     ${postsHtml}
                 </div>
             `;
         }
-
+        function getOwnerFolderFromBlockId(blockId) {
+            if(blockId.includes('dengjie')) return 'dengjie';
+            if(blockId.includes('wang')) return 'wangboning';
+            return 'together';
+        }
         function getCurrentPersonName() {
             if(currentPageDetail === 'dengjie') return '邓杰';
             if(currentPageDetail === 'wangboning') return '王泊宁';
@@ -358,106 +444,26 @@
             if(currentPageDetail) { currentPage = currentPageDetail; currentPageDetail = null; renderApp(); }
             else { currentPage = 'index'; renderApp(); }
         }
-
-        // 渲染详情页 (不规则版块并且每个不规则卡片加上专栏跳转链接)
         function renderDetail(personId) {
             const data = personsData[personId];
             if (!data) return '<div>出错</div>';
-            // 版块1 三块动态注入blockId映射
-            const block1Html = `
-                <div class="block-split-3">
-                    ${data.block1Items.map((item, idx) => {
-                        let shapeClass = idx === 0 ? "shape-triangle-left" : (idx === 1 ? "shape-trapezoid-mid" : "shape-reverse-triangle");
-                        return `<div class="shape-card ${shapeClass}" style="position:relative;">
-                                    <a href="javascript:void(0)" class="section-link" onclick="navigateToColumn('${item.blockId}', '${escapeAttr(item.title)}')">↗</a>
-                                    <div class="block-icon">${item.icon}</div>
-                                    <h3>${item.title}</h3>
-                                    <p>${item.desc}</p>
-                                </div>`;
-                    }).join('')}
-                </div>
-            `;
-            const block2Html = `
-                <div class="block-single" style="position:relative;">
-                    <a href="javascript:void(0)" class="section-link" onclick="navigateToColumn('${data.singleBlockId}', '${escapeAttr(data.singleTitle)}')">↗</a>
-                    <div class="single-content">
-                        <div class="single-text"><h2>${data.singleTitle}</h2><p>${data.singleDesc}</p></div>
-                        <div class="single-stats"><div style="font-size:2rem;">✨</div><div style="font-weight:500;">${data.singleStat.replace(/\n/g, '<br>')}</div></div>
-                    </div>
-                </div>
-            `;
-            const block3Html = `
-                <div class="block-split-2">
-                    <div class="dual-left" style="position:relative;">
-                        <a href="javascript:void(0)" class="section-link" onclick="navigateToColumn('${data.leftBlockId}', '${escapeAttr(data.leftTitle)}')">↗</a>
-                        <div class="mini-profile"><h3>${data.leftTitle}</h3><div class="hobby-list">${data.leftHobbies.map(h => `<span class="hobby-badge">${h}</span>`).join('')}</div><p>“${data.leftQuote}”</p></div>
-                    </div>
-                    <div class="dual-right" style="position:relative;">
-                        <a href="javascript:void(0)" class="section-link" onclick="navigateToColumn('${data.rightBlockId}', '${escapeAttr(data.rightTitle)}')">↗</a>
-                        <div class="mini-profile"><h3>${data.rightTitle}</h3><div class="hobby-list">${data.rightHobbies.map(h => `<span class="hobby-badge">${h}</span>`).join('')}</div><p>“${data.rightQuote}”</p></div>
-                    </div>
-                </div>
-            `;
-            return `
-                <div class="detail-page">
-                    <div class="back-home-bar"><button class="back-home-btn" id="back-to-index">← 返回首页 · 三个超链接</button></div>
-                    <div style="text-align: center; margin-bottom: 1.8rem;"><h1 style="font-size:2.3rem; color:#153e5a;">${data.name}</h1><div style="color:#d28b46;">${data.titleNote}</div><div style="color:#5c6f87;">${data.roleDesc}</div></div>
-                    <div class="irregular-stack">${block1Html}${block2Html}${block3Html}</div>
-                    <div class="detail-footer">© 2026 不规则日常 · 点击 ↗ 符号进入对应专栏板块 · 自由创作</div>
-                </div>
-            `;
+            const block1Html = `<div class="block-split-3">${data.block1Items.map((item, idx) => { let shapeClass = idx === 0 ? "shape-triangle-left" : (idx === 1 ? "shape-trapezoid-mid" : "shape-reverse-triangle"); return `<div class="shape-card ${shapeClass}" style="position:relative;"><a href="javascript:void(0)" class="section-link" onclick="navigateToColumn('${item.blockId}', '${escapeAttr(item.title)}')">↗</a><div class="block-icon">${item.icon}</div><h3>${item.title}</h3><p>${item.desc}</p></div>`; }).join('')}</div>`;
+            const block2Html = `<div class="block-single" style="position:relative;"><a href="javascript:void(0)" class="section-link" onclick="navigateToColumn('${data.singleBlockId}', '${escapeAttr(data.singleTitle)}')">↗</a><div class="single-content"><div class="single-text"><h2>${data.singleTitle}</h2><p>${data.singleDesc}</p></div><div class="single-stats"><div style="font-size:2rem;">✨</div><div>${data.singleStat.replace(/\n/g, '<br>')}</div></div></div></div>`;
+            const block3Html = `<div class="block-split-2"><div class="dual-left" style="position:relative;"><a href="javascript:void(0)" class="section-link" onclick="navigateToColumn('${data.leftBlockId}', '${escapeAttr(data.leftTitle)}')">↗</a><div class="mini-profile"><h3>${data.leftTitle}</h3><div class="hobby-list">${data.leftHobbies.map(h => `<span class="hobby-badge">${h}</span>`).join('')}</div><p>“${data.leftQuote}”</p></div></div><div class="dual-right" style="position:relative;"><a href="javascript:void(0)" class="section-link" onclick="navigateToColumn('${data.rightBlockId}', '${escapeAttr(data.rightTitle)}')">↗</a><div class="mini-profile"><h3>${data.rightTitle}</h3><div class="hobby-list">${data.rightHobbies.map(h => `<span class="hobby-badge">${h}</span>`).join('')}</div><p>“${data.rightQuote}”</p></div></div></div>`;
+            return `<div class="detail-page"><div class="back-home-bar"><button class="back-home-btn" id="back-to-index">← 返回首页</button></div><div style="text-align:center;margin-bottom:1.8rem;"><h1 style="font-size:2.3rem;">${data.name}</h1><div style="color:#d28b46;">${data.titleNote}</div><div>${data.roleDesc}</div></div><div class="irregular-stack">${block1Html}${block2Html}${block3Html}</div><div class="detail-footer">© 不规则日常 · 点击↗进入专栏，文章将按角色存入 posts/ 对应文件夹</div></div>`;
         }
-
-        function navigateToColumn(blockId, blockTitle) {
-            // 暂存当前详情页面，以便返回
-            if(currentPage !== 'index') currentPageDetail = currentPage;
-            currentPage = 'column';
-            window._tempBlockId = blockId;
-            window._tempBlockTitle = blockTitle;
-            renderApp();
-        }
-
-        function renderIndex() {
-            return `
-                <div class="hero-index">
-                    <div class="greeting-tag">✦ 双人宇宙 ✦</div>
-                    <div class="main-headline">邓杰 · 王泊宁<br>两人的日常</div>
-                    <div class="subhead">独立轨迹 · 交叠星光</div>
-                    <div class="triple-links">
-                        <div class="daily-card" data-person="dengjie"><div class="card-icon">🌿</div><div class="card-name">邓杰的日常</div><div class="card-desc">全栈 · 光影收集者</div><div class="daily-note">📸 探店 & 胶片日记</div></div>
-                        <div class="daily-card" data-person="wangboning"><div class="card-icon">🎨</div><div class="card-name">王泊宁的日常</div><div class="card-desc">创意开发 · 设计思维</div><div class="daily-note">🎙️ 播客 & 动效魔法</div></div>
-                        <div class="daily-card" data-person="together"><div class="card-icon">✨🤝✨</div><div class="card-name">两人的共同日常</div><div class="card-desc">共同项目 · 双城灵感</div><div class="daily-note">📖 播客/食记/联合创作</div></div>
-                    </div>
-                    <div class="footer-note">点击卡片进入不规则版块世界 · 每个↗链接汇聚专栏文章</div>
-                </div>
-            `;
-        }
-
-        function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+        function navigateToColumn(blockId, blockTitle) { if(currentPage !== 'index') currentPageDetail = currentPage; currentPage = 'column'; window._tempBlockId = blockId; window._tempBlockTitle = blockTitle; renderApp(); }
+        function renderIndex() { return `<div class="hero-index"><div class="greeting-tag">✦ 双人宇宙 ✦</div><div class="main-headline">邓杰 · 王泊宁<br>两人的日常</div><div class="subhead">独立轨迹 · 交叠星光</div><div class="triple-links"><div class="daily-card" data-person="dengjie"><div class="card-icon">🌿</div><div class="card-name">邓杰的日常</div><div class="card-desc">全栈 · 光影收集者</div></div><div class="daily-card" data-person="wangboning"><div class="card-icon">🎨</div><div class="card-name">王泊宁的日常</div><div class="card-desc">创意开发 · 设计思维</div></div><div class="daily-card" data-person="together"><div class="card-icon">✨🤝✨</div><div class="card-name">两人的共同日常</div><div class="card-desc">共同项目 · 双城灵感</div></div></div><div class="footer-note">点击卡片 · 每个↗链接可发布专栏，文章自动生成JSON到 posts/{角色}/ 目录</div></div>`; }
+        function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
         function escapeAttr(str) { return str.replace(/['"]/g, ''); }
-
         function renderApp() {
             const root = document.getElementById('app-root');
             if(currentPage === 'index') {
                 root.innerHTML = renderIndex();
-                document.querySelectorAll('.daily-card').forEach(card => {
-                    const person = card.getAttribute('data-person');
-                    card.addEventListener('click', () => { currentPage = person; currentPageDetail = null; renderApp(); });
-                });
-            } 
-            else if(currentPage === 'column') {
-                const blockId = window._tempBlockId;
-                const blockTitle = window._tempBlockTitle;
-                root.innerHTML = renderColumnPage(blockId, blockTitle);
-            }
-            else {
-                const personId = currentPage;
-                root.innerHTML = renderDetail(personId);
-                const backBtn = document.getElementById('back-to-index');
-                if(backBtn) backBtn.addEventListener('click', () => { currentPage = 'index'; renderApp(); });
-            }
+                document.querySelectorAll('.daily-card').forEach(card => { const p = card.getAttribute('data-person'); card.addEventListener('click', () => { currentPage = p; currentPageDetail = null; renderApp(); }); });
+            } else if(currentPage === 'column') { root.innerHTML = renderColumnPage(window._tempBlockId, window._tempBlockTitle); }
+            else { root.innerHTML = renderDetail(currentPage); const backBtn = document.getElementById('back-to-index'); if(backBtn) backBtn.addEventListener('click', () => { currentPage = 'index'; renderApp(); }); }
         }
-
         loadPostsFromStorage();
         renderApp();
     </script>
