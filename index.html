@@ -303,6 +303,7 @@
             for (const folder of folders) {
                 const apiUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/posts/${folder}?ref=${GITHUB_CONFIG.branch}`;
                 try {
+                    console.log(`正在加载 posts/${folder}/ ...`);
                     const response = await fetch(apiUrl);
                     if (response.ok) {
                         const files = await response.json();
@@ -312,6 +313,8 @@
                                     try {
                                         const contentRes = await fetch(file.download_url);
                                         const postData = await contentRes.json();
+                                        console.log(`找到文件: ${file.name}`, postData);
+                                        
                                         const blockId = postData.blockId;
                                         
                                         if (blockId) {
@@ -325,6 +328,9 @@
                                                 content: postData.content || '',
                                                 imageFolder: postData.imageFolder || ''
                                             });
+                                            console.log(`  已添加到板块: ${blockId}`);
+                                        } else {
+                                            console.warn(`  文件 ${file.name} 缺少 blockId 字段`);
                                         }
                                     } catch(e) {
                                         console.log(`解析文件 ${file.name} 失败:`, e);
@@ -332,13 +338,18 @@
                                 }
                             }
                         }
+                    } else {
+                        console.log(`posts/${folder} 文件夹不存在或无法访问`);
                     }
                 } catch(e) { console.log(`加载${folder}失败:`, e); }
             }
-            // 按日期排序
-            for (let [key, arr] of allPosts.entries()) {
-                arr.sort((a,b) => (b.date || '').localeCompare(a.date || ''));
+            
+            // 打印最终加载结果
+            console.log('===== 加载完成 =====');
+            for (let [blockId, posts] of allPosts.entries()) {
+                console.log(`板块 ${blockId}:`, posts.map(p => `${p.title} (${p.type})`));
             }
+            
             return allPosts;
         }
         
@@ -391,6 +402,7 @@
             // 复制到剪贴板
             try {
                 await navigator.clipboard.writeText(jsonStr);
+                alert("✅ JSON内容已复制到剪贴板！");
             } catch(err) {
                 console.log("复制失败:", err);
             }
@@ -410,7 +422,10 @@
                     📁 请上传到 <code>posts/${targetFolder}/</code> 目录<br>
                     🖼️ 请确保图片已上传到 <code>${imageFolderFull}/</code> 目录`;
             } else {
-                guide.innerHTML = `<strong>✅ JSON文件已下载并复制到剪贴板！</strong><br>请上传到 <code>posts/${targetFolder}/</code> 目录，然后刷新页面。`;
+                guide.innerHTML = `<strong>✅ JSON文件已下载并复制到剪贴板！</strong><br>
+                    📁 请上传到 <code>posts/${targetFolder}/</code> 目录<br>
+                    📝 文件名: <code>${fileName}</code><br>
+                    🔄 上传后刷新页面即可看到新文章`;
             }
             
             // 清空表单
@@ -422,11 +437,14 @@
             setTimeout(() => { guide.style.display = 'none'; }, 10000);
         }
         
-        function getPostsByBlock(blockId) { return postsDB.get(blockId) || []; }
+        function getPostsByBlock(blockId) { 
+            const posts = postsDB.get(blockId) || [];
+            console.log(`getPostsByBlock(${blockId}) 返回 ${posts.length} 篇文章`);
+            return posts;
+        }
         
         // 路由
         let currentPage = 'index';
-        let currentPageDetail = null;
         
         function openLightbox(imgSrc) {
             document.getElementById('lightbox-img').src = imgSrc;
@@ -435,27 +453,16 @@
         function closeLightbox() { document.getElementById('lightbox').classList.remove('active'); }
         
         // 普通文章详情页
-        function renderArticleDetailPage(blockId, post) {
+        function renderArticleDetailPage(blockId, post, blockTitle) {
             let content = post.content || '';
             content = content.replace(/src="assets\/images\/([^"]+)"/g, (match, filename) => {
                 return `src="https://raw.githubusercontent.com/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/${GITHUB_CONFIG.branch}/assets/images/${filename}"`;
             });
             
-            // 获取板块标题用于返回按钮
-            let blockTitle = '';
-            for (const person of Object.values(personsData)) {
-                for (const item of person.block1Items) {
-                    if (item.blockId === blockId) blockTitle = item.title;
-                }
-                if (person.singleBlockId === blockId) blockTitle = person.singleTitle;
-                if (person.leftBlockId === blockId) blockTitle = person.leftTitle;
-                if (person.rightBlockId === blockId) blockTitle = person.rightTitle;
-            }
-            
             return `
                 <div>
                     <div style="margin-bottom:1.5rem;">
-                        <button class="back-home-btn" onclick="goBackToColumnList('${encodeURIComponent(blockId)}', '${encodeURIComponent(blockTitle)}')">← 返回专栏</button>
+                        <button class="back-home-btn" onclick="goToColumnList('${encodeURIComponent(blockId)}', '${encodeURIComponent(blockTitle)}')">← 返回专栏</button>
                     </div>
                     <div class="article-detail-page">
                         <div class="article-detail-header">
@@ -473,10 +480,11 @@
         
         // 专栏列表页
         async function renderColumnListPage(blockId, blockTitle) {
+            console.log(`渲染专栏列表页: blockId=${blockId}, blockTitle=${blockTitle}`);
             const posts = getPostsByBlock(blockId);
             
             if (posts.length === 0) {
-                return `<div class="column-container"><div class="back-home-bar"><button class="back-home-btn" onclick="backToHome()">← 返回主页</button></div><div class="column-header"><h2>📂 ${escapeHtml(blockTitle)}</h2></div><div class="empty-posts">✨ 暂无内容，点击右下角「创作文章」发布 ✨</div></div>`;
+                return `<div class="column-container"><div class="back-home-bar"><button class="back-home-btn" onclick="backToHome()">← 返回主页</button></div><div class="column-header"><h2>📂 ${escapeHtml(blockTitle)}</h2></div><div class="empty-posts">✨ 暂无内容，点击右下角「创作文章」发布 ✨<br><br><small>💡 请确保JSON文件已上传到 <code>posts/${blockId.includes('dengjie') ? 'dengjie' : (blockId.includes('wang') ? 'wangboning' : 'together')}/</code> 目录</small></div></div>`;
             }
             
             const postsHtml = posts.map(post => `
@@ -496,13 +504,17 @@
         
         // 查看文章详情
         function viewArticleDetail(blockId, postId, blockTitle) {
+            console.log(`viewArticleDetail: blockId=${blockId}, postId=${postId}`);
             const posts = getPostsByBlock(decodeURIComponent(blockId));
             const post = posts.find(p => p.id === postId);
+            
             if (!post) {
-                alert("文章不存在");
+                console.error(`文章不存在: postId=${postId}, 可用文章:`, posts.map(p => p.id));
+                alert(`文章不存在\n\n可用的文章ID: ${posts.map(p => p.id).join(', ')}`);
                 return;
             }
             
+            console.log(`找到文章:`, post);
             currentPage = 'article_detail';
             window._detailBlockId = decodeURIComponent(blockId);
             window._detailPost = post;
@@ -510,11 +522,12 @@
             renderApp();
         }
         
-        // 从详情页返回专栏列表
-        function goBackToColumnList(blockId, blockTitle) {
+        // 跳转到专栏列表页
+        function goToColumnList(blockId, blockTitle) {
+            console.log(`goToColumnList: blockId=${blockId}, blockTitle=${blockTitle}`);
             currentPage = 'column_list';
-            window._currentBlockId = decodeURIComponent(blockId);
-            window._currentBlockTitle = decodeURIComponent(blockTitle);
+            window._currentBlockId = blockId;
+            window._currentBlockTitle = blockTitle;
             renderApp();
         }
         
@@ -539,7 +552,7 @@
                 root.innerHTML = await renderColumnListPage(window._currentBlockId, window._currentBlockTitle);
             }
             else if (currentPage === 'article_detail') {
-                root.innerHTML = renderArticleDetailPage(window._detailBlockId, window._detailPost);
+                root.innerHTML = renderArticleDetailPage(window._detailBlockId, window._detailPost, window._detailBlockTitle);
             }
             else {
                 // 人物详情页（带不规则板块的首页）
@@ -551,14 +564,6 @@
                     root.innerHTML = `<div class="detail-page"><div class="back-home-bar"><button class="back-home-btn" onclick="backToHome()">← 返回首页</button></div><div style="text-align:center;margin-bottom:1rem;"><h1>${data.name}</h1><div>${data.titleNote}</div><div style="color:#6c8dae;">${data.roleDesc}</div></div><div class="irregular-stack">${block1Html}${block2Html}${block3Html}</div><div class="detail-footer" style="text-align:center;margin-top:2rem;font-size:0.75rem;color:#8ba0bc;">点击 ↗ 进入专栏 · 支持文章和图片两种类型</div></div>`;
                 }
             }
-        }
-        
-        // 跳转到专栏列表页
-        function goToColumnList(blockId, blockTitle) {
-            currentPage = 'column_list';
-            window._currentBlockId = blockId;
-            window._currentBlockTitle = blockTitle;
-            renderApp();
         }
         
         function escapeHtml(str) { 
@@ -579,11 +584,8 @@
             root.innerHTML = '<div class="loading">📡 正在从GitHub加载专栏...</div>';
             try {
                 postsDB = await loadAllPostsFromGitHub();
-                console.log('加载完成，共加载', postsDB.size, '个板块的文章');
-                // 打印每个板块的文章详情用于调试
-                for (let [blockId, posts] of postsDB.entries()) {
-                    console.log(`板块 ${blockId}:`, posts.map(p => p.title));
-                }
+                console.log('===== 最终 postsDB =====');
+                console.log(postsDB);
                 renderApp();
             } catch(e) {
                 console.error('初始化失败:', e);
