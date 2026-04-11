@@ -74,79 +74,10 @@
             padding: 4px 12px;
             border-radius: 20px;
             transition: 0.2s;
+            display: inline-block;
         }
         .read-more-link:hover { background: #e6a157; color: white; }
         .empty-posts { text-align: center; padding: 3rem; background: #faf9fe; border-radius: 2rem; color: #7c8ba0; }
-        
-        /* ========== 图片详情页样式 ========== */
-        .image-detail-page {
-            max-width: 1100px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 2rem;
-            padding: 2rem;
-            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1);
-        }
-        .image-detail-header {
-            text-align: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #eef2ff;
-        }
-        .image-detail-title {
-            font-size: 2rem;
-            font-weight: 800;
-            color: #1e3c4c;
-            margin-bottom: 0.5rem;
-        }
-        .image-detail-meta {
-            font-size: 0.85rem;
-            color: #8ba0bc;
-            display: flex;
-            justify-content: center;
-            gap: 1.5rem;
-        }
-        .image-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.2rem;
-            margin-top: 1.5rem;
-        }
-        .image-grid-item {
-            background: #f8fafc;
-            border-radius: 0.8rem;
-            overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        }
-        .image-grid-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-        }
-        .image-grid-item img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            display: block;
-        }
-        .image-caption {
-            padding: 0.6rem;
-            font-size: 0.7rem;
-            color: #6c8dae;
-            text-align: center;
-            background: white;
-            border-top: 1px solid #eef2ff;
-            word-break: break-all;
-        }
-        .image-count-info {
-            text-align: center;
-            margin-top: 1.5rem;
-            font-size: 0.8rem;
-            color: #8ba0bc;
-            padding-top: 1rem;
-            border-top: 1px solid #eef2ff;
-        }
         
         /* ========== 文章详情页样式 ========== */
         .article-detail-page {
@@ -233,11 +164,6 @@
             .block-split-3 { grid-template-columns: 1fr; gap: 1rem; }
             .shape-triangle-left, .shape-trapezoid-mid, .shape-reverse-triangle { clip-path: none; border-radius: 1.5rem; margin: 0; }
             .block-split-2 { grid-template-columns: 1fr; }
-            .image-grid { grid-template-columns: repeat(2, 1fr); }
-            .image-grid-item img { height: 160px; }
-        }
-        @media (max-width: 500px) {
-            .image-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -308,7 +234,7 @@
                 <div class="form-group">
                     <label>📁 图片文件夹名称</label>
                     <input type="text" id="image-folder-name" placeholder="例如: budapest 或 paris">
-                    <div class="folder-hint">💡 图片将自动从 <code>assets/images/【你输入的名字】/</code> 加载<br>请在GitHub仓库中创建对应文件夹并上传图片</div>
+                    <div class="folder-hint">💡 图片将自动从 <code>assets/images/【你输入的名字】/</code> 加载</div>
                 </div>
             </div>
             <button class="submit-btn" onclick="publishAndDownload()">✨ 发布并下载JSON文件</button>
@@ -361,7 +287,6 @@
         
         // 文章存储
         let postsDB = new Map();
-        let isLoading = false;
         
         // 监听专栏类型切换
         document.getElementById('post-type').addEventListener('change', function() {
@@ -369,25 +294,6 @@
             document.getElementById('article-fields').style.display = isImageGallery ? 'none' : 'block';
             document.getElementById('image-fields').style.display = isImageGallery ? 'block' : 'none';
         });
-        
-        // 获取指定文件夹内的所有图片（使用 jsDelivr CDN 加速）
-        async function getImagesFromFolder(folderPath) {
-            // 使用 jsDelivr CDN 获取文件列表（更稳定）
-            const apiUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${folderPath}?ref=${GITHUB_CONFIG.branch}`;
-            try {
-                const response = await fetch(apiUrl);
-                if (response.ok) {
-                    const files = await response.json();
-                    // 如果返回的是数组（文件夹存在且有文件）
-                    if (Array.isArray(files)) {
-                        return files.filter(f => f.type === 'file' && f.name.match(/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i));
-                    }
-                } else if (response.status === 404) {
-                    console.log(`文件夹不存在: ${folderPath}`);
-                }
-            } catch(e) { console.log('获取图片失败:', e); }
-            return [];
-        }
         
         // 从GitHub加载所有文章
         async function loadAllPostsFromGitHub() {
@@ -406,21 +312,18 @@
                                     try {
                                         const contentRes = await fetch(file.download_url);
                                         const postData = await contentRes.json();
-                                        // 兼容多种 JSON 格式
-                                        const blockId = postData.blockId || 
-                                                       (postData.meta && postData.meta.blockId) ||
-                                                       (postData.raw && postData.raw.targetBlock);
+                                        const blockId = postData.blockId;
                                         
                                         if (blockId) {
                                             if (!allPosts.has(blockId)) allPosts.set(blockId, []);
                                             allPosts.get(blockId).push({
                                                 id: file.name,
-                                                title: postData.title || (postData.meta && postData.meta.title) || (postData.raw && postData.raw.title) || '无标题',
-                                                author: postData.author || (postData.meta && postData.meta.author) || (postData.raw && postData.raw.author) || '未知作者',
-                                                date: postData.date || (postData.meta && postData.meta.date) || (postData.raw && postData.raw.date) || file.name.slice(0, 10),
-                                                type: postData.type || (postData.meta && postData.meta.type) || 'article',
-                                                content: postData.content || postData.body || (postData.raw && postData.raw.content) || '',
-                                                imageFolder: postData.imageFolder || (postData.meta && postData.meta.imageFolder) || ''
+                                                title: postData.title || '无标题',
+                                                author: postData.author || '未知作者',
+                                                date: postData.date || file.name.slice(0, 10),
+                                                type: postData.type || 'article',
+                                                content: postData.content || '',
+                                                imageFolder: postData.imageFolder || ''
                                             });
                                         }
                                     } catch(e) {
@@ -429,8 +332,6 @@
                                 }
                             }
                         }
-                    } else if (response.status === 404) {
-                        console.log(`posts/${folder} 文件夹不存在，已跳过`);
                     }
                 } catch(e) { console.log(`加载${folder}失败:`, e); }
             }
@@ -507,8 +408,7 @@
             if (type === 'image-gallery') {
                 guide.innerHTML = `<strong>✅ JSON文件已下载并复制到剪贴板！</strong><br>
                     📁 请上传到 <code>posts/${targetFolder}/</code> 目录<br>
-                    🖼️ 请确保图片已上传到 <code>${imageFolderFull}/</code> 目录<br>
-                    📤 <a href="https://github.com/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/upload/main/${imageFolderFull}" target="_blank">点击上传图片</a>`;
+                    🖼️ 请确保图片已上传到 <code>${imageFolderFull}/</code> 目录`;
             } else {
                 guide.innerHTML = `<strong>✅ JSON文件已下载并复制到剪贴板！</strong><br>请上传到 <code>posts/${targetFolder}/</code> 目录，然后刷新页面。`;
             }
@@ -534,54 +434,28 @@
         }
         function closeLightbox() { document.getElementById('lightbox').classList.remove('active'); }
         
-        // 图片详情页渲染
-        async function renderImageDetailPage(blockId, post) {
-            const images = await getImagesFromFolder(post.imageFolder);
-            
-            const imagesHtml = images.length === 0 ? 
-                `<div class="empty-posts">📭 暂无图片<br>请将图片上传到 <code>${post.imageFolder}/</code> 目录</div>` :
-                `<div class="image-grid">${images.map(img => `
-                    <div class="image-grid-item" onclick="openLightbox('${img.download_url}')">
-                        <img src="${img.download_url}" alt="${img.name}" loading="lazy">
-                        <div class="image-caption">${img.name}</div>
-                    </div>
-                `).join('')}</div>`;
-            
-            return `
-                <div>
-                    <div style="margin-bottom:1.5rem;">
-                        <button class="back-home-btn" onclick="backToColumnList('${encodeURIComponent(blockId)}')">← 返回专栏</button>
-                    </div>
-                    <div class="image-detail-page">
-                        <div class="image-detail-header">
-                            <h1 class="image-detail-title">${escapeHtml(post.title)}</h1>
-                            <div class="image-detail-meta">
-                                <span>✍️ ${escapeHtml(post.author)}</span>
-                                <span>📅 ${post.date || '未知日期'}</span>
-                            </div>
-                        </div>
-                        ${imagesHtml}
-                        ${images.length > 0 ? `<div class="image-count-info">📸 共 ${images.length} 张图片 · 点击图片可放大</div>` : ''}
-                    </div>
-                </div>
-            `;
-        }
-        
         // 普通文章详情页
         function renderArticleDetailPage(blockId, post) {
             let content = post.content || '';
-            // 转换图片路径为GitHub原始链接
             content = content.replace(/src="assets\/images\/([^"]+)"/g, (match, filename) => {
                 return `src="https://raw.githubusercontent.com/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/${GITHUB_CONFIG.branch}/assets/images/${filename}"`;
             });
-            content = content.replace(/src='assets\/images\/([^']+)'/g, (match, filename) => {
-                return `src='https://raw.githubusercontent.com/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/${GITHUB_CONFIG.branch}/assets/images/${filename}'`;
-            });
+            
+            // 获取板块标题用于返回按钮
+            let blockTitle = '';
+            for (const person of Object.values(personsData)) {
+                for (const item of person.block1Items) {
+                    if (item.blockId === blockId) blockTitle = item.title;
+                }
+                if (person.singleBlockId === blockId) blockTitle = person.singleTitle;
+                if (person.leftBlockId === blockId) blockTitle = person.leftTitle;
+                if (person.rightBlockId === blockId) blockTitle = person.rightTitle;
+            }
             
             return `
                 <div>
                     <div style="margin-bottom:1.5rem;">
-                        <button class="back-home-btn" onclick="backToColumnList('${encodeURIComponent(blockId)}')">← 返回专栏</button>
+                        <button class="back-home-btn" onclick="goBackToColumnList('${encodeURIComponent(blockId)}', '${encodeURIComponent(blockTitle)}')">← 返回专栏</button>
                     </div>
                     <div class="article-detail-page">
                         <div class="article-detail-header">
@@ -591,7 +465,7 @@
                                 <span>📅 ${post.date || '未知日期'}</span>
                             </div>
                         </div>
-                        <div class="article-detail-content">${content}</div>
+                        <div class="article-detail-content">${content || '暂无内容'}</div>
                     </div>
                 </div>
             `;
@@ -602,7 +476,7 @@
             const posts = getPostsByBlock(blockId);
             
             if (posts.length === 0) {
-                return `<div class="column-container"><div class="back-home-bar"><button class="back-home-btn" onclick="backToDetail()">← 返回主页</button></div><div class="column-header"><h2>📂 ${escapeHtml(blockTitle)}</h2></div><div class="empty-posts">✨ 暂无内容，点击右下角「创作文章」发布 ✨<br><br><small>💡 提示：请确保已创建JSON文件并上传到 <code>posts/${blockId.includes('dengjie') ? 'dengjie' : (blockId.includes('wang') ? 'wangboning' : 'together')}/</code> 目录</small></div></div>`;
+                return `<div class="column-container"><div class="back-home-bar"><button class="back-home-btn" onclick="backToHome()">← 返回主页</button></div><div class="column-header"><h2>📂 ${escapeHtml(blockTitle)}</h2></div><div class="empty-posts">✨ 暂无内容，点击右下角「创作文章」发布 ✨</div></div>`;
             }
             
             const postsHtml = posts.map(post => `
@@ -613,28 +487,40 @@
                         <span>📅 ${post.date || '未知日期'}</span>
                         <span class="post-type-badge">${post.type === 'image-gallery' ? '🖼️ 图片专栏' : '📝 文章'}</span>
                     </div>
-                    <a class="read-more-link" onclick="viewPost('${encodeURIComponent(blockId)}', '${encodeURIComponent(post.id)}', '${post.type}')">阅读原文 →</a>
+                    <a class="read-more-link" onclick="viewArticleDetail('${encodeURIComponent(blockId)}', '${encodeURIComponent(post.id)}', '${encodeURIComponent(blockTitle)}')">阅读原文 →</a>
                 </div>
             `).join('');
             
-            return `<div class="column-container"><div class="back-home-bar"><button class="back-home-btn" onclick="backToDetail()">← 返回主页</button></div><div class="column-header"><h2>📂 ${escapeHtml(blockTitle)}</h2><p style="color:#6c8dae;">共 ${posts.length} 个专栏</p></div><div class="posts-grid">${postsHtml}</div></div>`;
+            return `<div class="column-container"><div class="back-home-bar"><button class="back-home-btn" onclick="backToHome()">← 返回主页</button></div><div class="column-header"><h2>📂 ${escapeHtml(blockTitle)}</h2><p style="color:#6c8dae;">共 ${posts.length} 个专栏</p></div><div class="posts-grid">${postsHtml}</div></div>`;
         }
         
-        // 查看专栏详情
-        async function viewPost(blockId, postId, type) {
+        // 查看文章详情
+        function viewArticleDetail(blockId, postId, blockTitle) {
             const posts = getPostsByBlock(decodeURIComponent(blockId));
             const post = posts.find(p => p.id === postId);
-            if (!post) return;
-            
-            if (type === 'image-gallery') {
-                currentPage = 'image_detail';
-                window._detailBlockId = decodeURIComponent(blockId);
-                window._detailPost = post;
-            } else {
-                currentPage = 'article_detail';
-                window._detailBlockId = decodeURIComponent(blockId);
-                window._detailPost = post;
+            if (!post) {
+                alert("文章不存在");
+                return;
             }
+            
+            currentPage = 'article_detail';
+            window._detailBlockId = decodeURIComponent(blockId);
+            window._detailPost = post;
+            window._detailBlockTitle = decodeURIComponent(blockTitle);
+            renderApp();
+        }
+        
+        // 从详情页返回专栏列表
+        function goBackToColumnList(blockId, blockTitle) {
+            currentPage = 'column_list';
+            window._currentBlockId = decodeURIComponent(blockId);
+            window._currentBlockTitle = decodeURIComponent(blockTitle);
+            renderApp();
+        }
+        
+        // 返回主页
+        function backToHome() {
+            currentPage = 'index';
             renderApp();
         }
         
@@ -643,63 +529,36 @@
             if (currentPage === 'index') {
                 root.innerHTML = `<div class="hero-index"><div class="greeting-tag">✦ 双人宇宙 ✦</div><div class="main-headline">邓杰 · 王泊宁<br>两人的日常</div><div class="subhead">独立轨迹 · 交叠星光</div><div class="triple-links"><div class="daily-card" data-person="dengjie"><div class="card-icon">🌿</div><div class="card-name">邓杰的日常</div><div class="card-desc">全栈 · 光影收集者</div></div><div class="daily-card" data-person="wangboning"><div class="card-icon">🎨</div><div class="card-name">王泊宁的日常</div><div class="card-desc">创意开发 · 设计思维</div></div><div class="daily-card" data-person="together"><div class="card-icon">✨🤝✨</div><div class="card-name">两人的共同日常</div><div class="card-desc">共同项目 · 双城灵感</div></div></div><div class="footer-note">点击卡片进入 · 支持文章专栏和图片专栏 ✨</div></div>`;
                 document.querySelectorAll('.daily-card').forEach(card => {
-                    card.addEventListener('click', () => { currentPage = card.dataset.person; currentPageDetail = null; renderApp(); });
+                    card.addEventListener('click', () => { 
+                        currentPage = card.dataset.person; 
+                        renderApp(); 
+                    });
                 });
             } 
             else if (currentPage === 'column_list') {
                 root.innerHTML = await renderColumnListPage(window._currentBlockId, window._currentBlockTitle);
             }
-            else if (currentPage === 'image_detail') {
-                root.innerHTML = await renderImageDetailPage(window._detailBlockId, window._detailPost);
-            }
             else if (currentPage === 'article_detail') {
                 root.innerHTML = renderArticleDetailPage(window._detailBlockId, window._detailPost);
             }
             else {
+                // 人物详情页（带不规则板块的首页）
                 const data = personsData[currentPage];
                 if (data) {
-                    const block1Html = `<div class="block-split-3">${data.block1Items.map((item, i) => `<div class="shape-card ${i===0?'shape-triangle-left':i===1?'shape-trapezoid-mid':'shape-reverse-triangle'}"><a class="section-link" onclick="navigateToColumnList('${item.blockId}','${item.title}')">↗</a><div class="block-icon">${item.icon}</div><h3>${item.title}</h3><p>${item.desc}</p></div>`).join('')}</div>`;
-                    const block2Html = `<div class="block-single"><a class="section-link" onclick="navigateToColumnList('${data.singleBlockId}','${data.singleTitle}')">↗</a><div class="single-content"><div><h2>${data.singleTitle}</h2><p>${data.singleDesc}</p></div><div class="single-stats">✨ ${data.singleStat}</div></div></div>`;
-                    const block3Html = `<div class="block-split-2"><div class="dual-left"><a class="section-link" onclick="navigateToColumnList('${data.leftBlockId}','${data.leftTitle}')">↗</a><h3>${data.leftTitle}</h3><div class="hobby-list">${data.leftHobbies.map(h=>`<span class="hobby-badge">${h}</span>`).join('')}</div><p>“${data.leftQuote}”</p></div><div class="dual-right"><a class="section-link" onclick="navigateToColumnList('${data.rightBlockId}','${data.rightTitle}')">↗</a><h3>${data.rightTitle}</h3><div class="hobby-list">${data.rightHobbies.map(h=>`<span class="hobby-badge">${h}</span>`).join('')}</div><p>“${data.rightQuote}”</p></div></div>`;
-                    root.innerHTML = `<div class="detail-page"><div class="back-home-bar"><button class="back-home-btn" id="back-to-index">← 返回首页</button></div><div style="text-align:center;margin-bottom:1rem;"><h1>${data.name}</h1><div>${data.titleNote}</div><div style="color:#6c8dae;">${data.roleDesc}</div></div><div class="irregular-stack">${block1Html}${block2Html}${block3Html}</div><div class="detail-footer" style="text-align:center;margin-top:2rem;font-size:0.75rem;color:#8ba0bc;">点击 ↗ 进入专栏 · 支持文章和图片两种类型</div></div>`;
-                    document.getElementById('back-to-index')?.addEventListener('click', () => { currentPage = 'index'; renderApp(); });
+                    const block1Html = `<div class="block-split-3">${data.block1Items.map((item, i) => `<div class="shape-card ${i===0?'shape-triangle-left':i===1?'shape-trapezoid-mid':'shape-reverse-triangle'}"><a class="section-link" onclick="goToColumnList('${item.blockId}','${item.title}')">↗</a><div class="block-icon">${item.icon}</div><h3>${item.title}</h3><p>${item.desc}</p></div>`).join('')}</div>`;
+                    const block2Html = `<div class="block-single"><a class="section-link" onclick="goToColumnList('${data.singleBlockId}','${data.singleTitle}')">↗</a><div class="single-content"><div><h2>${data.singleTitle}</h2><p>${data.singleDesc}</p></div><div class="single-stats">✨ ${data.singleStat}</div></div></div>`;
+                    const block3Html = `<div class="block-split-2"><div class="dual-left"><a class="section-link" onclick="goToColumnList('${data.leftBlockId}','${data.leftTitle}')">↗</a><h3>${data.leftTitle}</h3><div class="hobby-list">${data.leftHobbies.map(h=>`<span class="hobby-badge">${h}</span>`).join('')}</div><p>“${data.leftQuote}”</p></div><div class="dual-right"><a class="section-link" onclick="goToColumnList('${data.rightBlockId}','${data.rightTitle}')">↗</a><h3>${data.rightTitle}</h3><div class="hobby-list">${data.rightHobbies.map(h=>`<span class="hobby-badge">${h}</span>`).join('')}</div><p>“${data.rightQuote}”</p></div></div>`;
+                    root.innerHTML = `<div class="detail-page"><div class="back-home-bar"><button class="back-home-btn" onclick="backToHome()">← 返回首页</button></div><div style="text-align:center;margin-bottom:1rem;"><h1>${data.name}</h1><div>${data.titleNote}</div><div style="color:#6c8dae;">${data.roleDesc}</div></div><div class="irregular-stack">${block1Html}${block2Html}${block3Html}</div><div class="detail-footer" style="text-align:center;margin-top:2rem;font-size:0.75rem;color:#8ba0bc;">点击 ↗ 进入专栏 · 支持文章和图片两种类型</div></div>`;
                 }
             }
         }
         
-        function navigateToColumnList(blockId, blockTitle) {
-            currentPageDetail = currentPage;
+        // 跳转到专栏列表页
+        function goToColumnList(blockId, blockTitle) {
             currentPage = 'column_list';
             window._currentBlockId = blockId;
             window._currentBlockTitle = blockTitle;
             renderApp();
-        }
-        
-        async function backToColumnList(blockId) {
-            currentPage = 'column_list';
-            window._currentBlockId = decodeURIComponent(blockId);
-            let blockTitle = '';
-            for (const person of Object.values(personsData)) {
-                for (const item of person.block1Items) {
-                    if (item.blockId === window._currentBlockId) blockTitle = item.title;
-                }
-                if (person.singleBlockId === window._currentBlockId) blockTitle = person.singleTitle;
-                if (person.leftBlockId === window._currentBlockId) blockTitle = person.leftTitle;
-                if (person.rightBlockId === window._currentBlockId) blockTitle = person.rightTitle;
-            }
-            window._currentBlockTitle = blockTitle;
-            renderApp();
-        }
-        
-        function backToDetail() { 
-            if (currentPageDetail) { 
-                currentPage = currentPageDetail; 
-                currentPageDetail = null; 
-                renderApp(); 
-            } else { 
-                currentPage = 'index'; 
-                renderApp(); 
-            } 
         }
         
         function escapeHtml(str) { 
@@ -721,6 +580,10 @@
             try {
                 postsDB = await loadAllPostsFromGitHub();
                 console.log('加载完成，共加载', postsDB.size, '个板块的文章');
+                // 打印每个板块的文章详情用于调试
+                for (let [blockId, posts] of postsDB.entries()) {
+                    console.log(`板块 ${blockId}:`, posts.map(p => p.title));
+                }
                 renderApp();
             } catch(e) {
                 console.error('初始化失败:', e);
