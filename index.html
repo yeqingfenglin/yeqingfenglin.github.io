@@ -263,7 +263,8 @@
             '活': 'huo', '合': 'he', '伙': 'huo', '伴': 'ban', '公': 'gong', '路': 'lu',
             '旅': 'lv', '行': 'xing', '厨': 'chu', '艺': 'yi', '植': 'zhi', '物': 'wu',
             '养': 'yang', '护': 'hu', '小': 'xiao', '报': 'bao', '工': 'gong', '作': 'zuo',
-            '坊': 'fang', '教': 'jiao', '练': 'lian', '场': 'chang', '地': 'di', '图': 'tu'
+            '坊': 'fang', '教': 'jiao', '练': 'lian', '场': 'chang', '地': 'di', '图': 'tu',
+            '近': 'jin', '期': 'qi', '日': 'ri', '常': 'chang'
         };
         
         // 简单的中文转拼音函数
@@ -272,22 +273,17 @@
             let result = '';
             for (let i = 0; i < text.length; i++) {
                 const char = text[i];
-                // 如果是英文字母或数字，直接保留
                 if (/[a-zA-Z0-9]/.test(char)) {
                     result += char;
                 }
-                // 如果是中文，尝试转换
                 else if (pinyinMap[char]) {
                     result += pinyinMap[char];
                 }
-                // 其他字符（空格、标点等）转为下划线
                 else {
                     result += '_';
                 }
             }
-            // 合并连续的下划线
             result = result.replace(/_+/g, '_');
-            // 去除首尾下划线
             result = result.replace(/^_|_$/g, '');
             return result.toLowerCase();
         }
@@ -402,11 +398,9 @@
             
             // 将标题转换为拼音作为文件名
             let slug = chineseToPinyin(title);
-            // 如果转换后为空（全是特殊字符），则使用默认值
             if (!slug || slug.length === 0) {
                 slug = 'post';
             }
-            // 限制长度
             if (slug.length > 40) slug = slug.substring(0, 40);
             
             const fileName = `${date}_${slug}.json`;
@@ -444,7 +438,6 @@
             // 复制到剪贴板
             try {
                 await navigator.clipboard.writeText(jsonStr);
-                console.log("JSON已复制到剪贴板");
             } catch(err) {
                 console.log("复制失败:", err);
             }
@@ -468,8 +461,7 @@
                 guide.innerHTML = `<strong>✅ JSON文件已下载并复制到剪贴板！</strong><br>
                     📁 请上传到 <code>posts/${targetFolder}/</code> 目录<br>
                     📄 文件名: <code>${fileName}</code><br>
-                    🔄 上传后刷新页面即可看到新文章<br>
-                    💡 标题 "${title}" 已转换为拼音文件名`;
+                    🔄 上传后刷新页面即可看到新文章`;
             }
             
             // 清空表单
@@ -483,8 +475,11 @@
         
         function getPostsByBlock(blockId) { return postsDB.get(blockId) || []; }
         
-        // 路由
+        // 路由 - 简化版，避免重复编码
         let currentPage = 'index';
+        let currentBlockId = null;
+        let currentBlockTitle = null;
+        let currentPost = null;
         
         function openLightbox(imgSrc) {
             document.getElementById('lightbox-img').src = imgSrc;
@@ -493,7 +488,7 @@
         function closeLightbox() { document.getElementById('lightbox').classList.remove('active'); }
         
         // 普通文章详情页
-        function renderArticleDetailPage(blockId, post, blockTitle) {
+        function renderArticleDetailPage(post, blockTitle) {
             let content = post.content || '';
             content = content.replace(/src="assets\/images\/([^"]+)"/g, (match, filename) => {
                 return `src="https://raw.githubusercontent.com/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/${GITHUB_CONFIG.branch}/assets/images/${filename}"`;
@@ -502,7 +497,7 @@
             return `
                 <div>
                     <div style="margin-bottom:1.5rem;">
-                        <button class="back-home-btn" onclick="goToColumnList('${encodeURIComponent(blockId)}', '${encodeURIComponent(blockTitle)}')">← 返回专栏</button>
+                        <button class="back-home-btn" onclick="goBackToColumnList()">← 返回专栏</button>
                     </div>
                     <div class="article-detail-page">
                         <div class="article-detail-header">
@@ -534,7 +529,7 @@
                         <span>📅 ${post.date || '未知日期'}</span>
                         <span class="post-type-badge">${post.type === 'image-gallery' ? '🖼️ 图片专栏' : '📝 文章'}</span>
                     </div>
-                    <a class="read-more-link" onclick="viewArticleDetail('${encodeURIComponent(blockId)}', '${encodeURIComponent(post.id)}', '${encodeURIComponent(blockTitle)}')">阅读原文 →</a>
+                    <a class="read-more-link" onclick="viewArticleDetail('${post.id}')">阅读原文 →</a>
                 </div>
             `).join('');
             
@@ -542,8 +537,8 @@
         }
         
         // 查看文章详情
-        function viewArticleDetail(blockId, postId, blockTitle) {
-            const posts = getPostsByBlock(decodeURIComponent(blockId));
+        function viewArticleDetail(postId) {
+            const posts = getPostsByBlock(currentBlockId);
             const post = posts.find(p => p.id === postId);
             
             if (!post) {
@@ -552,23 +547,30 @@
             }
             
             currentPage = 'article_detail';
-            window._detailBlockId = decodeURIComponent(blockId);
-            window._detailPost = post;
-            window._detailBlockTitle = decodeURIComponent(blockTitle);
+            currentPost = post;
             renderApp();
         }
         
-        // 跳转到专栏列表页
+        // 返回专栏列表
+        function goBackToColumnList() {
+            currentPage = 'column_list';
+            renderApp();
+        }
+        
+        // 跳转到专栏列表页（从人物详情页）
         function goToColumnList(blockId, blockTitle) {
             currentPage = 'column_list';
-            window._currentBlockId = blockId;
-            window._currentBlockTitle = blockTitle;
+            currentBlockId = blockId;
+            currentBlockTitle = blockTitle;
             renderApp();
         }
         
         // 返回主页
         function backToHome() {
             currentPage = 'index';
+            currentBlockId = null;
+            currentBlockTitle = null;
+            currentPost = null;
             renderApp();
         }
         
@@ -584,12 +586,13 @@
                 });
             } 
             else if (currentPage === 'column_list') {
-                root.innerHTML = await renderColumnListPage(window._currentBlockId, window._currentBlockTitle);
+                root.innerHTML = await renderColumnListPage(currentBlockId, currentBlockTitle);
             }
             else if (currentPage === 'article_detail') {
-                root.innerHTML = renderArticleDetailPage(window._detailBlockId, window._detailPost, window._detailBlockTitle);
+                root.innerHTML = renderArticleDetailPage(currentPost, currentBlockTitle);
             }
             else {
+                // 人物详情页（带不规则板块的首页）
                 const data = personsData[currentPage];
                 if (data) {
                     const block1Html = `<div class="block-split-3">${data.block1Items.map((item, i) => `<div class="shape-card ${i===0?'shape-triangle-left':i===1?'shape-trapezoid-mid':'shape-reverse-triangle'}"><a class="section-link" onclick="goToColumnList('${item.blockId}','${item.title}')">↗</a><div class="block-icon">${item.icon}</div><h3>${item.title}</h3><p>${item.desc}</p></div>`).join('')}</div>`;
