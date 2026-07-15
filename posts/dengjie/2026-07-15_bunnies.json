@@ -1,0 +1,11 @@
+{
+  "type": "image-gallery",
+  "title": "Bunnies",
+  "author": "wbn",
+  "date": "2026-07-15",
+  "imageFolder": "assets/images/assets-images",
+  "images": [
+    "assets/images/assets-images/01-IMG_4035.jpg"
+  ],
+  "blockId": "dengjie-b1-1"
+}
