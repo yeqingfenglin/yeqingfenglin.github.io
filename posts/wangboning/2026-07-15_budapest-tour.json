@@ -1,0 +1,14 @@
+{
+  "type": "image-gallery",
+  "title": "Budapest tour",
+  "author": "wbn",
+  "date": "2026-07-15",
+  "imageFolder": "assets/images/assets-images-assets-images",
+  "images": [
+    "assets/images/assets-images-assets-images/01-IMG_4500.jpg",
+    "assets/images/assets-images-assets-images/02-IMG_4516.jpg",
+    "assets/images/assets-images-assets-images/03-IMG_4518.jpg",
+    "assets/images/assets-images-assets-images/04-IMG_4605.jpg"
+  ],
+  "blockId": "wang-b1-3"
+}
