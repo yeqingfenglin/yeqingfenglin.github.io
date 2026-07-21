@@ -152,7 +152,7 @@
                         <option value="both-b1-1" data-folder="together">开源协作</option>
                         <option value="both-b1-2" data-folder="together">两人食记</option>
                         <option value="both-b1-3" data-folder="together">杰宁漫谈</option>
-                        <option value="both-b2-1" data-folder="together">共同里程碑</option>
+                        <option value="both-b2-1" data-folder="together">旅行日记</option>
                         <option value="both-b3-L" data-folder="together">共同兴趣</option>
                         <option value="both-b3-R" data-folder="together">未来计划</option>
                     </optgroup>
@@ -283,7 +283,7 @@
                     { icon: '🍜', title: '两人食记', desc: '美食IP', blockId: 'both-b1-2' },
                     { icon: '🎙️', title: '杰宁漫谈', desc: '双人播客', blockId: 'both-b1-3' }
                 ],
-                singleTitle: '📌 共同里程碑', singleDesc: '完成30+场黑客马拉松', singleStat: '双城联展', singleBlockId: 'both-b2-1',
+                singleTitle: '✈️ 旅行日记', singleDesc: '', singleStat: '', singleBlockId: 'both-b2-1',
                 leftTitle: '🌈 共同兴趣', leftHobbies: ['公路旅行', '双人厨艺'], leftQuote: '一起发呆或徒步', leftBlockId: 'both-b3-L',
                 rightTitle: '🌱 未来计划', rightHobbies: ['两人小报', '工作坊'], rightQuote: '记录日常微光', rightBlockId: 'both-b3-R'
             }
@@ -960,7 +960,7 @@
                     <div class="block-icon">${item.icon}</div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.desc)}</p>
                 </div>
             `).join('')}</div>`;
-            const block2Html = `<div class="block-single"><a class="section-link" onclick="goToColumnList('${data.singleBlockId}','${escapeHtml(data.singleTitle)}')">↗</a><div class="single-content"><div><h2>${escapeHtml(data.singleTitle)}</h2><p>${escapeHtml(data.singleDesc)}</p></div><div class="single-stats">✨ ${escapeHtml(data.singleStat)}</div></div></div>`;
+            const block2Html = `<div class="block-single"><a class="section-link" onclick="goToColumnList('${data.singleBlockId}','${escapeHtml(data.singleTitle)}')">↗</a><div class="single-content"><div><h2>${escapeHtml(data.singleTitle)}</h2>${data.singleDesc ? `<p>${escapeHtml(data.singleDesc)}</p>` : ''}</div>${data.singleStat ? `<div class="single-stats">✨ ${escapeHtml(data.singleStat)}</div>` : ''}</div></div>`;
             const block3Html = `<div class="block-split-2"><div class="dual-left"><a class="section-link" onclick="goToColumnList('${data.leftBlockId}','${escapeHtml(data.leftTitle)}')">↗</a><h3>${escapeHtml(data.leftTitle)}</h3><div class="hobby-list">${data.leftHobbies.map(hobby => `<span class="hobby-badge">${escapeHtml(hobby)}</span>`).join('')}</div><p>“${escapeHtml(data.leftQuote)}”</p></div><div class="dual-right"><a class="section-link" onclick="goToColumnList('${data.rightBlockId}','${escapeHtml(data.rightTitle)}')">↗</a><h3>${escapeHtml(data.rightTitle)}</h3><div class="hobby-list">${data.rightHobbies.map(hobby => `<span class="hobby-badge">${escapeHtml(hobby)}</span>`).join('')}</div><p>“${escapeHtml(data.rightQuote)}”</p></div></div>`;
             root.innerHTML = `<div class="detail-page"><div class="back-home-bar"><button class="back-home-btn" onclick="backToHome()">← 返回首页</button></div><div style="text-align:center;margin-bottom:1rem;"><h1>${escapeHtml(data.name)}</h1><div>${escapeHtml(data.titleNote)}</div><div style="color:#6c8dae;">${escapeHtml(data.roleDesc)}</div></div><div class="irregular-stack">${block1Html}${block2Html}${block3Html}</div><div class="detail-footer" style="text-align:center;margin-top:2rem;font-size:0.75rem;color:#8ba0bc;">点击 ↗ 进入专栏 · 支持文章和图片两种类型</div></div>`;
         }
