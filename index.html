@@ -44,13 +44,18 @@
         .column-container { max-width: 1100px; margin: 0 auto; }
         .column-header { margin-bottom: 2rem; text-align: center; }
         .posts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.8rem; margin-top: 1.5rem; }
-        .post-card { background: white; border-radius: 1.5rem; padding: 1.5rem; box-shadow: 0 6px 12px rgba(0,0,0,0.05); transition: 0.2s; border: 1px solid #eef2ff; display: flex; flex-direction: column; position: relative; min-height: 160px; }
+        .post-card { background: white; border-radius: 1.5rem; padding: 1.5rem 1.5rem 4.2rem; box-shadow: 0 6px 12px rgba(0,0,0,0.05); transition: 0.2s; border: 1px solid #eef2ff; display: flex; flex-direction: column; position: relative; min-height: 160px; }
         .post-card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px rgba(0,0,0,0.1); }
         .post-title { font-size: 1.3rem; font-weight: 700; color: #1e3c4c; margin-bottom: 0.3rem; }
         .post-meta { font-size: 0.75rem; color: #8ba0bc; margin-bottom: 0.5rem; display: flex; gap: 1rem; flex-wrap: wrap; }
         .post-type-badge { background: #eef2ff; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; color: #2c6e9e; }
         .read-more-link { position: absolute; bottom: 1.2rem; right: 1.5rem; color: #e6a157; font-weight: 500; text-decoration: none; font-size: 0.85rem; cursor: pointer; background: white; padding: 4px 12px; border-radius: 20px; transition: 0.2s; display: inline-block; border: none; }
         .read-more-link:hover { background: #e6a157; color: white; }
+        .delete-post-btn { position: absolute; bottom: 1.2rem; left: 1.5rem; color: #b91c1c; font-weight: 600; font-size: 0.82rem; cursor: pointer; background: #fff1f2; padding: 5px 12px; border-radius: 20px; border: 1px solid #fecdd3; transition: 0.2s; }
+        .delete-post-btn:hover { background: #dc2626; color: white; border-color: #dc2626; }
+        .detail-toolbar { margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+        .detail-delete-btn { background: #fff1f2; color: #b91c1c; border: 1px solid #fecdd3; padding: 0.5rem 1rem; border-radius: 40px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+        .detail-delete-btn:hover { background: #dc2626; color: white; border-color: #dc2626; }
         .empty-posts { text-align: center; padding: 3rem; background: #faf9fe; border-radius: 2rem; color: #7c8ba0; }
 
         .article-detail-page { max-width: 900px; margin: 0 auto; background: white; border-radius: 2rem; padding: 2.5rem; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1); }
@@ -72,7 +77,7 @@
         .lightbox img { max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 8px; }
         .lightbox-close { position: absolute; top: 20px; right: 30px; color: white; font-size: 2rem; cursor: pointer; }
 
-        #editor-overlay { display: none; position: fixed; inset: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; backdrop-filter: blur(5px); }
+        #editor-overlay, #delete-overlay { display: none; position: fixed; inset: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; backdrop-filter: blur(5px); }
         .editor-modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 90%; max-width: 640px; padding: 2rem; border-radius: 1.5rem; max-height: 90vh; overflow-y: auto; }
         .form-group { margin-bottom: 1.2rem; }
         .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
@@ -88,6 +93,11 @@
         .token-hint { background: #fff7ed; color: #9a3412; padding: .7rem .8rem; border-radius: .7rem; font-size: .75rem; margin-top: .5rem; }
         .error-message { color: #dc2626; background: #fee2e2; padding: 12px; border-radius: 8px; margin: 10px 0; }
         .selected-files { font-size: .75rem; color: #64748b; margin-top: .5rem; max-height: 95px; overflow-y: auto; }
+        .delete-warning { background: #fff7ed; color: #9a3412; padding: .9rem 1rem; border-radius: .8rem; line-height: 1.7; margin-bottom: 1.1rem; border-left: 4px solid #f97316; }
+        .delete-target { background: #f8fafc; border: 1px solid #e2e8f0; padding: .9rem 1rem; border-radius: .8rem; margin-bottom: 1.1rem; overflow-wrap: anywhere; }
+        .checkbox-row { display: flex; align-items: flex-start; gap: .65rem; padding: .75rem 0; color: #475569; font-size: .88rem; }
+        .checkbox-row input { width: auto; margin-top: .2rem; }
+        .submit-btn.danger { background: #dc2626; }
 
         @media (max-width: 780px) {
             .block-split-3 { grid-template-columns: 1fr; gap: 1rem; }
@@ -193,6 +203,35 @@
         </div>
     </div>
 
+    <div id="delete-overlay">
+        <div class="editor-modal" style="max-width:560px;">
+            <h2 style="margin-bottom:1.2rem;">🗑️ 删除专栏</h2>
+            <div class="delete-warning">
+                删除会直接修改 GitHub 仓库，并且无法从本页面撤销。专栏配置文件会被永久删除。
+            </div>
+            <div id="delete-target" class="delete-target"></div>
+
+            <div class="form-group">
+                <label for="delete-github-token">🔐 GitHub Fine-grained Token</label>
+                <input type="password" id="delete-github-token" autocomplete="off" placeholder="需要 Contents: Read and write 权限">
+            </div>
+
+            <label id="delete-images-row" class="checkbox-row" style="display:none;">
+                <input type="checkbox" id="delete-gallery-images">
+                <span>同时删除这个图片专栏引用的仓库图片。未勾选时只删除专栏，图片仍保留在 <code>assets/images/</code>。</span>
+            </label>
+
+            <label class="checkbox-row">
+                <input type="checkbox" id="delete-confirm-checkbox">
+                <span>我确认要永久删除这个专栏。</span>
+            </label>
+
+            <button id="delete-confirm-button" class="submit-btn danger" onclick="deleteSelectedPost()">永久删除</button>
+            <div id="delete-status" class="upload-guide"></div>
+            <button class="submit-btn cancel" onclick="closeDeleteDialog()">取消</button>
+        </div>
+    </div>
+
     <script>
         'use strict';
 
@@ -255,6 +294,7 @@
         let currentBlockId = null;
         let currentBlockTitle = null;
         let currentPost = null;
+        let pendingDeletePost = null;
 
         function escapeHtml(value) {
             return String(value ?? '').replace(/[&<>'"]/g, character => ({
@@ -375,6 +415,49 @@
             });
         }
 
+        async function githubDeleteFile(path, token, message) {
+            const encodedPath = encodeGitHubPath(path);
+            const apiUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${encodedPath}`;
+            const headers = {
+                Accept: 'application/vnd.github+json',
+                Authorization: `Bearer ${token}`,
+                'X-GitHub-Api-Version': '2022-11-28',
+                'Content-Type': 'application/json'
+            };
+
+            const metadataResponse = await githubRequest(
+                `${apiUrl}?ref=${encodeURIComponent(GITHUB_CONFIG.branch)}`,
+                { headers, cache: 'no-store' }
+            );
+            const metadata = await metadataResponse.json();
+            if (!metadata.sha || metadata.type !== 'file') {
+                throw new Error(`无法取得待删除文件的 SHA：${path}`);
+            }
+
+            return githubRequest(apiUrl, {
+                method: 'DELETE',
+                headers,
+                body: JSON.stringify({
+                    message,
+                    sha: metadata.sha,
+                    branch: GITHUB_CONFIG.branch
+                })
+            });
+        }
+
+        async function listGitHubFolderFiles(path, token = '') {
+            const encodedPath = encodeGitHubPath(path);
+            const apiUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${encodedPath}?ref=${encodeURIComponent(GITHUB_CONFIG.branch)}`;
+            const headers = { Accept: 'application/vnd.github+json' };
+            if (token) {
+                headers.Authorization = `Bearer ${token}`;
+                headers['X-GitHub-Api-Version'] = '2022-11-28';
+            }
+            const response = await githubRequest(apiUrl, { headers, cache: 'no-store' });
+            const data = await response.json();
+            return Array.isArray(data) ? data : [];
+        }
+
         function setUploadStatus(html, isError = false) {
             const guide = document.getElementById('upload-guide');
             guide.style.display = 'block';
@@ -422,6 +505,7 @@
                             if (!allPosts.has(blockId)) allPosts.set(blockId, []);
                             allPosts.get(blockId).push({
                                 id: file.name,
+                                path: file.path || `posts/${folder}/${file.name}`,
                                 title: postData.title || '无标题',
                                 author: postData.author || '未知作者',
                                 date: postData.date || file.name.slice(0, 10),
@@ -575,8 +659,9 @@
             const content = normalizeArticleImageSources(post.content || '');
             return `
                 <div>
-                    <div style="margin-bottom:1.5rem;">
+                    <div class="detail-toolbar">
                         <button class="back-home-btn" onclick="goBackToColumnList()">← 返回专栏</button>
+                        <button class="detail-delete-btn" onclick="openDeleteDialog('${encodeURIComponent(post.id)}')">🗑️ 删除专栏</button>
                     </div>
                     <div class="article-detail-page">
                         <div class="article-detail-header">
@@ -627,8 +712,9 @@
 
                 return `
                     <div>
-                        <div style="margin-bottom:1.5rem;">
+                        <div class="detail-toolbar">
                             <button class="back-home-btn" onclick="goBackToColumnList()">← 返回专栏</button>
+                            <button class="detail-delete-btn" onclick="openDeleteDialog('${encodeURIComponent(post.id)}')">🗑️ 删除专栏</button>
                         </div>
                         <div class="article-detail-page">
                             <div class="article-detail-header">
@@ -646,8 +732,9 @@
             } catch (error) {
                 return `
                     <div>
-                        <div style="margin-bottom:1.5rem;">
+                        <div class="detail-toolbar">
                             <button class="back-home-btn" onclick="goBackToColumnList()">← 返回专栏</button>
+                            <button class="detail-delete-btn" onclick="openDeleteDialog('${encodeURIComponent(post.id)}')">🗑️ 删除专栏</button>
                         </div>
                         <div class="article-detail-page">
                             <div class="error-message">图片加载失败：${escapeHtml(error.message)}</div>
@@ -677,6 +764,7 @@
                         <span>📅 ${escapeHtml(post.date || '未知日期')}</span>
                         <span class="post-type-badge">${post.type === 'image-gallery' ? '🖼️ 图片专栏' : '📝 文章'}</span>
                     </div>
+                    <button class="delete-post-btn" onclick="openDeleteDialog('${encodeURIComponent(post.id)}')">🗑️ 删除</button>
                     <button class="read-more-link" onclick="viewArticleDetail('${encodeURIComponent(post.id)}')">阅读原文 →</button>
                 </div>
             `).join('');
@@ -688,6 +776,104 @@
                     <div class="posts-grid">${postsHtml}</div>
                 </div>
             `;
+        }
+
+        function setDeleteStatus(html, isError = false) {
+            const status = document.getElementById('delete-status');
+            status.style.display = 'block';
+            status.classList.toggle('error', isError);
+            status.innerHTML = html;
+        }
+
+        function findPostInCurrentBlock(encodedPostId) {
+            const postId = decodeURIComponent(encodedPostId);
+            return getPostsByBlock(currentBlockId).find(item => item.id === postId) || null;
+        }
+
+        function openDeleteDialog(encodedPostId) {
+            const post = findPostInCurrentBlock(encodedPostId);
+            if (!post) {
+                alert('找不到要删除的专栏。请刷新页面后重试。');
+                return;
+            }
+
+            pendingDeletePost = post;
+            document.getElementById('delete-target').innerHTML = `
+                <strong>${escapeHtml(post.title)}</strong><br>
+                <span style="color:#64748b;font-size:.8rem;">${escapeHtml(post.path || post.id)}</span>
+            `;
+            document.getElementById('delete-images-row').style.display = post.type === 'image-gallery' ? 'flex' : 'none';
+            document.getElementById('delete-gallery-images').checked = false;
+            document.getElementById('delete-confirm-checkbox').checked = false;
+            document.getElementById('delete-github-token').value = '';
+            document.getElementById('delete-status').style.display = 'none';
+            document.getElementById('delete-overlay').style.display = 'block';
+        }
+
+        function closeDeleteDialog() {
+            document.getElementById('delete-overlay').style.display = 'none';
+            pendingDeletePost = null;
+        }
+
+        async function getGalleryRepositoryImagePaths(post, token) {
+            const directPaths = Array.isArray(post.images)
+                ? post.images.filter(path => typeof path === 'string' && path && !/^https?:\/\//i.test(path))
+                : [];
+            if (directPaths.length) return [...new Set(directPaths)];
+            if (!post.imageFolder) return [];
+
+            const files = await listGitHubFolderFiles(post.imageFolder, token);
+            return files
+                .filter(file => file.type === 'file' && /\.(jpe?g|png|gif|webp|avif|bmp|svg)$/i.test(file.name))
+                .map(file => file.path)
+                .filter(Boolean);
+        }
+
+        async function deleteSelectedPost() {
+            const button = document.getElementById('delete-confirm-button');
+            const token = document.getElementById('delete-github-token').value.trim();
+            const confirmed = document.getElementById('delete-confirm-checkbox').checked;
+            const deleteImages = document.getElementById('delete-gallery-images').checked;
+            const post = pendingDeletePost;
+
+            if (!post) { setDeleteStatus('没有选中待删除的专栏。', true); return; }
+            if (!token) { setDeleteStatus('请输入 GitHub Fine-grained Token。', true); return; }
+            if (!confirmed) { setDeleteStatus('请先勾选删除确认。', true); return; }
+            if (!post.path) { setDeleteStatus('当前专栏缺少 GitHub 文件路径，请刷新页面后重试。', true); return; }
+
+            button.disabled = true;
+            button.textContent = '正在删除…';
+
+            try {
+                if (post.type === 'image-gallery' && deleteImages) {
+                    const imagePaths = await getGalleryRepositoryImagePaths(post, token);
+                    for (let index = 0; index < imagePaths.length; index += 1) {
+                        const imagePath = imagePaths[index];
+                        setDeleteStatus(`正在删除图片 ${index + 1}/${imagePaths.length}：<code>${escapeHtml(imagePath)}</code>`);
+                        await githubDeleteFile(
+                            imagePath,
+                            token,
+                            `Delete gallery image: ${post.title} (${index + 1}/${imagePaths.length})`
+                        );
+                    }
+                }
+
+                setDeleteStatus(`正在删除专栏配置：<code>${escapeHtml(post.path)}</code>`);
+                await githubDeleteFile(post.path, token, `Delete post: ${post.title}`);
+
+                postsDB = await loadAllPostsFromGitHub();
+                currentPage = 'column_list';
+                currentPost = null;
+                pendingDeletePost = null;
+                document.getElementById('delete-overlay').style.display = 'none';
+                await renderApp();
+            } catch (error) {
+                console.error(error);
+                setDeleteStatus(`<strong>删除失败：</strong>${escapeHtml(error.message)}<br>请检查 Token 权限、文件是否已被删除以及网络状态。`, true);
+            } finally {
+                button.disabled = false;
+                button.textContent = '永久删除';
+            }
         }
 
         function viewArticleDetail(encodedPostId) {
@@ -793,6 +979,7 @@
             if (event.key === 'Escape') {
                 closeLightbox();
                 closeEditor();
+                closeDeleteDialog();
             }
         });
 
