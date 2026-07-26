@@ -1,0 +1,14 @@
+{
+  "type": "image-gallery",
+  "title": "Citadella",
+  "author": "wbn",
+  "date": "2026-07-26",
+  "imageFolder": "assets/images/budapest",
+  "images": [
+    "assets/images/budapest/01-微信图片_20260726192002_138_2.jpg",
+    "assets/images/budapest/02-微信图片_20260726191957_135_2.jpg",
+    "assets/images/budapest/03-微信图片_20260726191959_136_2.jpg",
+    "assets/images/budapest/04-微信图片_20260726192001_137_2.jpg"
+  ],
+  "blockId": "wang-b1-3"
+}
