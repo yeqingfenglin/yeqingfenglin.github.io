@@ -1,0 +1,11 @@
+{
+  "type": "image-gallery",
+  "title": "牛奶冰咖啡",
+  "author": "wbn",
+  "date": "2026-08-06",
+  "imageFolder": "assets/images/Coffee",
+  "images": [
+    "assets/images/Coffee/01-IMG_20260806_080313.jpg"
+  ],
+  "blockId": "wang-b1-1"
+}
