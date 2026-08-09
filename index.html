@@ -56,6 +56,8 @@
         .detail-toolbar { margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
         .detail-delete-btn { background: #fff1f2; color: #b91c1c; border: 1px solid #fecdd3; padding: 0.5rem 1rem; border-radius: 40px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
         .detail-delete-btn:hover { background: #dc2626; color: white; border-color: #dc2626; }
+        .comment-create-btn { position: fixed; right: 20px; bottom: 20px; z-index: 1000; background: #2c6e9e; color: white; border: none; border-radius: 50px; padding: 11px 20px; font-size: .9rem; font-weight: 600; cursor: pointer; box-shadow: 0 5px 18px rgba(30,60,76,.28); transition: .2s; }
+        .comment-create-btn:hover { background: #e6a157; transform: translateY(-2px); }
         .empty-posts { text-align: center; padding: 3rem; background: #faf9fe; border-radius: 2rem; color: #7c8ba0; }
 
         .article-detail-page { max-width: 900px; margin: 0 auto; background: white; border-radius: 2rem; padding: 2.5rem; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1); }
@@ -65,6 +67,16 @@
         .article-detail-content { font-size: 1rem; line-height: 1.8; color: #334e68; margin-top: 1.5rem; }
         .article-detail-content p { margin-bottom: 1rem; }
         .article-detail-content img { max-width: 100%; border-radius: 1rem; margin: 1rem 0; cursor: zoom-in; }
+
+        .comments-section { margin-top: 2.5rem; padding-top: 1.8rem; border-top: 1px solid #e2e8f0; }
+        .comments-heading { color: #1e3c4c; font-size: 1.25rem; margin-bottom: 1rem; }
+        .comments-list { display: flex; flex-direction: column; gap: 1rem; }
+        .comment-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 1rem; padding: 1rem 1.1rem; }
+        .comment-time { color: #8ba0bc; font-size: .75rem; margin-bottom: .55rem; }
+        .comment-content { color: #334e68; line-height: 1.75; white-space: pre-wrap; overflow-wrap: anywhere; }
+        .comment-images { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .75rem; margin-top: .9rem; }
+        .comment-images img { display: block; width: 100%; height: 160px; object-fit: cover; border-radius: .8rem; cursor: zoom-in; background: #e2e8f0; }
+        .comments-empty { color: #8ba0bc; text-align: center; background: #f8fafc; border-radius: 1rem; padding: 1.5rem; }
 
         .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
         .gallery-card { background: #f8fafc; border-radius: 1rem; overflow: hidden; border: 1px solid #eef2ff; min-height: 180px; }
@@ -77,7 +89,7 @@
         .lightbox img { max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 8px; }
         .lightbox-close { position: absolute; top: 20px; right: 30px; color: white; font-size: 2rem; cursor: pointer; }
 
-        #editor-overlay, #delete-overlay { display: none; position: fixed; inset: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; backdrop-filter: blur(5px); }
+        #editor-overlay, #delete-overlay, #comment-overlay { display: none; position: fixed; inset: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; backdrop-filter: blur(5px); }
         .editor-modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 90%; max-width: 640px; padding: 2rem; border-radius: 1.5rem; max-height: 90vh; overflow-y: auto; }
         .form-group { margin-bottom: 1.2rem; }
         .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
@@ -107,6 +119,9 @@
             .article-detail-page { padding: 1.4rem; }
             .gallery-grid { grid-template-columns: 1fr; }
             .gallery-card img { height: auto; max-height: 70vh; object-fit: contain; }
+            .comment-create-btn { right: 14px; bottom: 14px; }
+            .comment-images { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .comment-images img { height: 130px; }
         }
     </style>
 </head>
@@ -229,6 +244,34 @@
             <button id="delete-confirm-button" class="submit-btn danger" onclick="deleteSelectedPost()">永久删除</button>
             <div id="delete-status" class="upload-guide"></div>
             <button class="submit-btn cancel" onclick="closeDeleteDialog()">取消</button>
+        </div>
+    </div>
+
+    <div id="comment-overlay">
+        <div class="editor-modal" style="max-width:600px;">
+            <h2 style="margin-bottom:.4rem;">💬 发表评论</h2>
+            <div id="comment-target" style="color:#64748b;font-size:.82rem;margin-bottom:1.2rem;"></div>
+
+            <div class="form-group">
+                <label for="comment-github-token">🔐 GitHub Fine-grained Token</label>
+                <input type="password" id="comment-github-token" autocomplete="off" placeholder="仅在本次评论发布中使用，不会保存">
+                <div class="token-hint">Token 需要该仓库的 Contents: Read and write 权限。Token 不会写入评论或网页代码。</div>
+            </div>
+
+            <div class="form-group">
+                <label for="comment-content">💬 评论</label>
+                <textarea id="comment-content" placeholder="填写评论内容"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="comment-image-files">🖼️ 插入图片（可选）</label>
+                <input type="file" id="comment-image-files" accept="image/*" multiple>
+                <div id="comment-selected-files" class="selected-files">尚未选择图片</div>
+            </div>
+
+            <button id="comment-publish-button" class="submit-btn" onclick="publishCommentToGitHub()">⬆️ 发布评论到 GitHub</button>
+            <div id="comment-status" class="upload-guide"></div>
+            <button class="submit-btn cancel" onclick="closeCommentEditor()">取消</button>
         </div>
     </div>
 
@@ -481,6 +524,16 @@
             list.innerHTML = files.map(file => `${escapeHtml(file.name)}（${(file.size / 1024 / 1024).toFixed(2)} MB）`).join('<br>');
         });
 
+        document.getElementById('comment-image-files').addEventListener('change', function () {
+            const files = Array.from(this.files || []);
+            const list = document.getElementById('comment-selected-files');
+            if (!files.length) {
+                list.textContent = '尚未选择图片';
+                return;
+            }
+            list.innerHTML = files.map(file => `${escapeHtml(file.name)}（${(file.size / 1024 / 1024).toFixed(2)} MB）`).join('<br>');
+        });
+
         async function loadAllPostsFromGitHub() {
             const folders = ['dengjie', 'wangboning', 'together'];
             const allPosts = new Map();
@@ -527,6 +580,195 @@
                 posts.sort((a, b) => String(b.date).localeCompare(String(a.date)) || String(b.id).localeCompare(String(a.id)));
             }
             return allPosts;
+        }
+
+        function getPostCommentKey(post) {
+            const source = String(post?.path || post?.id || 'post')
+                .replace(/\.json$/i, '')
+                .replace(/\//g, '--');
+            return sanitizePathPart(source, 'post').slice(0, 160);
+        }
+
+        function formatCommentTime(value) {
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return String(value || '未知时间');
+            return new Intl.DateTimeFormat('zh-CN', {
+                timeZone: 'Asia/Taipei',
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit', second: '2-digit',
+                hour12: false
+            }).format(date);
+        }
+
+        async function loadCommentsForPost(post) {
+            const commentFolder = `comments/${getPostCommentKey(post)}`;
+            const apiUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${encodeGitHubPath(commentFolder)}?ref=${encodeURIComponent(GITHUB_CONFIG.branch)}`;
+            const response = await fetch(apiUrl, {
+                headers: { Accept: 'application/vnd.github+json' },
+                cache: 'no-store'
+            });
+            if (response.status === 404) return [];
+            if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+
+            const files = await response.json();
+            if (!Array.isArray(files)) return [];
+            const commentFiles = files.filter(file => file.type === 'file' && file.name.toLowerCase().endsWith('.json'));
+            const comments = await Promise.all(commentFiles.map(async file => {
+                try {
+                    const contentResponse = await fetch(file.download_url, { cache: 'no-store' });
+                    if (!contentResponse.ok) throw new Error(`${contentResponse.status}`);
+                    const data = await contentResponse.json();
+                    return {
+                        id: file.name,
+                        createdAt: data.createdAt || file.name,
+                        content: String(data.content || ''),
+                        images: Array.isArray(data.images) ? data.images : []
+                    };
+                } catch (error) {
+                    console.warn(`解析评论 ${file.name} 失败：`, error);
+                    return null;
+                }
+            }));
+
+            return comments
+                .filter(Boolean)
+                .sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)) || String(a.id).localeCompare(String(b.id)));
+        }
+
+        async function renderCommentsSection(post) {
+            try {
+                const comments = await loadCommentsForPost(post);
+                const commentsHtml = comments.length
+                    ? `<div class="comments-list">${comments.map(comment => {
+                        const images = comment.images
+                            .filter(path => typeof path === 'string' && path)
+                            .map(path => {
+                                const imageUrl = /^https?:\/\//i.test(path) ? path : rawGitHubUrl(path);
+                                const encodedUrl = encodeURIComponent(imageUrl);
+                                return `<img src="${escapeHtml(imageUrl)}" alt="评论图片" loading="lazy" onclick="openLightbox(decodeURIComponent('${encodedUrl}'))">`;
+                            }).join('');
+                        return `
+                            <article class="comment-item">
+                                <div class="comment-time">🕒 ${escapeHtml(formatCommentTime(comment.createdAt))}</div>
+                                ${comment.content ? `<div class="comment-content">${escapeHtml(comment.content)}</div>` : ''}
+                                ${images ? `<div class="comment-images">${images}</div>` : ''}
+                            </article>
+                        `;
+                    }).join('')}</div>`
+                    : '<div class="comments-empty">还没有评论，点击右下角“评论”留下第一条。</div>';
+
+                return `
+                    <section class="comments-section">
+                        <h2 class="comments-heading">💬 评论（${comments.length}）</h2>
+                        ${commentsHtml}
+                    </section>
+                `;
+            } catch (error) {
+                console.error('评论加载失败：', error);
+                return `
+                    <section class="comments-section">
+                        <h2 class="comments-heading">💬 评论</h2>
+                        <div class="error-message">评论加载失败：${escapeHtml(error.message)}</div>
+                    </section>
+                `;
+            }
+        }
+
+        function setCommentStatus(html, isError = false) {
+            const status = document.getElementById('comment-status');
+            status.style.display = 'block';
+            status.classList.toggle('error', isError);
+            status.innerHTML = html;
+        }
+
+        function openCommentEditor() {
+            if (!currentPost) {
+                alert('当前文章不存在，请刷新页面后重试。');
+                return;
+            }
+            document.getElementById('comment-target').textContent = `评论文章：${currentPost.title}`;
+            document.getElementById('comment-github-token').value = '';
+            document.getElementById('comment-content').value = '';
+            document.getElementById('comment-image-files').value = '';
+            document.getElementById('comment-selected-files').textContent = '尚未选择图片';
+            document.getElementById('comment-status').style.display = 'none';
+            document.getElementById('comment-overlay').style.display = 'block';
+        }
+
+        function closeCommentEditor() {
+            document.getElementById('comment-overlay').style.display = 'none';
+        }
+
+        async function publishCommentToGitHub() {
+            const button = document.getElementById('comment-publish-button');
+            const token = document.getElementById('comment-github-token').value.trim();
+            const content = document.getElementById('comment-content').value.trim();
+            const files = Array.from(document.getElementById('comment-image-files').files || []);
+            const post = currentPost;
+
+            if (!post) { setCommentStatus('当前文章不存在，请刷新页面后重试。', true); return; }
+            if (!token) { setCommentStatus('请输入 GitHub Fine-grained Token。', true); return; }
+            if (!content && !files.length) { setCommentStatus('请填写评论内容或选择至少一张图片。', true); return; }
+            if (files.some(file => !file.type.startsWith('image/'))) { setCommentStatus('所选文件中包含非图片文件。', true); return; }
+            if (files.some(file => file.size > 25 * 1024 * 1024)) { setCommentStatus('单张图片不能超过 25 MB。', true); return; }
+
+            const createdAt = new Date().toISOString();
+            const randomPart = window.crypto && typeof window.crypto.randomUUID === 'function'
+                ? window.crypto.randomUUID().slice(0, 8)
+                : Math.random().toString(36).slice(2, 10);
+            const commentId = `${createdAt.replace(/[-:.]/g, '')}-${randomPart}`;
+            const postKey = getPostCommentKey(post);
+            const commentFolder = `comments/${postKey}`;
+            const imageFolder = `assets/images/comments/${postKey}/${commentId}`;
+            const imagePaths = [];
+
+            button.disabled = true;
+            button.textContent = '正在发布…';
+
+            try {
+                for (let index = 0; index < files.length; index += 1) {
+                    const file = files[index];
+                    const fileName = sanitizeFileName(file.name, index);
+                    const imagePath = `${imageFolder}/${fileName}`;
+                    setCommentStatus(`正在上传第 ${index + 1}/${files.length} 张评论图片：<code>${escapeHtml(fileName)}</code>`);
+                    await githubPutFile(
+                        imagePath,
+                        await fileToBase64(file),
+                        token,
+                        `Upload comment image for: ${post.title} (${index + 1}/${files.length})`
+                    );
+                    imagePaths.push(imagePath);
+                }
+
+                const commentPath = `${commentFolder}/${commentId}.json`;
+                const commentJSON = {
+                    postId: post.id,
+                    postPath: post.path || '',
+                    postTitle: post.title,
+                    createdAt,
+                    content,
+                    images: imagePaths
+                };
+                setCommentStatus(`正在发布评论：<code>${escapeHtml(commentPath)}</code>`);
+                await githubPutFile(
+                    commentPath,
+                    textToBase64(JSON.stringify(commentJSON, null, 2)),
+                    token,
+                    `Publish comment for: ${post.title}`
+                );
+
+                setCommentStatus('<strong>评论发布成功。</strong><br>GitHub Pages 更新通常需要稍后刷新页面才能看到。');
+                document.getElementById('comment-content').value = '';
+                document.getElementById('comment-image-files').value = '';
+                document.getElementById('comment-selected-files').textContent = '尚未选择图片';
+                await renderApp();
+            } catch (error) {
+                console.error(error);
+                setCommentStatus(`<strong>评论发布失败：</strong>${escapeHtml(error.message)}<br>请检查 Token 权限、仓库名称和网络。`, true);
+            } finally {
+                button.disabled = false;
+                button.textContent = '⬆️ 发布评论到 GitHub';
+            }
         }
 
         async function publishToGitHub() {
@@ -655,10 +897,12 @@
             );
         }
 
-        function renderArticleDetailPage(post) {
+        async function renderArticleDetailPage(post) {
             const content = normalizeArticleImageSources(post.content || '');
+            const commentsHtml = await renderCommentsSection(post);
             return `
                 <div>
+                    <button class="comment-create-btn" onclick="openCommentEditor()">💬 评论</button>
                     <div class="detail-toolbar">
                         <button class="back-home-btn" onclick="goBackToColumnList()">← 返回专栏</button>
                         <button class="detail-delete-btn" onclick="openDeleteDialog('${encodeURIComponent(post.id)}')">🗑️ 删除专栏</button>
@@ -672,6 +916,7 @@
                             </div>
                         </div>
                         <div id="article-content" class="article-detail-content">${content || '暂无内容'}</div>
+                        ${commentsHtml}
                     </div>
                 </div>
             `;
@@ -703,6 +948,7 @@
         async function renderImageGalleryPage(post) {
             try {
                 const images = await loadGalleryImages(post);
+                const commentsHtml = await renderCommentsSection(post);
                 const galleryHtml = images.length
                     ? `<div class="gallery-grid">${images.map(image => {
                         const encodedUrl = encodeURIComponent(image.url);
@@ -712,6 +958,7 @@
 
                 return `
                     <div>
+                        <button class="comment-create-btn" onclick="openCommentEditor()">💬 评论</button>
                         <div class="detail-toolbar">
                             <button class="back-home-btn" onclick="goBackToColumnList()">← 返回专栏</button>
                             <button class="detail-delete-btn" onclick="openDeleteDialog('${encodeURIComponent(post.id)}')">🗑️ 删除专栏</button>
@@ -726,12 +973,14 @@
                                 </div>
                             </div>
                             ${galleryHtml}
+                            ${commentsHtml}
                         </div>
                     </div>
                 `;
             } catch (error) {
                 return `
                     <div>
+                        <button class="comment-create-btn" onclick="openCommentEditor()">💬 评论</button>
                         <div class="detail-toolbar">
                             <button class="back-home-btn" onclick="goBackToColumnList()">← 返回专栏</button>
                             <button class="detail-delete-btn" onclick="openDeleteDialog('${encodeURIComponent(post.id)}')">🗑️ 删除专栏</button>
@@ -946,7 +1195,7 @@
                 if (currentPost?.type === 'image-gallery') {
                     root.innerHTML = await renderImageGalleryPage(currentPost);
                 } else {
-                    root.innerHTML = renderArticleDetailPage(currentPost || {});
+                    root.innerHTML = await renderArticleDetailPage(currentPost || {});
                     attachArticleImageLightbox();
                 }
                 return;
@@ -980,6 +1229,7 @@
                 closeLightbox();
                 closeEditor();
                 closeDeleteDialog();
+                closeCommentEditor();
             }
         });
 
@@ -997,3 +1247,4 @@
     </script>
 </body>
 </html>
+
