@@ -9,7 +9,7 @@
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.5; color: #1e2a3e; background: #f1f5f9; min-height: 100vh; }
         button, input, select, textarea { font: inherit; }
         .app-container { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
-        .create-post-btn { position: fixed; top: 20px; right: 20px; z-index: 1000; background: #1e3c4c; color: white; padding: 10px 20px; border-radius: 50px; font-size: 0.9rem; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: 0.3s; font-weight: 600; cursor: pointer; border: none; }
+        .create-post-btn { display: none; position: fixed; top: 20px; right: 20px; z-index: 1000; background: #1e3c4c; color: white; padding: 10px 20px; border-radius: 50px; font-size: 0.9rem; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: 0.3s; font-weight: 600; cursor: pointer; border: none; }
         .create-post-btn:hover { background: #e6a157; transform: translateY(-2px); }
         .section-link { position: absolute; top: 12px; right: 16px; text-decoration: none; font-size: 1.2rem; color: #cbd5e1; transition: 0.3s; font-weight: bold; background: rgba(255,255,240,0.6); border-radius: 30px; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
         .section-link:hover { color: #e6a157; transform: scale(1.2); background: white; }
@@ -116,6 +116,36 @@
         .dialog-actions { display: flex; gap: .8rem; margin-top: 1rem; }
         .dialog-actions .submit-btn { flex: 1; width: auto; margin-top: 0; }
 
+        .session-banner { display: none; position: fixed; top: 18px; left: 20px; z-index: 1000; background: rgba(255,255,255,.94); border: 1px solid #dbeafe; border-radius: 1rem; padding: .65rem .85rem; box-shadow: 0 5px 18px rgba(30,60,76,.12); color: #1e3c4c; font-size: .84rem; line-height: 1.5; }
+        .session-actions { display: flex; align-items: center; gap: .45rem; margin-top: .45rem; }
+        .session-action-btn { border: none; border-radius: 20px; padding: .28rem .7rem; font-size: .72rem; cursor: pointer; color: #1e4a76; background: #eef2ff; }
+        .session-action-btn:hover { background: #dbeafe; }
+        .session-action-btn.logout { color: #64748b; background: #f1f5f9; }
+
+        #auth-overlay, #access-request-overlay, #user-manager-overlay, #review-user-overlay { display: none; position: fixed; inset: 0; width: 100%; height: 100%; background: rgba(15,23,42,.7); z-index: 4000; backdrop-filter: blur(7px); }
+        #auth-overlay { display: block; }
+        #access-request-overlay, #review-user-overlay { z-index: 4100; }
+        .auth-modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 430px; background: white; border-radius: 1.6rem; padding: 2rem; box-shadow: 0 25px 60px rgba(15,23,42,.3); }
+        .auth-title { color: #1e3c4c; text-align: center; font-size: 1.7rem; margin-bottom: .35rem; }
+        .auth-subtitle { color: #64748b; text-align: center; font-size: .82rem; margin-bottom: 1.4rem; }
+        .request-access-btn { display: block; margin: 1rem 0 0 auto; border: none; background: transparent; color: #2c6e9e; cursor: pointer; font-size: .82rem; text-decoration: underline; text-underline-offset: 3px; }
+        .request-access-btn:hover { color: #e6a157; }
+        .auth-setup-error { color: #b91c1c; background: #fff1f2; border: 1px solid #fecdd3; border-radius: .8rem; padding: .85rem; font-size: .8rem; line-height: 1.6; }
+        .current-commenter { background: #eef6ff; color: #1e4a76; border-radius: .8rem; padding: .7rem .8rem; margin-bottom: 1rem; font-size: .84rem; }
+
+        .user-manager-modal { max-width: 720px; }
+        .user-list { display: flex; flex-direction: column; gap: .7rem; max-height: 55vh; overflow-y: auto; margin: 1rem 0; }
+        .user-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: .9rem; padding: .75rem .9rem; }
+        .user-row.admin { background: #eef2ff; border-color: #a5b4fc; }
+        .user-row.pending { color: #a16207; background: #fefce8; border-color: #fde68a; cursor: pointer; }
+        .user-row.pending:hover { background: #fef9c3; }
+        .user-name { font-weight: 700; overflow-wrap: anywhere; }
+        .role-badge { display: inline-block; margin-left: .45rem; padding: .12rem .5rem; border-radius: 20px; font-size: .66rem; background: #c7d2fe; color: #3730a3; }
+        .remove-user-btn { border: 1px solid #fecdd3; background: #fff1f2; color: #b91c1c; border-radius: 20px; padding: .3rem .7rem; cursor: pointer; font-size: .72rem; flex: none; }
+        .remove-user-btn:hover { color: white; background: #dc2626; }
+        .protected-admin { color: #6366f1; font-size: .72rem; flex: none; }
+        .review-relationship { background: #f8fafc; border-radius: .9rem; padding: 1rem; margin: 1rem 0; color: #334155; line-height: 1.7; }
+
         @media (max-width: 780px) {
             .block-split-3 { grid-template-columns: 1fr; gap: 1rem; }
             .shape-triangle-left, .shape-trapezoid-mid, .shape-reverse-triangle { clip-path: none; border-radius: 1.5rem; margin: 0; }
@@ -127,11 +157,20 @@
             .comment-create-btn { right: 14px; bottom: 14px; }
             .comment-images { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .comment-images img { height: 130px; }
+            .session-banner { position: static; margin: 0 0 1rem; }
+            .create-post-btn { top: 14px; bottom: auto; right: 14px; }
         }
     </style>
 </head>
 <body>
     <button class="create-post-btn" onclick="openEditor()">✍️ 创作文章</button>
+    <div id="session-banner" class="session-banner">
+        <div id="session-greeting"></div>
+        <div class="session-actions">
+            <button id="manage-users-button" class="session-action-btn" onclick="openUserManager()" style="display:none;">管理用户</button>
+            <button class="session-action-btn logout" onclick="logoutCurrentUser()">退出登录</button>
+        </div>
+    </div>
     <div id="app-root" class="app-container"><div class="loading">📡 正在加载...</div></div>
 
     <div id="lightbox" class="lightbox" onclick="closeLightbox()">
@@ -256,17 +295,7 @@
         <div class="editor-modal" style="max-width:600px;">
             <h2 style="margin-bottom:.4rem;">💬 发表评论</h2>
             <div id="comment-target" style="color:#64748b;font-size:.82rem;margin-bottom:1.2rem;"></div>
-
-            <div class="form-group">
-                <label for="comment-github-token">🔐 GitHub Fine-grained Token</label>
-                <input type="password" id="comment-github-token" autocomplete="off" placeholder="仅在本次评论发布中使用，不会保存">
-                <div class="token-hint">Token 需要该仓库的 Contents: Read and write 权限。只需粘贴 <code>github_pat_...</code> Token 本身；Token 不会写入评论或网页代码。</div>
-            </div>
-
-            <div class="form-group">
-                <label for="comment-author">✍️ 评论人姓名</label>
-                <input type="text" id="comment-author" placeholder="填写评论人的名字；不填则显示为匿名">
-            </div>
+            <div id="comment-current-user" class="current-commenter"></div>
 
             <div class="form-group">
                 <label for="comment-content">💬 评论</label>
@@ -279,7 +308,7 @@
                 <div id="comment-selected-files" class="selected-files">尚未选择图片</div>
             </div>
 
-            <button id="comment-publish-button" class="submit-btn" onclick="publishCommentToGitHub()">⬆️ 发布评论到 GitHub</button>
+            <button id="comment-publish-button" class="submit-btn" onclick="publishComment()">发布评论</button>
             <div id="comment-status" class="upload-guide"></div>
             <button class="submit-btn cancel" onclick="closeCommentEditor()">取消</button>
         </div>
@@ -290,11 +319,6 @@
             <div class="comment-delete-warning">注意！是否确认删除此评论，删除后将无法恢复！请慎重！</div>
             <div id="comment-delete-target" class="delete-target"></div>
 
-            <div class="form-group">
-                <label for="comment-delete-github-token">🔐 GitHub Fine-grained Token</label>
-                <input type="password" id="comment-delete-github-token" autocomplete="off" placeholder="需要 Contents: Read and write 权限">
-            </div>
-
             <div id="comment-delete-status" class="upload-guide"></div>
             <div class="dialog-actions">
                 <button id="comment-delete-confirm-button" class="submit-btn danger" onclick="deleteSelectedComment()">是</button>
@@ -303,6 +327,74 @@
         </div>
     </div>
 
+    <div id="auth-overlay">
+        <div class="auth-modal">
+            <h1 class="auth-title">欢迎来访</h1>
+            <div class="auth-subtitle">登录后才能进入主页</div>
+
+            <div class="form-group">
+                <label for="login-username">用户名</label>
+                <input type="text" id="login-username" autocomplete="username" placeholder="填写已通过审核的用户名">
+            </div>
+            <div class="form-group">
+                <label for="login-password">密码</label>
+                <input type="password" id="login-password" autocomplete="current-password" placeholder="填写密码">
+            </div>
+
+            <button id="login-button" class="submit-btn" onclick="loginUser()">登录</button>
+            <div id="login-status" class="upload-guide"></div>
+            <button class="request-access-btn" onclick="openAccessRequest()">申请访问</button>
+        </div>
+    </div>
+
+    <div id="access-request-overlay">
+        <div class="auth-modal">
+            <h2 class="auth-title" style="font-size:1.45rem;">申请访问</h2>
+
+            <div class="form-group">
+                <label for="request-username">用户名</label>
+                <input type="text" id="request-username" autocomplete="username" placeholder="设置用于登录的用户名">
+            </div>
+            <div class="form-group">
+                <label for="request-relationship">关系（请填写个人姓名）</label>
+                <input type="text" id="request-relationship" placeholder="填写个人姓名及与管理员的关系">
+            </div>
+            <div class="form-group">
+                <label for="request-password">密码</label>
+                <input type="password" id="request-password" autocomplete="new-password" placeholder="至少 8 位；审核通过后用于登录">
+            </div>
+
+            <button id="request-register-button" class="submit-btn" onclick="registerAccessRequest()">注册</button>
+            <div id="request-status" class="upload-guide"></div>
+            <button class="submit-btn cancel" onclick="closeAccessRequest()">返回登录</button>
+        </div>
+    </div>
+
+    <div id="user-manager-overlay">
+        <div class="auth-modal user-manager-modal">
+            <h2 style="color:#1e3c4c;">管理用户</h2>
+            <div id="user-manager-status" class="upload-guide"></div>
+            <div id="user-list" class="user-list"><div class="loading">正在加载用户…</div></div>
+            <button class="submit-btn cancel" onclick="closeUserManager()">关闭</button>
+        </div>
+    </div>
+
+    <div id="review-user-overlay">
+        <div class="auth-modal">
+            <h2 style="color:#a16207;">审核访问申请</h2>
+            <div id="review-user-name" style="font-weight:800;font-size:1.15rem;margin-top:1rem;"></div>
+            <div id="review-user-relationship" class="review-relationship"></div>
+            <div id="review-user-status" class="upload-guide"></div>
+            <div class="dialog-actions">
+                <button id="approve-user-button" class="submit-btn" onclick="reviewPendingUser('approve')">同意</button>
+                <button id="reject-user-button" class="submit-btn danger" onclick="reviewPendingUser('reject')">不同意</button>
+            </div>
+            <button class="submit-btn cancel" onclick="closeReviewUser()">返回</button>
+        </div>
+    </div>
+
+    <script src="supabase-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         'use strict';
 
@@ -326,6 +418,8 @@
             repo: 'yeqingfenglin.github.io',
             branch: 'main'
         };
+
+        const SUPABASE_CONFIG = window.SITE_SUPABASE_CONFIG || {};
 
         const personsData = {
             dengjie: { id: 'dengjie', name: '邓杰', titleNote: '🌿 邓杰的日常', roleDesc: '孤寂行者',
@@ -368,6 +462,326 @@
         let pendingDeletePost = null;
         let currentComments = [];
         let pendingDeleteComment = null;
+        let supabaseClient = null;
+        let currentUser = null;
+        let managedUsers = [];
+        let pendingReviewUser = null;
+
+        function setPanelStatus(elementId, html, isError = false) {
+            const status = document.getElementById(elementId);
+            status.style.display = 'block';
+            status.classList.toggle('error', isError);
+            status.innerHTML = html;
+        }
+
+        function isSupabaseConfigured() {
+            return /^https:\/\/.+\.supabase\.co$/i.test(String(SUPABASE_CONFIG.url || '').replace(/\/$/, ''))
+                && String(SUPABASE_CONFIG.publishableKey || '').length > 20
+                && !String(SUPABASE_CONFIG.publishableKey).startsWith('YOUR_');
+        }
+
+        function normalizeUsername(value) {
+            return String(value || '').normalize('NFKC').trim().toLowerCase();
+        }
+
+        async function usernameToInternalEmail(username) {
+            const normalized = normalizeUsername(username);
+            const digest = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(normalized));
+            const hash = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+            return `${hash}@users.example`;
+        }
+
+        function showLoginScreen(message = '', isError = false) {
+            document.getElementById('auth-overlay').style.display = 'block';
+            document.getElementById('session-banner').style.display = 'none';
+            document.querySelector('.create-post-btn').style.display = 'none';
+            document.getElementById('app-root').innerHTML = '';
+            if (message) setPanelStatus('login-status', escapeHtml(message), isError);
+            else document.getElementById('login-status').style.display = 'none';
+        }
+
+        async function loadCurrentProfile(userId) {
+            const { data, error } = await supabaseClient
+                .from('profiles')
+                .select('id, username, relationship, role, status')
+                .eq('id', userId)
+                .single();
+            if (error) throw new Error(error.message);
+            return data;
+        }
+
+        async function enterSite(session, profile) {
+            currentUser = {
+                id: session.user.id,
+                username: profile.username,
+                role: profile.role,
+                status: profile.status
+            };
+            document.getElementById('auth-overlay').style.display = 'none';
+            document.getElementById('access-request-overlay').style.display = 'none';
+            document.getElementById('session-banner').style.display = 'block';
+            const isAdmin = currentUser.role === 'admin';
+            document.getElementById('session-greeting').textContent = isAdmin
+                ? '欢迎回家，请随意创作'
+                : `欢迎你的来访，“${currentUser.username}”`;
+            document.getElementById('manage-users-button').style.display = isAdmin ? 'inline-block' : 'none';
+            document.querySelector('.create-post-btn').style.display = isAdmin ? 'block' : 'none';
+
+            const root = document.getElementById('app-root');
+            root.innerHTML = '<div class="loading">📡 正在从 GitHub 加载专栏...</div>';
+            postsDB = await loadAllPostsFromGitHub();
+            await renderApp();
+        }
+
+        async function handleAuthenticatedSession(session) {
+            if (!session?.user) {
+                currentUser = null;
+                showLoginScreen();
+                return;
+            }
+
+            try {
+                const profile = await loadCurrentProfile(session.user.id);
+                if (profile.status !== 'approved') {
+                    await supabaseClient.auth.signOut();
+                    const message = profile.status === 'pending'
+                        ? '您的访问申请仍在等待管理员审核。'
+                        : '您的访问申请未通过，请联系管理员。';
+                    showLoginScreen(message, profile.status !== 'pending');
+                    return;
+                }
+                await enterSite(session, profile);
+            } catch (error) {
+                await supabaseClient.auth.signOut();
+                showLoginScreen(`无法读取访问权限：${error.message}`, true);
+            }
+        }
+
+        async function initializeAuthentication() {
+            if (!isSupabaseConfigured()) {
+                showLoginScreen('网站尚未完成 Supabase 配置。请先填写 supabase-config.js。', true);
+                return;
+            }
+            if (!window.supabase?.createClient) {
+                showLoginScreen('认证组件加载失败，请检查网络后刷新。', true);
+                return;
+            }
+
+            supabaseClient = window.supabase.createClient(
+                String(SUPABASE_CONFIG.url).replace(/\/$/, ''),
+                SUPABASE_CONFIG.publishableKey,
+                { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false } }
+            );
+            const { data, error } = await supabaseClient.auth.getSession();
+            if (error) {
+                showLoginScreen(`读取登录状态失败：${error.message}`, true);
+                return;
+            }
+            await handleAuthenticatedSession(data.session);
+        }
+
+        async function loginUser() {
+            const button = document.getElementById('login-button');
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value;
+            if (!supabaseClient) { setPanelStatus('login-status', '网站认证尚未配置完成。', true); return; }
+            if (!username || !password) { setPanelStatus('login-status', '请填写用户名和密码。', true); return; }
+
+            button.disabled = true;
+            button.textContent = '正在登录…';
+            try {
+                const email = await usernameToInternalEmail(username);
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) throw error;
+                await handleAuthenticatedSession(data.session);
+            } catch (error) {
+                setPanelStatus('login-status', `登录失败：${escapeHtml(error.message === 'Invalid login credentials' ? '用户名或密码错误。' : error.message)}`, true);
+            } finally {
+                button.disabled = false;
+                button.textContent = '登录';
+            }
+        }
+
+        function openAccessRequest() {
+            document.getElementById('request-username').value = '';
+            document.getElementById('request-relationship').value = '';
+            document.getElementById('request-password').value = '';
+            document.getElementById('request-status').style.display = 'none';
+            document.getElementById('request-register-button').style.display = 'block';
+            document.getElementById('access-request-overlay').style.display = 'block';
+        }
+
+        function closeAccessRequest() {
+            document.getElementById('access-request-overlay').style.display = 'none';
+        }
+
+        async function registerAccessRequest() {
+            const button = document.getElementById('request-register-button');
+            const username = document.getElementById('request-username').value.trim();
+            const relationship = document.getElementById('request-relationship').value.trim();
+            const password = document.getElementById('request-password').value;
+            if (!supabaseClient) { setPanelStatus('request-status', '网站认证尚未配置完成。', true); return; }
+            if (!username || !relationship || !password) { setPanelStatus('request-status', '请完整填写用户名、关系和密码。', true); return; }
+            if (username.length > 50 || relationship.length > 150) { setPanelStatus('request-status', '用户名或关系内容过长。', true); return; }
+            if (password.length < 8) { setPanelStatus('request-status', '密码至少需要 8 位。', true); return; }
+
+            button.disabled = true;
+            button.textContent = '正在注册…';
+            try {
+                const email = await usernameToInternalEmail(username);
+                const { error } = await supabaseClient.auth.signUp({
+                    email,
+                    password,
+                    options: { data: { username, relationship } }
+                });
+                if (error) throw error;
+                await supabaseClient.auth.signOut();
+                setPanelStatus('request-status', '已经将您的申请交给管理员，请在管理员审核成功后再次登录尝试');
+                button.style.display = 'none';
+            } catch (error) {
+                setPanelStatus('request-status', `申请提交失败：${escapeHtml(error.message)}`, true);
+            } finally {
+                button.disabled = false;
+                button.textContent = '注册';
+            }
+        }
+
+        async function logoutCurrentUser() {
+            if (supabaseClient) await supabaseClient.auth.signOut();
+            currentUser = null;
+            currentComments = [];
+            closeUserManager();
+            showLoginScreen();
+        }
+
+        function ensureAdmin() {
+            if (currentUser?.role === 'admin') return true;
+            alert('只有管理员可以进行此操作。');
+            return false;
+        }
+
+        function setUserManagerStatus(html, isError = false) {
+            setPanelStatus('user-manager-status', html, isError);
+        }
+
+        async function openUserManager() {
+            if (!ensureAdmin()) return;
+            document.getElementById('user-manager-overlay').style.display = 'block';
+            document.getElementById('user-manager-status').style.display = 'none';
+            await loadManagedUsers();
+        }
+
+        function closeUserManager() {
+            document.getElementById('user-manager-overlay').style.display = 'none';
+            closeReviewUser();
+        }
+
+        async function loadManagedUsers() {
+            const list = document.getElementById('user-list');
+            list.innerHTML = '<div class="loading">正在加载用户…</div>';
+            const { data, error } = await supabaseClient
+                .from('profiles')
+                .select('id, username, relationship, role, status, created_at')
+                .in('status', ['approved', 'pending']);
+            if (error) {
+                list.innerHTML = `<div class="error-message">加载用户失败：${escapeHtml(error.message)}</div>`;
+                return;
+            }
+
+            managedUsers = (data || []).sort((a, b) => {
+                const statusOrder = { approved: 0, pending: 1 };
+                const roleOrder = { admin: 0, visitor: 1 };
+                return statusOrder[a.status] - statusOrder[b.status]
+                    || roleOrder[a.role] - roleOrder[b.role]
+                    || String(a.created_at).localeCompare(String(b.created_at));
+            });
+            list.innerHTML = managedUsers.length ? managedUsers.map(user => {
+                if (user.status === 'pending') {
+                    return `
+                        <div class="user-row pending" onclick="openReviewUser('${user.id}')">
+                            <div class="user-name">${escapeHtml(user.username)}（待审核）</div>
+                            <span>查看申请 →</span>
+                        </div>
+                    `;
+                }
+                return `
+                    <div class="user-row ${user.role === 'admin' ? 'admin' : ''}">
+                        <div class="user-name">
+                            ${escapeHtml(user.username)}
+                            ${user.role === 'admin' ? '<span class="role-badge">管理员</span>' : ''}
+                        </div>
+                        ${user.role === 'admin'
+                            ? '<span class="protected-admin">固定管理员</span>'
+                            : `<button class="remove-user-btn" onclick="removeUserAccess('${user.id}')">删除访问权限</button>`}
+                    </div>
+                `;
+            }).join('') : '<div class="comments-empty">暂无用户。</div>';
+        }
+
+        function openReviewUser(userId) {
+            if (!ensureAdmin()) return;
+            const user = managedUsers.find(item => item.id === userId && item.status === 'pending');
+            if (!user) { alert('找不到待审核用户，请刷新后重试。'); return; }
+            pendingReviewUser = user;
+            document.getElementById('review-user-name').textContent = `${user.username}（待审核）`;
+            document.getElementById('review-user-relationship').textContent = `关系：${user.relationship || '未填写'}`;
+            document.getElementById('review-user-status').style.display = 'none';
+            document.getElementById('review-user-overlay').style.display = 'block';
+        }
+
+        function closeReviewUser() {
+            document.getElementById('review-user-overlay').style.display = 'none';
+            pendingReviewUser = null;
+        }
+
+        async function invokeAdminUserAction(action, targetUserId) {
+            const { data, error } = await supabaseClient.functions.invoke('admin-users', {
+                body: { action, targetUserId }
+            });
+            if (error) {
+                let detail = error.message;
+                try {
+                    const body = await error.context.json();
+                    detail = body.error || detail;
+                } catch (_) {}
+                throw new Error(detail);
+            }
+            if (!data?.ok) throw new Error(data?.error || '用户管理操作失败');
+            return data;
+        }
+
+        async function reviewPendingUser(action) {
+            if (!ensureAdmin() || !pendingReviewUser) return;
+            const approveButton = document.getElementById('approve-user-button');
+            const rejectButton = document.getElementById('reject-user-button');
+            approveButton.disabled = true;
+            rejectButton.disabled = true;
+            try {
+                const result = await invokeAdminUserAction(action, pendingReviewUser.id);
+                setPanelStatus('review-user-status', escapeHtml(result.message));
+                await loadManagedUsers();
+                setTimeout(closeReviewUser, 700);
+            } catch (error) {
+                setPanelStatus('review-user-status', escapeHtml(error.message), true);
+            } finally {
+                approveButton.disabled = false;
+                rejectButton.disabled = false;
+            }
+        }
+
+        async function removeUserAccess(userId) {
+            if (!ensureAdmin()) return;
+            const user = managedUsers.find(item => item.id === userId);
+            if (!user || user.role === 'admin') return;
+            if (!confirm(`确认删除“${user.username}”的访问权限吗？`)) return;
+            try {
+                const result = await invokeAdminUserAction('delete', userId);
+                setUserManagerStatus(escapeHtml(result.message));
+                await loadManagedUsers();
+            } catch (error) {
+                setUserManagerStatus(escapeHtml(error.message), true);
+            }
+        }
 
         function escapeHtml(value) {
             return String(value ?? '').replace(/[&<>'"]/g, character => ({
@@ -631,13 +1045,6 @@
             return allPosts;
         }
 
-        function getPostCommentKey(post) {
-            const source = String(post?.path || post?.id || 'post')
-                .replace(/\.json$/i, '')
-                .replace(/\//g, '--');
-            return sanitizePathPart(source, 'post').slice(0, 160);
-        }
-
         function formatCommentTime(value) {
             const date = new Date(value);
             if (Number.isNaN(date.getTime())) return String(value || '未知时间');
@@ -650,40 +1057,37 @@
         }
 
         async function loadCommentsForPost(post) {
-            const commentFolder = `comments/${getPostCommentKey(post)}`;
-            const apiUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${encodeGitHubPath(commentFolder)}?ref=${encodeURIComponent(GITHUB_CONFIG.branch)}`;
-            const response = await fetch(apiUrl, {
-                headers: { Accept: 'application/vnd.github+json' },
-                cache: 'no-store'
-            });
-            if (response.status === 404) return [];
-            if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+            if (!supabaseClient || !currentUser) return [];
+            const { data, error } = await supabaseClient
+                .from('comments')
+                .select('id, post_path, author_id, author_name, content, images, created_at')
+                .eq('post_path', post.path || post.id)
+                .order('created_at', { ascending: true });
+            if (error) throw new Error(error.message);
 
-            const files = await response.json();
-            if (!Array.isArray(files)) return [];
-            const commentFiles = files.filter(file => file.type === 'file' && file.name.toLowerCase().endsWith('.json'));
-            const comments = await Promise.all(commentFiles.map(async file => {
-                try {
-                    const contentResponse = await fetch(file.download_url, { cache: 'no-store' });
-                    if (!contentResponse.ok) throw new Error(`${contentResponse.status}`);
-                    const data = await contentResponse.json();
-                    return {
-                        id: file.name,
-                        path: file.path || `${commentFolder}/${file.name}`,
-                        author: String(data.author || '匿名'),
-                        createdAt: data.createdAt || file.name,
-                        content: String(data.content || ''),
-                        images: Array.isArray(data.images) ? data.images : []
-                    };
-                } catch (error) {
-                    console.warn(`解析评论 ${file.name} 失败：`, error);
-                    return null;
-                }
+            return Promise.all((data || []).map(async row => {
+                const imagePaths = Array.isArray(row.images) ? row.images : [];
+                const imageItems = await Promise.all(imagePaths.map(async path => {
+                    const { data: signedData, error: signedError } = await supabaseClient
+                        .storage
+                        .from('comment-images')
+                        .createSignedUrl(path, 60 * 60);
+                    if (signedError) {
+                        console.warn(`评论图片签名失败：${path}`, signedError);
+                        return null;
+                    }
+                    return { path, url: signedData.signedUrl };
+                }));
+                return {
+                    id: row.id,
+                    authorId: row.author_id,
+                    author: row.author_name,
+                    createdAt: row.created_at,
+                    content: row.content || '',
+                    images: imagePaths,
+                    imageItems: imageItems.filter(Boolean)
+                };
             }));
-
-            return comments
-                .filter(Boolean)
-                .sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)) || String(a.id).localeCompare(String(b.id)));
         }
 
         async function renderCommentsSection(post) {
@@ -692,23 +1096,21 @@
                 currentComments = comments;
                 const commentsHtml = comments.length
                     ? `<div class="comments-list">${comments.map(comment => {
-                        const images = comment.images
-                            .filter(path => typeof path === 'string' && path)
-                            .map(path => {
-                                const imageUrl = /^https?:\/\//i.test(path) ? path : rawGitHubUrl(path);
-                                const encodedUrl = encodeURIComponent(imageUrl);
-                                return `<img src="${escapeHtml(imageUrl)}" alt="评论图片" loading="lazy" onclick="openLightbox(decodeURIComponent('${encodedUrl}'))">`;
+                        const images = comment.imageItems
+                            .map(image => {
+                                const encodedUrl = encodeURIComponent(image.url);
+                                return `<img src="${escapeHtml(image.url)}" alt="评论图片" loading="lazy" onclick="openLightbox(decodeURIComponent('${encodedUrl}'))">`;
                             }).join('');
-                        const encodedCommentPath = encodeURIComponent(comment.path).replace(/'/g, '%27');
+                        const canDelete = currentUser?.role === 'admin' || comment.authorId === currentUser?.id;
                         return `
                             <article class="comment-item">
                                 <div class="comment-meta">
-                                    <span>✍️ ${escapeHtml(comment.author || '匿名')}</span>
+                                    <span>✍️ ${escapeHtml(comment.author)}</span>
                                     <span>🕒 ${escapeHtml(formatCommentTime(comment.createdAt))}</span>
                                 </div>
                                 ${comment.content ? `<div class="comment-content">${escapeHtml(comment.content)}</div>` : ''}
                                 ${images ? `<div class="comment-images">${images}</div>` : ''}
-                                <button class="delete-comment-btn" onclick="openCommentDeleteDialog('${encodedCommentPath}')">删除评论</button>
+                                ${canDelete ? `<button class="delete-comment-btn" onclick="openCommentDeleteDialog('${comment.id}')">删除评论</button>` : ''}
                             </article>
                         `;
                     }).join('')}</div>`
@@ -744,9 +1146,12 @@
                 alert('当前文章不存在，请刷新页面后重试。');
                 return;
             }
+            if (!currentUser) {
+                showLoginScreen('请先登录后再发表评论。', true);
+                return;
+            }
             document.getElementById('comment-target').textContent = `评论文章：${currentPost.title}`;
-            document.getElementById('comment-github-token').value = '';
-            document.getElementById('comment-author').value = '';
+            document.getElementById('comment-current-user').textContent = `评论人：${currentUser.username}`;
             document.getElementById('comment-content').value = '';
             document.getElementById('comment-image-files').value = '';
             document.getElementById('comment-selected-files').textContent = '尚未选择图片';
@@ -758,28 +1163,19 @@
             document.getElementById('comment-overlay').style.display = 'none';
         }
 
-        async function publishCommentToGitHub() {
+        async function publishComment() {
             const button = document.getElementById('comment-publish-button');
-            const token = normalizeGitHubToken(document.getElementById('comment-github-token').value);
-            const author = document.getElementById('comment-author').value.trim() || '匿名';
             const content = document.getElementById('comment-content').value.trim();
             const files = Array.from(document.getElementById('comment-image-files').files || []);
             const post = currentPost;
 
             if (!post) { setCommentStatus('当前文章不存在，请刷新页面后重试。', true); return; }
-            if (!token) { setCommentStatus('请输入 GitHub Fine-grained Token。', true); return; }
+            if (!currentUser || !supabaseClient) { setCommentStatus('登录已失效，请重新登录。', true); return; }
             if (!content && !files.length) { setCommentStatus('请填写评论内容或选择至少一张图片。', true); return; }
             if (files.some(file => !file.type.startsWith('image/'))) { setCommentStatus('所选文件中包含非图片文件。', true); return; }
             if (files.some(file => file.size > 25 * 1024 * 1024)) { setCommentStatus('单张图片不能超过 25 MB。', true); return; }
 
-            const createdAt = new Date().toISOString();
-            const randomPart = window.crypto && typeof window.crypto.randomUUID === 'function'
-                ? window.crypto.randomUUID().slice(0, 8)
-                : Math.random().toString(36).slice(2, 10);
-            const commentId = `${createdAt.replace(/[-:.]/g, '')}-${randomPart}`;
-            const postKey = getPostCommentKey(post);
-            const commentFolder = `comments/${postKey}`;
-            const imageFolder = `assets/images/comments/${postKey}/${commentId}`;
+            const commentId = window.crypto.randomUUID();
             const imagePaths = [];
 
             button.disabled = true;
@@ -789,47 +1185,39 @@
                 for (let index = 0; index < files.length; index += 1) {
                     const file = files[index];
                     const fileName = sanitizeFileName(file.name, index);
-                    const imagePath = `${imageFolder}/${fileName}`;
+                    const imagePath = `${currentUser.id}/${commentId}/${fileName}`;
                     setCommentStatus(`正在上传第 ${index + 1}/${files.length} 张评论图片：<code>${escapeHtml(fileName)}</code>`);
-                    await githubPutFile(
-                        imagePath,
-                        await fileToBase64(file),
-                        token,
-                        `Upload comment image for: ${post.title} (${index + 1}/${files.length})`
-                    );
+                    const { error: uploadError } = await supabaseClient
+                        .storage
+                        .from('comment-images')
+                        .upload(imagePath, file, { contentType: file.type, upsert: false });
+                    if (uploadError) throw uploadError;
                     imagePaths.push(imagePath);
                 }
 
-                const commentPath = `${commentFolder}/${commentId}.json`;
-                const commentJSON = {
-                    postId: post.id,
-                    postPath: post.path || '',
-                    postTitle: post.title,
-                    author,
-                    createdAt,
+                setCommentStatus('正在发布评论…');
+                const { error: insertError } = await supabaseClient.from('comments').insert({
+                    id: commentId,
+                    post_path: post.path || post.id,
                     content,
                     images: imagePaths
-                };
-                setCommentStatus(`正在发布评论：<code>${escapeHtml(commentPath)}</code>`);
-                await githubPutFile(
-                    commentPath,
-                    textToBase64(JSON.stringify(commentJSON, null, 2)),
-                    token,
-                    `Publish comment for: ${post.title}`
-                );
+                });
+                if (insertError) throw insertError;
 
-                setCommentStatus('<strong>评论发布成功。</strong><br>GitHub Pages 更新通常需要稍后刷新页面才能看到。');
-                document.getElementById('comment-author').value = '';
+                setCommentStatus('<strong>评论发布成功。</strong>');
                 document.getElementById('comment-content').value = '';
                 document.getElementById('comment-image-files').value = '';
                 document.getElementById('comment-selected-files').textContent = '尚未选择图片';
                 await renderApp();
             } catch (error) {
                 console.error(error);
-                setCommentStatus(`<strong>评论发布失败：</strong>${escapeHtml(error.message)}<br>请检查 Token 权限、仓库名称和网络。`, true);
+                if (imagePaths.length) {
+                    await supabaseClient.storage.from('comment-images').remove(imagePaths).catch(() => {});
+                }
+                setCommentStatus(`<strong>评论发布失败：</strong>${escapeHtml(error.message)}`, true);
             } finally {
                 button.disabled = false;
-                button.textContent = '⬆️ 发布评论到 GitHub';
+                button.textContent = '发布评论';
             }
         }
 
@@ -840,21 +1228,23 @@
             status.innerHTML = html;
         }
 
-        function openCommentDeleteDialog(encodedCommentPath) {
-            const commentPath = decodeURIComponent(encodedCommentPath);
-            const comment = currentComments.find(item => item.path === commentPath);
+        function openCommentDeleteDialog(commentId) {
+            const comment = currentComments.find(item => item.id === commentId);
             if (!comment) {
                 alert('找不到要删除的评论，请刷新页面后重试。');
+                return;
+            }
+            if (currentUser?.role !== 'admin' && comment.authorId !== currentUser?.id) {
+                alert('您只能删除自己的评论。');
                 return;
             }
 
             pendingDeleteComment = comment;
             document.getElementById('comment-delete-target').innerHTML = `
-                <strong>${escapeHtml(comment.author || '匿名')}</strong>
+                <strong>${escapeHtml(comment.author)}</strong>
                 <span style="color:#8ba0bc;font-size:.78rem;"> · ${escapeHtml(formatCommentTime(comment.createdAt))}</span><br>
                 <span style="color:#475569;font-size:.86rem;">${escapeHtml(comment.content || '（图片评论）')}</span>
             `;
-            document.getElementById('comment-delete-github-token').value = '';
             document.getElementById('comment-delete-status').style.display = 'none';
             document.getElementById('comment-delete-overlay').style.display = 'block';
         }
@@ -867,39 +1257,39 @@
         async function deleteSelectedComment() {
             const confirmButton = document.getElementById('comment-delete-confirm-button');
             const cancelButton = document.getElementById('comment-delete-cancel-button');
-            const token = normalizeGitHubToken(document.getElementById('comment-delete-github-token').value);
             const comment = pendingDeleteComment;
 
             if (!comment) { setCommentDeleteStatus('没有选中待删除的评论。', true); return; }
-            if (!token) { setCommentDeleteStatus('请输入 GitHub Fine-grained Token。', true); return; }
-            if (!comment.path) { setCommentDeleteStatus('当前评论缺少 GitHub 文件路径，请刷新页面后重试。', true); return; }
+            if (!currentUser || !supabaseClient) { setCommentDeleteStatus('登录已失效，请重新登录。', true); return; }
+            if (currentUser.role !== 'admin' && comment.authorId !== currentUser.id) { setCommentDeleteStatus('您只能删除自己的评论。', true); return; }
 
             confirmButton.disabled = true;
             cancelButton.disabled = true;
             confirmButton.textContent = '正在删除…';
 
             try {
-                const imagePaths = comment.images.filter(path => typeof path === 'string' && path && !/^https?:\/\//i.test(path));
-                for (let index = 0; index < imagePaths.length; index += 1) {
-                    const imagePath = imagePaths[index];
-                    setCommentDeleteStatus(`正在删除评论图片 ${index + 1}/${imagePaths.length}：<code>${escapeHtml(imagePath)}</code>`);
-                    try {
-                        await githubDeleteFile(imagePath, token, `Delete comment image (${index + 1}/${imagePaths.length})`);
-                    } catch (error) {
-                        if (!/\b404\b/.test(error.message)) throw error;
-                    }
+                if (comment.images.length) {
+                    setCommentDeleteStatus(`正在删除 ${comment.images.length} 张评论图片…`);
+                    const { error: imageError } = await supabaseClient.storage.from('comment-images').remove(comment.images);
+                    if (imageError) throw imageError;
                 }
 
-                setCommentDeleteStatus(`正在删除评论：<code>${escapeHtml(comment.path)}</code>`);
-                await githubDeleteFile(comment.path, token, `Delete comment by: ${comment.author || 'anonymous'}`);
+                setCommentDeleteStatus('正在删除评论…');
+                const { data, error: deleteError } = await supabaseClient
+                    .from('comments')
+                    .delete()
+                    .eq('id', comment.id)
+                    .select('id');
+                if (deleteError) throw deleteError;
+                if (!data?.length) throw new Error('没有删除权限，或评论已经被删除。');
 
-                currentComments = currentComments.filter(item => item.path !== comment.path);
+                currentComments = currentComments.filter(item => item.id !== comment.id);
                 pendingDeleteComment = null;
                 document.getElementById('comment-delete-overlay').style.display = 'none';
                 await renderApp();
             } catch (error) {
                 console.error(error);
-                setCommentDeleteStatus(`<strong>删除评论失败：</strong>${escapeHtml(error.message)}<br>请检查 Token 权限、评论是否已经删除以及网络状态。`, true);
+                setCommentDeleteStatus(`<strong>删除评论失败：</strong>${escapeHtml(error.message)}`, true);
             } finally {
                 confirmButton.disabled = false;
                 cancelButton.disabled = false;
@@ -908,6 +1298,7 @@
         }
 
         async function publishToGitHub() {
+            if (!ensureAdmin()) return;
             const button = document.getElementById('publish-button');
             const token = normalizeGitHubToken(document.getElementById('github-token').value);
             const selectElement = document.getElementById('post-target');
@@ -1036,12 +1427,15 @@
         async function renderArticleDetailPage(post) {
             const content = normalizeArticleImageSources(post.content || '');
             const commentsHtml = await renderCommentsSection(post);
+            const deleteButton = currentUser?.role === 'admin'
+                ? `<button class="detail-delete-btn" onclick="openDeleteDialog('${encodeURIComponent(post.id)}')">🗑️ 删除专栏</button>`
+                : '';
             return `
                 <div>
                     <button class="comment-create-btn" onclick="openCommentEditor()">💬 评论</button>
                     <div class="detail-toolbar">
                         <button class="back-home-btn" onclick="goBackToColumnList()">← 返回专栏</button>
-                        <button class="detail-delete-btn" onclick="openDeleteDialog('${encodeURIComponent(post.id)}')">🗑️ 删除专栏</button>
+                        ${deleteButton}
                     </div>
                     <div class="article-detail-page">
                         <div class="article-detail-header">
@@ -1082,6 +1476,9 @@
         }
 
         async function renderImageGalleryPage(post) {
+            const deleteButton = currentUser?.role === 'admin'
+                ? `<button class="detail-delete-btn" onclick="openDeleteDialog('${encodeURIComponent(post.id)}')">🗑️ 删除专栏</button>`
+                : '';
             try {
                 const images = await loadGalleryImages(post);
                 const commentsHtml = await renderCommentsSection(post);
@@ -1097,7 +1494,7 @@
                         <button class="comment-create-btn" onclick="openCommentEditor()">💬 评论</button>
                         <div class="detail-toolbar">
                             <button class="back-home-btn" onclick="goBackToColumnList()">← 返回专栏</button>
-                            <button class="detail-delete-btn" onclick="openDeleteDialog('${encodeURIComponent(post.id)}')">🗑️ 删除专栏</button>
+                            ${deleteButton}
                         </div>
                         <div class="article-detail-page">
                             <div class="article-detail-header">
@@ -1119,7 +1516,7 @@
                         <button class="comment-create-btn" onclick="openCommentEditor()">💬 评论</button>
                         <div class="detail-toolbar">
                             <button class="back-home-btn" onclick="goBackToColumnList()">← 返回专栏</button>
-                            <button class="detail-delete-btn" onclick="openDeleteDialog('${encodeURIComponent(post.id)}')">🗑️ 删除专栏</button>
+                            ${deleteButton}
                         </div>
                         <div class="article-detail-page">
                             <div class="error-message">图片加载失败：${escapeHtml(error.message)}</div>
@@ -1136,7 +1533,7 @@
                     <div class="column-container">
                         <div class="back-home-bar"><button class="back-home-btn" onclick="backToHome()">← 返回主页</button></div>
                         <div class="column-header"><h2>📂 ${escapeHtml(blockTitle)}</h2></div>
-                        <div class="empty-posts">暂无内容，点击右上角“创作文章”发布。</div>
+                        <div class="empty-posts">${currentUser?.role === 'admin' ? '暂无内容，点击右上角“创作文章”发布。' : '暂无内容。'}</div>
                     </div>
                 `;
             }
@@ -1149,7 +1546,7 @@
                         <span>📅 ${escapeHtml(post.date || '未知日期')}</span>
                         <span class="post-type-badge">${post.type === 'image-gallery' ? '🖼️ 图片专栏' : '📝 文章'}</span>
                     </div>
-                    <button class="delete-post-btn" onclick="openDeleteDialog('${encodeURIComponent(post.id)}')">🗑️ 删除</button>
+                    ${currentUser?.role === 'admin' ? `<button class="delete-post-btn" onclick="openDeleteDialog('${encodeURIComponent(post.id)}')">🗑️ 删除</button>` : ''}
                     <button class="read-more-link" onclick="viewArticleDetail('${encodeURIComponent(post.id)}')">阅读原文 →</button>
                 </div>
             `).join('');
@@ -1176,6 +1573,7 @@
         }
 
         function openDeleteDialog(encodedPostId) {
+            if (!ensureAdmin()) return;
             const post = findPostInCurrentBlock(encodedPostId);
             if (!post) {
                 alert('找不到要删除的专栏。请刷新页面后重试。');
@@ -1215,6 +1613,7 @@
         }
 
         async function deleteSelectedPost() {
+            if (!ensureAdmin()) return;
             const button = document.getElementById('delete-confirm-button');
             const token = normalizeGitHubToken(document.getElementById('delete-github-token').value);
             const confirmed = document.getElementById('delete-confirm-checkbox').checked;
@@ -1351,6 +1750,7 @@
         }
 
         function openEditor() {
+            if (!ensureAdmin()) return;
             document.getElementById('editor-overlay').style.display = 'block';
             document.getElementById('upload-guide').style.display = 'none';
             document.getElementById('post-type').dispatchEvent(new Event('change'));
@@ -1367,18 +1767,17 @@
                 closeDeleteDialog();
                 closeCommentEditor();
                 closeCommentDeleteDialog();
+                closeAccessRequest();
+                closeUserManager();
             }
         });
 
         (async function init() {
-            const root = document.getElementById('app-root');
-            root.innerHTML = '<div class="loading">📡 正在从 GitHub 加载专栏...</div>';
             try {
-                postsDB = await loadAllPostsFromGitHub();
-                await renderApp();
+                await initializeAuthentication();
             } catch (error) {
                 console.error('初始化失败：', error);
-                root.innerHTML = `<div class="loading error-message">加载失败：${escapeHtml(error.message)}</div>`;
+                showLoginScreen(`初始化失败：${error.message}`, true);
             }
         })();
     </script>
