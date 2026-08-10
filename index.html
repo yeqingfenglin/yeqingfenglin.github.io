@@ -255,7 +255,7 @@
             <div class="form-group">
                 <label for="comment-github-token">🔐 GitHub Fine-grained Token</label>
                 <input type="password" id="comment-github-token" autocomplete="off" placeholder="仅在本次评论发布中使用，不会保存">
-                <div class="token-hint">Token 需要该仓库的 Contents: Read and write 权限。Token 不会写入评论或网页代码。</div>
+                <div class="token-hint">Token 需要该仓库的 Contents: Read and write 权限。只需粘贴 <code>github_pat_...</code> Token 本身；Token 不会写入评论或网页代码。</div>
             </div>
 
             <div class="form-group">
@@ -384,6 +384,25 @@
             return `https://raw.githubusercontent.com/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/${GITHUB_CONFIG.branch}/${encodeGitHubPath(path)}`;
         }
 
+        function normalizeGitHubToken(value) {
+            let token = String(value || '').trim();
+            token = token.replace(/^(?:Bearer|token)\s+/i, '').trim();
+            if ((token.startsWith('"') && token.endsWith('"')) || (token.startsWith("'") && token.endsWith("'"))) {
+                token = token.slice(1, -1).trim();
+            }
+            return token;
+        }
+
+        function getGitHubErrorMessage(status, detail, action = 'GitHub 请求失败') {
+            if (status === 401) {
+                return 'Token 无效、已过期或已被撤销（401 Bad credentials）。请重新生成 Fine-grained Token，并只粘贴 github_pat_... 本身。';
+            }
+            if (status === 403) {
+                return `Token 已被识别，但没有完成此操作的权限（403）。请确认仓库选择了 ${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}，并把 Contents 权限设为 Read and write。`;
+            }
+            return `${action}：${status} ${detail || '未知错误'}`;
+        }
+
         function getTaipeiDate() {
             const parts = new Intl.DateTimeFormat('en-CA', {
                 timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit'
@@ -420,7 +439,7 @@
             } catch (_) {
                 detail = await response.text();
             }
-            throw new Error(`GitHub API ${response.status}: ${detail || response.statusText}`);
+            throw new Error(getGitHubErrorMessage(response.status, detail || response.statusText));
         }
 
         async function githubPutFile(path, base64Content, token, message) {
@@ -428,7 +447,7 @@
             const apiUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${encodedPath}`;
             const headers = {
                 Accept: 'application/vnd.github+json',
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${normalizeGitHubToken(token)}`,
                 'X-GitHub-Api-Version': '2022-11-28',
                 'Content-Type': 'application/json'
             };
@@ -441,7 +460,7 @@
             } else if (existing.status !== 404) {
                 let detail = '';
                 try { detail = (await existing.json()).message || ''; } catch (_) {}
-                throw new Error(`无法检查 ${path}：${existing.status} ${detail}`);
+                throw new Error(getGitHubErrorMessage(existing.status, detail || existing.statusText, `无法检查 ${path}`));
             }
 
             const body = {
@@ -463,7 +482,7 @@
             const apiUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${encodedPath}`;
             const headers = {
                 Accept: 'application/vnd.github+json',
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${normalizeGitHubToken(token)}`,
                 'X-GitHub-Api-Version': '2022-11-28',
                 'Content-Type': 'application/json'
             };
@@ -493,7 +512,7 @@
             const apiUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${encodedPath}?ref=${encodeURIComponent(GITHUB_CONFIG.branch)}`;
             const headers = { Accept: 'application/vnd.github+json' };
             if (token) {
-                headers.Authorization = `Bearer ${token}`;
+                headers.Authorization = `Bearer ${normalizeGitHubToken(token)}`;
                 headers['X-GitHub-Api-Version'] = '2022-11-28';
             }
             const response = await githubRequest(apiUrl, { headers, cache: 'no-store' });
@@ -701,7 +720,7 @@
 
         async function publishCommentToGitHub() {
             const button = document.getElementById('comment-publish-button');
-            const token = document.getElementById('comment-github-token').value.trim();
+            const token = normalizeGitHubToken(document.getElementById('comment-github-token').value);
             const content = document.getElementById('comment-content').value.trim();
             const files = Array.from(document.getElementById('comment-image-files').files || []);
             const post = currentPost;
@@ -773,7 +792,7 @@
 
         async function publishToGitHub() {
             const button = document.getElementById('publish-button');
-            const token = document.getElementById('github-token').value.trim();
+            const token = normalizeGitHubToken(document.getElementById('github-token').value);
             const selectElement = document.getElementById('post-target');
             const selectedOption = selectElement.options[selectElement.selectedIndex];
             const targetBlock = selectElement.value;
@@ -1080,7 +1099,7 @@
 
         async function deleteSelectedPost() {
             const button = document.getElementById('delete-confirm-button');
-            const token = document.getElementById('delete-github-token').value.trim();
+            const token = normalizeGitHubToken(document.getElementById('delete-github-token').value);
             const confirmed = document.getElementById('delete-confirm-checkbox').checked;
             const deleteImages = document.getElementById('delete-gallery-images').checked;
             const post = pendingDeletePost;
@@ -1247,4 +1266,3 @@
     </script>
 </body>
 </html>
-
