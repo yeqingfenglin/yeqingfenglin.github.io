@@ -1,0 +1,11 @@
+{
+  "type": "image-gallery",
+  "title": "M Stand again",
+  "author": "wbn",
+  "date": "2026-08-21",
+  "imageFolder": "assets/images/coffee",
+  "images": [
+    "assets/images/coffee/01-B3DCEA717EF7D00A25F4E335188D89A6.jpg"
+  ],
+  "blockId": "both-b1-1"
+}
