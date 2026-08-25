@@ -1,0 +1,11 @@
+{
+  "type": "image-gallery",
+  "title": "火车站蔡林记",
+  "author": "wbn",
+  "date": "2026-08-25",
+  "imageFolder": "assets/images/food",
+  "images": [
+    "assets/images/food/01-A30FCE1495AC0738C85E9A6E6ABC32EF.jpg"
+  ],
+  "blockId": "both-b1-2"
+}
