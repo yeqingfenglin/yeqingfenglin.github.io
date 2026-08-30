@@ -167,6 +167,7 @@
     <div id="session-banner" class="session-banner">
         <div id="session-greeting"></div>
         <div class="session-actions">
+            <button id="export-backup-button" class="session-action-btn" onclick="exportCompleteBackup()" style="display:none;">导出完整备份</button>
             <button id="manage-users-button" class="session-action-btn" onclick="openUserManager()" style="display:none;">管理用户</button>
             <button class="session-action-btn logout" onclick="logoutCurrentUser()">退出登录</button>
         </div>
@@ -182,11 +183,7 @@
         <div class="editor-modal">
             <h2 style="margin-bottom:1.2rem;">📝 新建专栏</h2>
 
-            <div class="form-group">
-                <label for="github-token">🔐 GitHub Fine-grained Token</label>
-                <input type="password" id="github-token" autocomplete="off" placeholder="仅在本次上传中使用，不会写入网页代码">
-                <div class="token-hint">Token 需要该仓库的 Contents: Read and write 权限。不要把 Token 直接写进 index.html 或提交到 GitHub。</div>
-            </div>
+            <div class="token-hint" style="margin-bottom:1rem;">内容将写入私有腾讯云 COS。上传权限由当前 Supabase 管理员会话校验，网页不会接触腾讯云永久密钥。</div>
 
             <div class="form-group">
                 <label for="post-target">📌 归属板块</label>
@@ -256,7 +253,7 @@
                 </div>
             </div>
 
-            <button id="publish-button" class="submit-btn" onclick="publishToGitHub()">⬆️ 上传并发布到 GitHub</button>
+            <button id="publish-button" class="submit-btn" onclick="publishToCOS()">⬆️ 上传并发布到 COS</button>
             <div id="upload-guide" class="upload-guide"></div>
             <button class="submit-btn cancel" onclick="closeEditor()">取消</button>
         </div>
@@ -266,18 +263,13 @@
         <div class="editor-modal" style="max-width:560px;">
             <h2 style="margin-bottom:1.2rem;">🗑️ 删除专栏</h2>
             <div class="delete-warning">
-                删除会直接修改 GitHub 仓库，并且无法从本页面撤销。专栏配置文件会被永久删除。
+                删除会修改私有 COS 内容。请先使用右上角“导出完整备份”；COS 开启版本控制后仍可在控制台恢复历史版本。
             </div>
             <div id="delete-target" class="delete-target"></div>
 
-            <div class="form-group">
-                <label for="delete-github-token">🔐 GitHub Fine-grained Token</label>
-                <input type="password" id="delete-github-token" autocomplete="off" placeholder="需要 Contents: Read and write 权限">
-            </div>
-
             <label id="delete-images-row" class="checkbox-row" style="display:none;">
                 <input type="checkbox" id="delete-gallery-images">
-                <span>同时删除这个图片专栏引用的仓库图片。未勾选时只删除专栏，图片仍保留在 <code>assets/images/</code>。</span>
+                <span>同时删除这个图片专栏引用的 COS 图片。未勾选时只删除专栏，图片仍保留在 <code>assets/images/</code>。</span>
             </label>
 
             <label class="checkbox-row">
@@ -394,7 +386,9 @@
     </div>
 
     <script src="supabase-config.js"></script>
+    <script src="content-config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
     <script>
         'use strict';
 
@@ -413,13 +407,8 @@
             '坊': 'fang', '教': 'jiao', '练': 'lian', '场': 'chang', '地': 'di', '图': 'tu', '近': 'jin', '期': 'qi'
         };
 
-        const GITHUB_CONFIG = {
-            owner: 'yeqingfenglin',
-            repo: 'yeqingfenglin.github.io',
-            branch: 'main'
-        };
-
         const SUPABASE_CONFIG = window.SITE_SUPABASE_CONFIG || {};
+        const CONTENT_CONFIG = window.SITE_CONTENT_CONFIG || {};
 
         const personsData = {
             dengjie: { id: 'dengjie', name: '邓杰', titleNote: '🌿 邓杰的日常', roleDesc: '孤寂行者',
@@ -466,6 +455,8 @@
         let currentUser = null;
         let managedUsers = [];
         let pendingReviewUser = null;
+        let contentManifest = { schemaVersion: 1, posts: [], legacyComments: [] };
+        const signedObjectUrlCache = new Map();
 
         function setPanelStatus(elementId, html, isError = false) {
             const status = document.getElementById(elementId);
@@ -609,11 +600,12 @@
                 ? '欢迎回家，请随意创作'
                 : `欢迎你的来访，“${currentUser.username}”`;
             document.getElementById('manage-users-button').style.display = isAdmin ? 'inline-block' : 'none';
+            document.getElementById('export-backup-button').style.display = isAdmin ? 'inline-block' : 'none';
             document.querySelector('.create-post-btn').style.display = isAdmin ? 'block' : 'none';
 
             const root = document.getElementById('app-root');
-            root.innerHTML = '<div class="loading">📡 正在从 GitHub 加载专栏...</div>';
-            postsDB = await loadAllPostsFromGitHub();
+            root.innerHTML = '<div class="loading">📡 正在从私有 COS 加载专栏...</div>';
+            postsDB = await loadAllPostsFromCOS();
             await renderApp();
         }
 
@@ -736,6 +728,76 @@
             currentComments = [];
             closeUserManager();
             showLoginScreen();
+        }
+
+        async function readAllRows(table, columns, orderColumn) {
+            const rows = [];
+            const pageSize = 1000;
+            for (let offset = 0; ; offset += pageSize) {
+                let query = supabaseClient.from(table).select(columns).range(offset, offset + pageSize - 1);
+                if (orderColumn) query = query.order(orderColumn, { ascending: true });
+                const { data, error } = await query;
+                if (error) throw error;
+                rows.push(...(data || []));
+                if (!data || data.length < pageSize) return rows;
+            }
+        }
+
+        async function exportCompleteBackup() {
+            if (!ensureAdmin()) return;
+            const button = document.getElementById('export-backup-button');
+            button.disabled = true;
+            button.textContent = '正在导出…';
+            try {
+                if (!window.JSZip) throw new Error('备份组件加载失败，请检查网络后重试。');
+                const [comments, profiles] = await Promise.all([
+                    readAllRows('comments', 'id, post_path, author_id, author_name, content, images, created_at', 'created_at'),
+                    readAllRows('profiles', 'id, username, relationship, role, status, created_at, approved_at, approved_by', 'created_at')
+                ]);
+                const zip = new JSZip();
+                zip.file('content-index.json', `${JSON.stringify(contentManifest, null, 2)}\n`);
+                zip.file('comments.json', `${JSON.stringify(comments, null, 2)}\n`);
+                zip.file('profiles.json', `${JSON.stringify(profiles, null, 2)}\n`);
+                const imagePaths = [...new Set(comments.flatMap(comment => Array.isArray(comment.images) ? comment.images : []))];
+                const imageErrors = [];
+                for (let index = 0; index < imagePaths.length; index += 1) {
+                    const imagePath = imagePaths[index];
+                    button.textContent = `备份图片 ${index + 1}/${imagePaths.length}`;
+                    const { data, error } = await supabaseClient.storage.from('comment-images').download(imagePath);
+                    if (error || !data) imageErrors.push(`${imagePath}: ${error?.message || '下载失败'}`);
+                    else zip.file(`supabase-comment-images/${imagePath}`, data, { compression: 'STORE' });
+                }
+                const backupManifest = {
+                    schemaVersion: 1,
+                    exportedAt: new Date().toISOString(),
+                    comments: comments.length,
+                    profiles: profiles.length,
+                    commentImagesExpected: imagePaths.length,
+                    commentImagesIncluded: imagePaths.length - imageErrors.length,
+                    note: '不含密码或腾讯云密钥；Supabase Auth 密码由 Supabase 托管，不能从浏览器导出。'
+                };
+                zip.file('backup-manifest.json', `${JSON.stringify(backupManifest, null, 2)}\n`);
+                zip.file('README.txt', '这是网站管理员导出的评论、评论图片、用户资料与当前 COS 内容索引备份。请离线保存，不要上传到公开 GitHub。\n');
+                if (imageErrors.length) zip.file('_ERRORS.txt', `${imageErrors.join('\n')}\n`);
+                const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `yqfl-complete-backup-${getTaipeiDate()}.zip`;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(url);
+                alert(imageErrors.length
+                    ? `备份已导出，但有 ${imageErrors.length} 张评论图片下载失败；详情见压缩包内 _ERRORS.txt。请不要删除原数据。`
+                    : `完整备份已导出：${comments.length} 条评论、${imagePaths.length} 张评论图片。`);
+            } catch (error) {
+                console.error(error);
+                alert(`备份导出失败：${error.message}\n原数据没有被修改。`);
+            } finally {
+                button.disabled = false;
+                button.textContent = '导出完整备份';
+            }
         }
 
         function ensureAdmin() {
@@ -904,31 +966,47 @@
             return `${String(index + 1).padStart(2, '0')}-${base}.${ext}`;
         }
 
-        function encodeGitHubPath(path) {
-            return String(path).split('/').filter(Boolean).map(encodeURIComponent).join('/');
+        function isContentGatewayConfigured() {
+            return CONTENT_CONFIG.provider === 'tencent-cos'
+                && typeof CONTENT_CONFIG.gatewayFunction === 'string'
+                && CONTENT_CONFIG.gatewayFunction.length > 0;
         }
 
-        function rawGitHubUrl(path) {
-            return `https://raw.githubusercontent.com/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/${GITHUB_CONFIG.branch}/${encodeGitHubPath(path)}`;
+        async function contentGateway(action, payload = {}) {
+            if (!supabaseClient || !currentUser) throw new Error('登录已失效，请重新登录。');
+            if (!isContentGatewayConfigured()) throw new Error('content-config.js 尚未配置完成。');
+            const { data, error } = await supabaseClient.functions.invoke(CONTENT_CONFIG.gatewayFunction, {
+                body: { action, ...payload }
+            });
+            if (error) {
+                let detail = error.message || 'COS 网关请求失败';
+                try {
+                    const responseBody = await error.context?.json();
+                    if (responseBody?.error) detail = responseBody.error;
+                } catch (_) {}
+                throw new Error(detail);
+            }
+            if (data?.error) throw new Error(data.error);
+            return data || {};
         }
 
-        function normalizeGitHubToken(value) {
-            let token = String(value || '').trim();
-            token = token.replace(/^(?:Bearer|token)\s+/i, '').trim();
-            if ((token.startsWith('"') && token.endsWith('"')) || (token.startsWith("'") && token.endsWith("'"))) {
-                token = token.slice(1, -1).trim();
+        async function getSignedObjectUrls(paths) {
+            const uniquePaths = [...new Set((paths || []).filter(path => typeof path === 'string' && path && !/^https?:\/\//i.test(path)))];
+            const now = Date.now();
+            const missing = uniquePaths.filter(path => {
+                const cached = signedObjectUrlCache.get(path);
+                return !cached || cached.expiresAt - now < 60_000;
+            });
+            for (let offset = 0; offset < missing.length; offset += 100) {
+                const { items = [] } = await contentGateway('get-urls', { keys: missing.slice(offset, offset + 100) });
+                for (const item of items) {
+                    signedObjectUrlCache.set(item.key, {
+                        url: item.url,
+                        expiresAt: new Date(item.expiresAt).getTime()
+                    });
+                }
             }
-            return token;
-        }
-
-        function getGitHubErrorMessage(status, detail, action = 'GitHub 请求失败') {
-            if (status === 401) {
-                return 'Token 无效、已过期或已被撤销（401 Bad credentials）。请重新生成 Fine-grained Token，并只粘贴 github_pat_... 本身。';
-            }
-            if (status === 403) {
-                return `Token 已被识别，但没有完成此操作的权限（403）。请确认仓库选择了 ${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}，并把 Contents 权限设为 Read and write。`;
-            }
-            return `${action}：${status} ${detail || '未知错误'}`;
+            return new Map(uniquePaths.map(path => [path, signedObjectUrlCache.get(path)?.url || '']));
         }
 
         function getTaipeiDate() {
@@ -939,113 +1017,8 @@
             return `${values.year}-${values.month}-${values.day}`;
         }
 
-        function bytesToBase64(bytes) {
-            let binary = '';
-            const chunkSize = 0x8000;
-            for (let offset = 0; offset < bytes.length; offset += chunkSize) {
-                binary += String.fromCharCode(...bytes.subarray(offset, offset + chunkSize));
-            }
-            return btoa(binary);
-        }
-
-        async function fileToBase64(file) {
-            return bytesToBase64(new Uint8Array(await file.arrayBuffer()));
-        }
-
-        function textToBase64(text) {
-            return bytesToBase64(new TextEncoder().encode(text));
-        }
-
-        async function githubRequest(url, options = {}) {
-            const response = await fetch(url, options);
-            if (response.ok) return response;
-
-            let detail = '';
-            try {
-                const data = await response.json();
-                detail = data.message || JSON.stringify(data);
-            } catch (_) {
-                detail = await response.text();
-            }
-            throw new Error(getGitHubErrorMessage(response.status, detail || response.statusText));
-        }
-
-        async function githubPutFile(path, base64Content, token, message) {
-            const encodedPath = encodeGitHubPath(path);
-            const apiUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${encodedPath}`;
-            const headers = {
-                Accept: 'application/vnd.github+json',
-                Authorization: `Bearer ${normalizeGitHubToken(token)}`,
-                'X-GitHub-Api-Version': '2022-11-28',
-                'Content-Type': 'application/json'
-            };
-
-            let sha;
-            const existing = await fetch(`${apiUrl}?ref=${encodeURIComponent(GITHUB_CONFIG.branch)}`, { headers });
-            if (existing.ok) {
-                const existingData = await existing.json();
-                sha = existingData.sha;
-            } else if (existing.status !== 404) {
-                let detail = '';
-                try { detail = (await existing.json()).message || ''; } catch (_) {}
-                throw new Error(getGitHubErrorMessage(existing.status, detail || existing.statusText, `无法检查 ${path}`));
-            }
-
-            const body = {
-                message,
-                content: base64Content,
-                branch: GITHUB_CONFIG.branch
-            };
-            if (sha) body.sha = sha;
-
-            return githubRequest(apiUrl, {
-                method: 'PUT',
-                headers,
-                body: JSON.stringify(body)
-            });
-        }
-
-        async function githubDeleteFile(path, token, message) {
-            const encodedPath = encodeGitHubPath(path);
-            const apiUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${encodedPath}`;
-            const headers = {
-                Accept: 'application/vnd.github+json',
-                Authorization: `Bearer ${normalizeGitHubToken(token)}`,
-                'X-GitHub-Api-Version': '2022-11-28',
-                'Content-Type': 'application/json'
-            };
-
-            const metadataResponse = await githubRequest(
-                `${apiUrl}?ref=${encodeURIComponent(GITHUB_CONFIG.branch)}`,
-                { headers, cache: 'no-store' }
-            );
-            const metadata = await metadataResponse.json();
-            if (!metadata.sha || metadata.type !== 'file') {
-                throw new Error(`无法取得待删除文件的 SHA：${path}`);
-            }
-
-            return githubRequest(apiUrl, {
-                method: 'DELETE',
-                headers,
-                body: JSON.stringify({
-                    message,
-                    sha: metadata.sha,
-                    branch: GITHUB_CONFIG.branch
-                })
-            });
-        }
-
-        async function listGitHubFolderFiles(path, token = '') {
-            const encodedPath = encodeGitHubPath(path);
-            const apiUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${encodedPath}?ref=${encodeURIComponent(GITHUB_CONFIG.branch)}`;
-            const headers = { Accept: 'application/vnd.github+json' };
-            if (token) {
-                headers.Authorization = `Bearer ${normalizeGitHubToken(token)}`;
-                headers['X-GitHub-Api-Version'] = '2022-11-28';
-            }
-            const response = await githubRequest(apiUrl, { headers, cache: 'no-store' });
-            const data = await response.json();
-            return Array.isArray(data) ? data : [];
+        async function putJsonToCOS(key, data) {
+            return contentGateway('put-json', { key, data });
         }
 
         function setUploadStatus(html, isError = false) {
@@ -1081,46 +1054,32 @@
             list.innerHTML = files.map(file => `${escapeHtml(file.name)}（${(file.size / 1024 / 1024).toFixed(2)} MB）`).join('<br>');
         });
 
-        async function loadAllPostsFromGitHub() {
-            const folders = ['dengjie', 'wangboning', 'together'];
+        async function loadAllPostsFromCOS() {
             const allPosts = new Map();
-
-            for (const folder of folders) {
-                const apiUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/posts/${folder}?ref=${encodeURIComponent(GITHUB_CONFIG.branch)}`;
-                try {
-                    const response = await fetch(apiUrl, { headers: { Accept: 'application/vnd.github+json' } });
-                    if (response.status === 404) continue;
-                    if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-                    const files = await response.json();
-                    if (!Array.isArray(files)) continue;
-
-                    for (const file of files) {
-                        if (file.type !== 'file' || !file.name.toLowerCase().endsWith('.json')) continue;
-                        try {
-                            const contentResponse = await fetch(file.download_url, { cache: 'no-store' });
-                            if (!contentResponse.ok) throw new Error(`${contentResponse.status}`);
-                            const postData = await contentResponse.json();
-                            const blockId = postData.blockId;
-                            if (!blockId) continue;
-                            if (!allPosts.has(blockId)) allPosts.set(blockId, []);
-                            allPosts.get(blockId).push({
-                                id: file.name,
-                                path: file.path || `posts/${folder}/${file.name}`,
-                                title: postData.title || '无标题',
-                                author: postData.author || '未知作者',
-                                date: postData.date || file.name.slice(0, 10),
-                                type: postData.type || 'article',
-                                content: postData.content || '',
-                                imageFolder: postData.imageFolder || '',
-                                images: Array.isArray(postData.images) ? postData.images : []
-                            });
-                        } catch (error) {
-                            console.warn(`解析文件 ${file.name} 失败：`, error);
-                        }
-                    }
-                } catch (error) {
-                    console.warn(`加载 posts/${folder} 失败：`, error);
-                }
+            const { manifest } = await contentGateway('get-manifest');
+            if (!manifest || !Array.isArray(manifest.posts)) throw new Error('COS 内容索引格式不正确。');
+            contentManifest = {
+                schemaVersion: manifest.schemaVersion || 1,
+                generatedAt: manifest.generatedAt || new Date().toISOString(),
+                source: manifest.source || 'tencent-cos',
+                posts: manifest.posts,
+                legacyComments: Array.isArray(manifest.legacyComments) ? manifest.legacyComments : []
+            };
+            for (const post of contentManifest.posts) {
+                if (!post?.blockId || !post?.path) continue;
+                if (!allPosts.has(post.blockId)) allPosts.set(post.blockId, []);
+                allPosts.get(post.blockId).push({
+                    id: post.id || String(post.path).split('/').pop(),
+                    path: post.path,
+                    title: post.title || '无标题',
+                    author: post.author || '未知作者',
+                    date: post.date || String(post.id || '').slice(0, 10),
+                    type: post.type || 'article',
+                    content: post.content || '',
+                    imageFolder: post.imageFolder || '',
+                    images: Array.isArray(post.images) ? post.images : [],
+                    blockId: post.blockId
+                });
             }
 
             for (const posts of allPosts.values()) {
@@ -1149,7 +1108,7 @@
                 .order('created_at', { ascending: true });
             if (error) throw new Error(error.message);
 
-            return Promise.all((data || []).map(async row => {
+            const liveComments = await Promise.all((data || []).map(async row => {
                 const imagePaths = Array.isArray(row.images) ? row.images : [];
                 const imageItems = await Promise.all(imagePaths.map(async path => {
                     const { data: signedData, error: signedError } = await supabaseClient
@@ -1169,9 +1128,27 @@
                     createdAt: row.created_at,
                     content: row.content || '',
                     images: imagePaths,
-                    imageItems: imageItems.filter(Boolean)
+                    imageItems: imageItems.filter(Boolean),
+                    source: 'supabase'
                 };
             }));
+
+            const legacyRows = (contentManifest.legacyComments || [])
+                .filter(comment => comment.postPath === (post.path || post.id));
+            const legacyPaths = legacyRows.flatMap(comment => Array.isArray(comment.images) ? comment.images : []);
+            const legacyUrls = await getSignedObjectUrls(legacyPaths);
+            const legacyComments = legacyRows.map(comment => ({
+                id: comment.id,
+                authorId: null,
+                author: comment.author || '历史评论',
+                createdAt: comment.createdAt,
+                content: comment.content || '',
+                images: Array.isArray(comment.images) ? comment.images : [],
+                imageItems: (comment.images || []).map(path => ({ path, url: legacyUrls.get(path) })).filter(item => item.url),
+                source: 'legacy'
+            }));
+            return [...liveComments, ...legacyComments]
+                .sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
         }
 
         async function renderCommentsSection(post) {
@@ -1185,7 +1162,8 @@
                                 const encodedUrl = encodeURIComponent(image.url);
                                 return `<img src="${escapeHtml(image.url)}" alt="评论图片" loading="lazy" onclick="openLightbox(decodeURIComponent('${encodedUrl}'))">`;
                             }).join('');
-                        const canDelete = currentUser?.role === 'admin' || comment.authorId === currentUser?.id;
+                        const canDelete = comment.source !== 'legacy'
+                            && (currentUser?.role === 'admin' || comment.authorId === currentUser?.id);
                         return `
                             <article class="comment-item">
                                 <div class="comment-meta">
@@ -1381,10 +1359,9 @@
             }
         }
 
-        async function publishToGitHub() {
+        async function publishToCOS() {
             if (!ensureAdmin()) return;
             const button = document.getElementById('publish-button');
-            const token = normalizeGitHubToken(document.getElementById('github-token').value);
             const selectElement = document.getElementById('post-target');
             const selectedOption = selectElement.options[selectElement.selectedIndex];
             const targetBlock = selectElement.value;
@@ -1393,7 +1370,6 @@
             const author = document.getElementById('post-author').value.trim();
             const type = document.getElementById('post-type').value;
 
-            if (!token) { setUploadStatus('请输入 GitHub Fine-grained Token。', true); return; }
             if (!title || !author) { setUploadStatus('请填写标题和作者。', true); return; }
 
             const date = getTaipeiDate();
@@ -1418,18 +1394,27 @@
 
                     const imageFolder = `assets/images/${folderName}`;
                     const imagePaths = [];
+                    const uploadObjects = files.map((file, index) => ({
+                        key: `${imageFolder}/${sanitizeFileName(file.name, index)}`,
+                        size: file.size,
+                        contentType: file.type || 'application/octet-stream'
+                    }));
+                    const { items: uploadItems = [] } = await contentGateway('get-upload-urls', { objects: uploadObjects });
+                    const uploadByKey = new Map(uploadItems.map(item => [item.key, item]));
 
                     for (let index = 0; index < files.length; index += 1) {
                         const file = files[index];
-                        const fileName = sanitizeFileName(file.name, index);
-                        const imagePath = `${imageFolder}/${fileName}`;
+                        const imagePath = uploadObjects[index].key;
+                        const fileName = imagePath.split('/').pop();
+                        const upload = uploadByKey.get(imagePath);
+                        if (!upload?.url) throw new Error(`没有取得 ${imagePath} 的上传链接。`);
                         setUploadStatus(`正在上传第 ${index + 1}/${files.length} 张图片：<code>${escapeHtml(fileName)}</code>`);
-                        await githubPutFile(
-                            imagePath,
-                            await fileToBase64(file),
-                            token,
-                            `Upload gallery image: ${title} (${index + 1}/${files.length})`
-                        );
+                        const response = await fetch(upload.url, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': upload.contentType },
+                            body: file
+                        });
+                        if (!response.ok) throw new Error(`COS 图片上传失败：${response.status} ${response.statusText}`);
                         imagePaths.push(imagePath);
                     }
 
@@ -1456,17 +1441,25 @@
                 }
 
                 setUploadStatus(`正在发布专栏配置：<code>${escapeHtml(postPath)}</code>`);
-                await githubPutFile(
-                    postPath,
-                    textToBase64(JSON.stringify(articleJSON, null, 2)),
-                    token,
-                    `Publish post: ${title}`
-                );
+                await putJsonToCOS(postPath, articleJSON);
+                const manifestPost = { id: postPath.split('/').pop(), path: postPath, ...articleJSON };
+                const nextPosts = (contentManifest.posts || []).filter(item => item.path !== postPath);
+                nextPosts.push(manifestPost);
+                nextPosts.sort((a, b) => String(b.date).localeCompare(String(a.date)) || String(b.path).localeCompare(String(a.path)));
+                const nextManifest = {
+                    ...contentManifest,
+                    schemaVersion: 1,
+                    generatedAt: new Date().toISOString(),
+                    posts: nextPosts,
+                    legacyComments: Array.isArray(contentManifest.legacyComments) ? contentManifest.legacyComments : []
+                };
+                await putJsonToCOS(CONTENT_CONFIG.manifestKey || 'content/index.json', nextManifest);
+                contentManifest = nextManifest;
 
                 setUploadStatus(`
                     <strong>发布成功。</strong><br>
                     配置文件：<code>${escapeHtml(postPath)}</code><br>
-                    GitHub Pages 更新通常需要稍后刷新页面才能看到。
+                    COS 内容索引已经同步更新。
                 `);
 
                 document.getElementById('post-title').value = '';
@@ -1476,14 +1469,14 @@
                 document.getElementById('image-files').value = '';
                 document.getElementById('selected-files').textContent = '尚未选择图片';
 
-                postsDB = await loadAllPostsFromGitHub();
+                postsDB = await loadAllPostsFromCOS();
                 if (currentPage === 'column_list') await renderApp();
             } catch (error) {
                 console.error(error);
-                setUploadStatus(`<strong>上传失败：</strong>${escapeHtml(error.message)}<br>请检查 Token 权限、仓库名称和网络。`, true);
+                setUploadStatus(`<strong>上传失败：</strong>${escapeHtml(error.message)}<br>请检查 COS 跨域规则、Supabase Edge Function 和管理员权限。`, true);
             } finally {
                 button.disabled = false;
-                button.textContent = '⬆️ 上传并发布到 GitHub';
+                button.textContent = '⬆️ 上传并发布到 COS';
             }
         }
 
@@ -1501,15 +1494,22 @@
             document.getElementById('lightbox-img').src = '';
         }
 
-        function normalizeArticleImageSources(content) {
-            return String(content || '').replace(
-                /src\s*=\s*(['"])assets\/images\/([^'"]+)\1/gi,
-                (_match, _quote, filename) => `src="${rawGitHubUrl(`assets/images/${filename}`)}"`
+        async function normalizeArticleImageSources(content) {
+            const source = String(content || '');
+            const paths = [];
+            source.replace(/src\s*=\s*(['"])(assets\/images\/.*?)\1/gi, (match, quote, objectPath) => {
+                paths.push(objectPath);
+                return match;
+            });
+            const urls = await getSignedObjectUrls(paths);
+            return source.replace(
+                /src\s*=\s*(['"])(assets\/images\/.*?)\1/gi,
+                (match, quote, objectPath) => urls.get(objectPath) ? `src=${quote}${urls.get(objectPath)}${quote}` : match
             );
         }
 
         async function renderArticleDetailPage(post) {
-            const content = normalizeArticleImageSources(post.content || '');
+            const content = await normalizeArticleImageSources(post.content || '');
             const commentsHtml = await renderCommentsSection(post);
             const deleteButton = currentUser?.role === 'admin'
                 ? `<button class="detail-delete-btn" onclick="openDeleteDialog('${encodeURIComponent(post.id)}')">🗑️ 删除专栏</button>`
@@ -1538,25 +1538,15 @@
 
         async function loadGalleryImages(post) {
             if (Array.isArray(post.images) && post.images.length) {
+                const objectPaths = post.images.filter(path => !/^https?:\/\//i.test(path));
+                const urls = await getSignedObjectUrls(objectPaths);
                 return post.images.map(path => ({
                     name: String(path).split('/').pop() || 'image',
-                    url: /^https?:\/\//i.test(path) ? path : rawGitHubUrl(path)
+                    url: /^https?:\/\//i.test(path) ? path : urls.get(path)
                 }));
             }
 
-            if (!post.imageFolder) return [];
-            const folderPath = encodeGitHubPath(post.imageFolder);
-            const apiUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${folderPath}?ref=${encodeURIComponent(GITHUB_CONFIG.branch)}`;
-            const response = await fetch(apiUrl, { headers: { Accept: 'application/vnd.github+json' }, cache: 'no-store' });
-            if (response.status === 404) throw new Error(`找不到图片文件夹：${post.imageFolder}`);
-            if (!response.ok) throw new Error(`读取图片文件夹失败：${response.status} ${response.statusText}`);
-            const files = await response.json();
-            if (!Array.isArray(files)) return [];
-
-            return files
-                .filter(file => file.type === 'file' && /\.(jpe?g|png|gif|webp|avif|bmp|svg)$/i.test(file.name))
-                .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
-                .map(file => ({ name: file.name, url: file.download_url || rawGitHubUrl(file.path) }));
+            return [];
         }
 
         async function renderImageGalleryPage(post) {
@@ -1672,7 +1662,6 @@
             document.getElementById('delete-images-row').style.display = post.type === 'image-gallery' ? 'flex' : 'none';
             document.getElementById('delete-gallery-images').checked = false;
             document.getElementById('delete-confirm-checkbox').checked = false;
-            document.getElementById('delete-github-token').value = '';
             document.getElementById('delete-status').style.display = 'none';
             document.getElementById('delete-overlay').style.display = 'block';
         }
@@ -1682,54 +1671,55 @@
             pendingDeletePost = null;
         }
 
-        async function getGalleryRepositoryImagePaths(post, token) {
-            const directPaths = Array.isArray(post.images)
+        function getPostImagePaths(post) {
+            const directPaths = Array.isArray(post?.images)
                 ? post.images.filter(path => typeof path === 'string' && path && !/^https?:\/\//i.test(path))
                 : [];
-            if (directPaths.length) return [...new Set(directPaths)];
-            if (!post.imageFolder) return [];
-
-            const files = await listGitHubFolderFiles(post.imageFolder, token);
-            return files
-                .filter(file => file.type === 'file' && /\.(jpe?g|png|gif|webp|avif|bmp|svg)$/i.test(file.name))
-                .map(file => file.path)
-                .filter(Boolean);
+            const embedded = [];
+            String(post?.content || '').replace(/src\s*=\s*(['"])(assets\/images\/.*?)\1/gi, (match, quote, path) => {
+                embedded.push(path);
+                return match;
+            });
+            return [...new Set([...directPaths, ...embedded])];
         }
 
         async function deleteSelectedPost() {
             if (!ensureAdmin()) return;
             const button = document.getElementById('delete-confirm-button');
-            const token = normalizeGitHubToken(document.getElementById('delete-github-token').value);
             const confirmed = document.getElementById('delete-confirm-checkbox').checked;
             const deleteImages = document.getElementById('delete-gallery-images').checked;
             const post = pendingDeletePost;
 
             if (!post) { setDeleteStatus('没有选中待删除的专栏。', true); return; }
-            if (!token) { setDeleteStatus('请输入 GitHub Fine-grained Token。', true); return; }
             if (!confirmed) { setDeleteStatus('请先勾选删除确认。', true); return; }
-            if (!post.path) { setDeleteStatus('当前专栏缺少 GitHub 文件路径，请刷新页面后重试。', true); return; }
+            if (!post.path) { setDeleteStatus('当前专栏缺少 COS 文件路径，请刷新页面后重试。', true); return; }
 
             button.disabled = true;
             button.textContent = '正在删除…';
 
             try {
+                let imagePaths = [];
                 if (post.type === 'image-gallery' && deleteImages) {
-                    const imagePaths = await getGalleryRepositoryImagePaths(post, token);
-                    for (let index = 0; index < imagePaths.length; index += 1) {
-                        const imagePath = imagePaths[index];
-                        setDeleteStatus(`正在删除图片 ${index + 1}/${imagePaths.length}：<code>${escapeHtml(imagePath)}</code>`);
-                        await githubDeleteFile(
-                            imagePath,
-                            token,
-                            `Delete gallery image: ${post.title} (${index + 1}/${imagePaths.length})`
-                        );
-                    }
+                    const referencedElsewhere = new Set(
+                        (contentManifest.posts || [])
+                            .filter(item => item.path !== post.path)
+                            .flatMap(getPostImagePaths)
+                    );
+                    imagePaths = getPostImagePaths(post).filter(path => !referencedElsewhere.has(path));
                 }
 
-                setDeleteStatus(`正在删除专栏配置：<code>${escapeHtml(post.path)}</code>`);
-                await githubDeleteFile(post.path, token, `Delete post: ${post.title}`);
+                setDeleteStatus(`正在更新内容索引：<code>${escapeHtml(post.path)}</code>`);
+                const nextManifest = {
+                    ...contentManifest,
+                    generatedAt: new Date().toISOString(),
+                    posts: (contentManifest.posts || []).filter(item => item.path !== post.path)
+                };
+                await putJsonToCOS(CONTENT_CONFIG.manifestKey || 'content/index.json', nextManifest);
+                contentManifest = nextManifest;
+                setDeleteStatus(`正在删除 COS 对象；被其他专栏引用的共享图片会自动保留。`);
+                await contentGateway('delete-objects', { keys: [post.path, ...imagePaths] });
 
-                postsDB = await loadAllPostsFromGitHub();
+                postsDB = await loadAllPostsFromCOS();
                 currentPage = 'column_list';
                 currentPost = null;
                 pendingDeletePost = null;
@@ -1737,7 +1727,7 @@
                 await renderApp();
             } catch (error) {
                 console.error(error);
-                setDeleteStatus(`<strong>删除失败：</strong>${escapeHtml(error.message)}<br>请检查 Token 权限、文件是否已被删除以及网络状态。`, true);
+                setDeleteStatus(`<strong>删除失败：</strong>${escapeHtml(error.message)}<br>请检查 COS 网关、管理员权限和网络状态。`, true);
             } finally {
                 button.disabled = false;
                 button.textContent = '永久删除';
