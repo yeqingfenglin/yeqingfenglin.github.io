@@ -603,10 +603,35 @@
             document.getElementById('export-backup-button').style.display = isAdmin ? 'inline-block' : 'none';
             document.querySelector('.create-post-btn').style.display = isAdmin ? 'block' : 'none';
 
+            await loadAndRenderSiteContent();
+        }
+
+        function isEdgeFunctionNetworkError(error) {
+            const message = String(error?.message || error || '');
+            return /failed to send a request to the edge function|failed to fetch|networkerror|load failed|functionsfetcherror/i.test(message);
+        }
+
+        async function loadAndRenderSiteContent() {
             const root = document.getElementById('app-root');
             root.innerHTML = '<div class="loading">📡 正在从私有 COS 加载专栏...</div>';
-            postsDB = await loadAllPostsFromCOS();
-            await renderApp();
+            try {
+                postsDB = await loadAllPostsFromCOS();
+                await renderApp();
+            } catch (error) {
+                console.error('内容服务连接失败', error);
+                const detail = isEdgeFunctionNetworkError(error)
+                    ? '当前网络暂时无法连接内容服务。请切换 Wi-Fi 或移动网络后重试。'
+                    : String(error?.message || '内容加载失败，请稍后重试。');
+                root.innerHTML = `
+                    <div class="error-message">
+                        <strong>登录成功，但内容暂时加载失败。</strong><br>
+                        ${escapeHtml(detail)}
+                        <div style="margin-top: 14px;">
+                            <button class="submit-btn" type="button" onclick="loadAndRenderSiteContent()">重新连接</button>
+                        </div>
+                    </div>
+                `;
+            }
         }
 
         async function handleAuthenticatedSession(session) {
@@ -975,19 +1000,39 @@
         async function contentGateway(action, payload = {}) {
             if (!supabaseClient || !currentUser) throw new Error('登录已失效，请重新登录。');
             if (!isContentGatewayConfigured()) throw new Error('content-config.js 尚未配置完成。');
-            const { data, error } = await supabaseClient.functions.invoke(CONTENT_CONFIG.gatewayFunction, {
-                body: { action, ...payload }
-            });
-            if (error) {
-                let detail = error.message || 'COS 网关请求失败';
+            const canRetry = action === 'get-manifest' || action === 'get-urls';
+            const attempts = canRetry ? 3 : 1;
+            let lastError = null;
+
+            for (let attempt = 0; attempt < attempts; attempt += 1) {
                 try {
-                    const responseBody = await error.context?.json();
-                    if (responseBody?.error) detail = responseBody.error;
-                } catch (_) {}
-                throw new Error(detail);
+                    const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+                    if (sessionError || !sessionData.session?.access_token) throw new Error('登录已失效，请重新登录。');
+                    const { data, error } = await supabaseClient.functions.invoke(CONTENT_CONFIG.gatewayFunction, {
+                        body: { action, ...payload },
+                        headers: { Authorization: `Bearer ${sessionData.session.access_token}` }
+                    });
+                    if (error) {
+                        let detail = error.message || 'COS 网关请求失败';
+                        try {
+                            const responseBody = await error.context?.json();
+                            if (responseBody?.error) detail = responseBody.error;
+                        } catch (_) {}
+                        throw new Error(detail);
+                    }
+                    if (data?.error) throw new Error(data.error);
+                    return data || {};
+                } catch (error) {
+                    lastError = error;
+                    if (!canRetry || !isEdgeFunctionNetworkError(error) || attempt === attempts - 1) break;
+                    await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+                }
             }
-            if (data?.error) throw new Error(data.error);
-            return data || {};
+
+            if (isEdgeFunctionNetworkError(lastError)) {
+                throw new Error('当前网络暂时无法连接内容服务。请切换 Wi-Fi 或移动网络后重试。');
+            }
+            throw lastError || new Error('内容服务请求失败');
         }
 
         async function getSignedObjectUrls(paths) {
