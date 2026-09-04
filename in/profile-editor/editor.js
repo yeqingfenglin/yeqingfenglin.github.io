@@ -11,6 +11,9 @@
   let client = null;
   let profileId = '';
   let savedProfile = null;
+  let storedAvatar = null;
+  let pendingAvatarFile = null;
+  let avatarPreviewUrl = '';
   let storedFiles = [];
   let pendingFiles = [];
 
@@ -19,6 +22,11 @@
   function safeFileName(name) {
     const clean = String(name || 'file').normalize('NFKC').replace(/[\\/:*?#"<>|\u0000-\u001f]/g, '-').replace(/\s+/g, '-').replace(/-+/g, '-').slice(0, 120);
     return clean || `file-${Date.now()}`;
+  }
+  function safeAvatarFileName(file) {
+    const extension = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' }[file.type];
+    const baseName = String(file.name || 'profile-photo').replace(/\.[^.]+$/, '');
+    return `${safeFileName(baseName)}.${extension}`;
   }
   function setStatus(message, isError) {
     const target = document.getElementById('save-status');
@@ -46,6 +54,7 @@
     return {
       schemaVersion: 1,
       ...defaults[id],
+      avatar: null,
       title: 'Academic title and affiliation to be added',
       location: 'Location to be added',
       email: 'Email to be added',
@@ -65,7 +74,10 @@
 
   function applyProfile(profile) {
     const merged = { ...defaultProfile(profileId), ...(profile || {}) };
+    releaseAvatarPreview();
     savedProfile = structuredClone(merged);
+    storedAvatar = merged.avatar && typeof merged.avatar === 'object' ? structuredClone(merged.avatar) : null;
+    pendingAvatarFile = null;
     storedFiles = Array.isArray(merged.files) ? structuredClone(merged.files) : [];
     pendingFiles = [];
     document.querySelectorAll('[data-field]').forEach(element => {
@@ -74,11 +86,43 @@
       if (field.endsWith('Html')) element.innerHTML = value;
       else element.textContent = value;
     });
-    document.querySelector('.portrait-placeholder').textContent = merged.initials || defaults[profileId].initials;
+    renderAvatar();
     document.getElementById('editor-brand').textContent = `修改 ${merged.displayName || defaults[profileId].displayName} 的主页`;
     document.getElementById('preview-link').href = `/out/${profileId}/`;
     renderFiles();
     setStatus('当前显示的是 COS 中已保存的内容', false);
+  }
+
+  function releaseAvatarPreview() {
+    if (avatarPreviewUrl) URL.revokeObjectURL(avatarPreviewUrl);
+    avatarPreviewUrl = '';
+  }
+
+  function renderAvatar() {
+    const picker = document.getElementById('avatar-picker-button');
+    const initials = document.getElementById('avatar-initials');
+    const preview = document.getElementById('avatar-preview');
+    const pickerLabel = document.getElementById('avatar-picker-label');
+    const removeButton = document.getElementById('remove-avatar-button');
+    const imageUrl = avatarPreviewUrl || String(storedAvatar?.url || '');
+    initials.textContent = savedProfile?.initials || defaults[profileId].initials;
+    if (imageUrl) {
+      preview.src = imageUrl;
+      preview.alt = `${savedProfile?.displayName || defaults[profileId].displayName} 的头像预览`;
+      preview.hidden = false;
+      initials.hidden = true;
+      pickerLabel.textContent = '更换照片';
+      picker.setAttribute('aria-label', '更换头像照片');
+      removeButton.hidden = false;
+    } else {
+      preview.removeAttribute('src');
+      preview.alt = '';
+      preview.hidden = true;
+      initials.hidden = false;
+      pickerLabel.textContent = '选择照片';
+      picker.setAttribute('aria-label', '选择头像照片');
+      removeButton.hidden = true;
+    }
   }
 
   function renderFiles() {
@@ -115,7 +159,7 @@
   }
 
   function collectProfile() {
-    const profile = { ...savedProfile, schemaVersion: 1, profileId, files: storedFiles };
+    const profile = { ...savedProfile, schemaVersion: 1, profileId, avatar: storedAvatar, files: storedFiles };
     document.querySelectorAll('[data-field]').forEach(element => {
       const field = element.dataset.field;
       profile[field] = field.endsWith('Html') ? element.innerHTML.trim() : element.textContent.trim();
@@ -123,6 +167,29 @@
     profile.displayName = document.querySelector('[data-field="displayName"]').textContent.trim();
     profile.initials = savedProfile?.initials || defaults[profileId].initials;
     return profile;
+  }
+
+  async function uploadPendingAvatar() {
+    if (!pendingAvatarFile) return;
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const object = {
+      key: `profiles/${profileId}/avatar/${timestamp}-${safeAvatarFileName(pendingAvatarFile)}`,
+      size: pendingAvatarFile.size,
+      contentType: pendingAvatarFile.type
+    };
+    const { item } = await gateway('get-profile-avatar-upload-url', { profileId, object });
+    if (!item?.url) throw new Error('无法取得头像上传地址。');
+    setStatus(`正在上传头像：${pendingAvatarFile.name}`, false);
+    const response = await fetch(item.url, { method: 'PUT', headers: { 'Content-Type': item.contentType }, body: pendingAvatarFile });
+    if (!response.ok) throw new Error(`头像上传失败：${response.status}`);
+    storedAvatar = {
+      name: pendingAvatarFile.name,
+      key: object.key,
+      size: pendingAvatarFile.size,
+      contentType: object.contentType,
+      addedAt: new Date().toISOString()
+    };
+    pendingAvatarFile = null;
   }
 
   async function uploadPendingFiles() {
@@ -161,6 +228,34 @@
     if (!/^(https?:\/\/|mailto:)/i.test(url.trim())) return alert('链接必须以 https://、http:// 或 mailto: 开头。');
     document.execCommand('createLink', false, url.trim());
   });
+  document.getElementById('avatar-picker-button').addEventListener('click', () => {
+    document.getElementById('profile-avatar-input').click();
+  });
+  document.getElementById('profile-avatar-input').addEventListener('change', event => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      alert('头像只支持 JPG、PNG 或 WebP。');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      alert('头像文件不能超过 10 MB。');
+      return;
+    }
+    releaseAvatarPreview();
+    pendingAvatarFile = file;
+    avatarPreviewUrl = URL.createObjectURL(file);
+    renderAvatar();
+    setStatus('头像已选择，点击“保存修改”后上传', false);
+  });
+  document.getElementById('remove-avatar-button').addEventListener('click', () => {
+    releaseAvatarPreview();
+    pendingAvatarFile = null;
+    storedAvatar = null;
+    renderAvatar();
+    setStatus('头像将被移除，点击“保存修改”确认', false);
+  });
   document.getElementById('profile-files-input').addEventListener('change', event => {
     const files = Array.from(event.target.files || []);
     if (files.some(file => file.size > 25 * 1024 * 1024)) {
@@ -184,6 +279,7 @@
     saveButton.disabled = true;
     restoreButton.disabled = true;
     try {
+      await uploadPendingAvatar();
       await uploadPendingFiles();
       const profile = collectProfile();
       const { profile: saved } = await gateway('put-profile', { profileId, profile });

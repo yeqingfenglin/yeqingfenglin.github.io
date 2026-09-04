@@ -20,7 +20,7 @@
   </header>
 
   <div class="editor-notice">
-    <strong>编辑提示：</strong>点击主页中的文字即可修改。选中个别文字后可用工具栏增加超链接。保存时，文字和文件索引会写入腾讯云 COS；单个文件上限 25 MB。
+    <strong>编辑提示：</strong>点击头像可选择照片，点击主页中的文字即可修改。选中个别文字后可用工具栏增加超链接。保存时，头像、文字和文件索引会写入腾讯云 COS；头像上限 10 MB，普通文件上限 25 MB。
   </div>
 
   <div class="format-toolbar" role="toolbar" aria-label="文字格式工具">
@@ -33,7 +33,18 @@
 
   <main id="editor-main" class="profile-page" hidden>
     <aside class="academic-sidebar" aria-label="个人资料编辑">
-      <div class="portrait-placeholder" aria-label="头像位置">—</div>
+      <div class="portrait-editor">
+        <button id="avatar-picker-button" type="button" class="portrait-placeholder portrait-picker" aria-label="选择头像照片">
+          <span id="avatar-initials">—</span>
+          <img id="avatar-preview" src="" alt="" hidden>
+          <span id="avatar-picker-label" class="portrait-edit-label">选择照片</span>
+        </button>
+        <input id="profile-avatar-input" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp">
+        <div class="avatar-actions">
+          <button id="remove-avatar-button" type="button" hidden>移除照片</button>
+        </div>
+        <p class="avatar-hint">点击头像上传 JPG、PNG 或 WebP，最大 10 MB。照片会自动居中裁切显示。</p>
+      </div>
       <h2 class="sidebar-name editable-text" data-field="displayName" contenteditable="true" spellcheck="true"></h2>
       <p class="sidebar-role editable-text" data-field="title" contenteditable="true" spellcheck="true"></p>
       <ul class="sidebar-links editor-sidebar-list">

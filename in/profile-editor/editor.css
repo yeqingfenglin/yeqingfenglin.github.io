@@ -11,6 +11,17 @@ body { padding-bottom: 96px; }
 .editor-sidebar-list li { min-height: 1.4rem; }
 .editor-state { width: min(calc(100% - 2rem), 1080px); margin: 3rem auto; padding: 1rem; color: #0b2545; text-align: center; }
 .editor-state.error { border: 1px solid #b91c1c; background: #fff1f2; color: #8a1010; }
+.portrait-editor { width: 190px; }
+.portrait-picker { position: relative; padding: 0; overflow: hidden; border: 1px solid #0b2545; font-family: inherit; cursor: pointer; }
+.portrait-picker:focus-visible { outline: 3px solid rgba(11,37,69,.32); outline-offset: 3px; }
+.portrait-picker img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; }
+.portrait-picker img[hidden] { display: none; }
+.portrait-edit-label { position: absolute; right: 0; bottom: 0; left: 0; padding: .4rem .3rem; background: rgba(11,37,69,.88); color: #fff; font-size: .78rem; font-weight: 700; line-height: 1.2; opacity: 0; transition: opacity .18s ease; }
+.portrait-picker:hover .portrait-edit-label, .portrait-picker:focus-visible .portrait-edit-label { opacity: 1; }
+#profile-avatar-input { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.avatar-actions { margin-top: .55rem; }
+.avatar-actions button { padding: 0; border: 0; background: transparent; color: #8a1010; font: inherit; font-size: .84rem; text-decoration: underline; cursor: pointer; }
+.avatar-hint { margin: .35rem 0 0; color: #0b2545; font-size: .78rem; line-height: 1.45; }
 .file-hint { margin: 0 0 1rem; color: #0b2545; }
 #profile-files-input { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 .file-picker { display: inline-block; padding: .55rem .9rem; border: 1px solid #0b2545; color: #0b2545; cursor: pointer; }
@@ -25,4 +36,6 @@ body { padding-bottom: 96px; }
 .restore-button { background: #fff; color: #0b2545; }
 .save-button { background: #0b2545; color: #fff; }
 .save-bar button:disabled { opacity: .55; cursor: wait; }
+@media (max-width: 820px) { .portrait-editor { width: 160px; } }
+@media (hover: none) { .portrait-edit-label { opacity: 1; } }
 @media (max-width: 500px) { .format-toolbar { top: 111px; } .save-bar { left: .75rem; right: .75rem; } .save-bar span { width: 100%; } }

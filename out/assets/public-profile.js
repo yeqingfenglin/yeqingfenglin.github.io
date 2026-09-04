@@ -11,6 +11,11 @@
     return /^(https?:\/\/|mailto:)/i.test(url) ? url : '';
   }
 
+  function safeImageUrl(value) {
+    const url = String(value || '').trim();
+    return /^https:\/\//i.test(url) ? url : '';
+  }
+
   function sanitizeHtml(html) {
     const template = document.createElement('template');
     template.innerHTML = String(html || '');
@@ -58,7 +63,28 @@
       if (profile.displayName) element.textContent = profile.displayName;
     });
     const portrait = document.querySelector('.portrait-placeholder');
-    if (portrait && profile.initials) portrait.textContent = profile.initials;
+    if (portrait) {
+      const initials = profile.initials || String(profile.displayName || '').split(/\s+/).map(part => part[0] || '').join('').slice(0, 2).toUpperCase();
+      const avatarUrl = safeImageUrl(profile.avatar?.url);
+      portrait.innerHTML = '';
+      portrait.setAttribute('aria-label', avatarUrl ? `Portrait of ${profile.displayName || 'profile owner'}` : `${profile.displayName || 'Profile owner'} initials`);
+      const fallback = document.createElement('span');
+      fallback.textContent = initials;
+      portrait.appendChild(fallback);
+      if (avatarUrl) {
+        fallback.hidden = true;
+        const image = document.createElement('img');
+        image.src = avatarUrl;
+        image.alt = `Portrait of ${profile.displayName || 'profile owner'}`;
+        image.decoding = 'async';
+        image.addEventListener('error', () => {
+          image.remove();
+          fallback.hidden = false;
+          portrait.setAttribute('aria-label', `${profile.displayName || 'Profile owner'} initials`);
+        }, { once: true });
+        portrait.appendChild(image);
+      }
+    }
     setText('profile-title', profile.title);
     setText('profile-about-heading', profile.aboutHeading);
     setText('profile-research-heading', profile.researchHeading);

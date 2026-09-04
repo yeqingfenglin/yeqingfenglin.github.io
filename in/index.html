@@ -896,13 +896,29 @@
                     publicProfileCount = publicProfiles.length;
                     for (const publicProfile of publicProfiles) {
                         const profileId = publicProfile.profileId || 'unknown';
+                        const avatar = publicProfile.avatar && typeof publicProfile.avatar === 'object' ? publicProfile.avatar : null;
                         const files = Array.isArray(publicProfile.files) ? publicProfile.files : [];
+                        const cleanAvatar = avatar ? (({ url, expiresAt, ...item }) => item)(avatar) : null;
                         const cleanProfile = {
                             ...publicProfile,
+                            avatar: cleanAvatar,
                             files: files.map(({ url, expiresAt, ...file }) => file)
                         };
                         zip.file(`public-profiles/${profileId}/profile.json`, `${JSON.stringify(cleanProfile, null, 2)}\n`);
-                        publicFilesExpected += files.length;
+                        publicFilesExpected += files.length + (avatar ? 1 : 0);
+                        if (avatar) {
+                            button.textContent = `备份外版头像 ${publicFilesIncluded + 1}/${publicFilesExpected}`;
+                            try {
+                                if (!avatar.url) throw new Error('缺少下载链接');
+                                const response = await fetch(avatar.url);
+                                if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+                                const safeName = String(avatar.name || 'profile-photo').replace(/[\\/:*?"<>|]/g, '-');
+                                zip.file(`public-profiles/${profileId}/avatar/${safeName}`, await response.blob(), { compression: 'STORE' });
+                                publicFilesIncluded += 1;
+                            } catch (error) {
+                                backupErrors.push(`public-profiles/${profileId}/avatar/${avatar.name || avatar.key}: ${error.message}`);
+                            }
+                        }
                         for (let index = 0; index < files.length; index += 1) {
                             const file = files[index];
                             button.textContent = `备份外版文件 ${publicFilesIncluded + 1}/${publicFilesExpected}`;
