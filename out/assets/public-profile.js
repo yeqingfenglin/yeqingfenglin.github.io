@@ -4,7 +4,7 @@
   const profileId = document.body.dataset.profileId;
   const config = window.SITE_SUPABASE_CONFIG || {};
   const contentConfig = window.SITE_CONTENT_CONFIG || { gatewayFunction: 'cos-content' };
-  const allowedTags = new Set(['P', 'BR', 'STRONG', 'B', 'EM', 'I', 'A', 'UL', 'OL', 'LI', 'H3', 'SPAN', 'DIV']);
+  const allowedTags = new Set(['P', 'BR', 'STRONG', 'B', 'EM', 'I', 'A', 'UL', 'OL', 'LI', 'H3', 'SPAN', 'DIV', 'FONT']);
 
   function safeUrl(value) {
     const url = String(value || '').trim();
@@ -14,6 +14,24 @@
   function safeImageUrl(value) {
     const url = String(value || '').trim();
     return /^https:\/\//i.test(url) ? url : '';
+  }
+
+  function safeCssColor(value) {
+    const color = String(value || '').trim();
+    return /^(#[0-9a-f]{3,8}|rgba?\([\d\s.,%]+\))$/i.test(color) ? color : '';
+  }
+
+  function safeInlineStyle(value) {
+    const source = document.createElement('span');
+    source.style.cssText = String(value || '');
+    const declarations = [];
+    const color = safeCssColor(source.style.color);
+    const backgroundColor = safeCssColor(source.style.backgroundColor);
+    const fontSize = String(source.style.fontSize || '').trim();
+    if (color) declarations.push(`color: ${color}`);
+    if (backgroundColor) declarations.push(`background-color: ${backgroundColor}`);
+    if (/^(xx-small|x-small|small|medium|large|x-large|xx-large|[1-7](?:\.\d+)?(?:px|rem|em|%))$/i.test(fontSize)) declarations.push(`font-size: ${fontSize}`);
+    return declarations.join('; ');
   }
 
   function sanitizeHtml(html) {
@@ -28,9 +46,19 @@
           }
           const originalHref = child.tagName === 'A' ? child.getAttribute('href') : '';
           const originalClass = child.getAttribute('class') || '';
+          const originalStyle = child.getAttribute('style') || '';
+          const originalColor = child.tagName === 'FONT' ? child.getAttribute('color') : '';
+          const originalSize = child.tagName === 'FONT' ? child.getAttribute('size') : '';
           for (const attribute of Array.from(child.attributes)) child.removeAttribute(attribute.name);
           if (child.tagName === 'LI' && originalClass.split(/\s+/).includes('academic-item')) child.className = 'academic-item';
           if (child.tagName === 'SPAN' && originalClass.split(/\s+/).includes('academic-year')) child.className = 'academic-year';
+          const safeStyle = safeInlineStyle(originalStyle);
+          if (safeStyle) child.setAttribute('style', safeStyle);
+          if (child.tagName === 'FONT') {
+            const color = safeCssColor(originalColor);
+            if (color) child.setAttribute('color', color);
+            if (/^[1-7]$/.test(String(originalSize || ''))) child.setAttribute('size', originalSize);
+          }
           if (child.tagName === 'A') {
             const href = safeUrl(originalHref);
             if (href) {

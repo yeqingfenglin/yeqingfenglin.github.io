@@ -878,6 +878,7 @@
                         '/out/wangboning/index.html',
                         '/out/tool/index.html',
                         '/out/assets/out.css',
+                        '/out/assets/theme.js',
                         '/out/assets/public-profile.js'
                     ];
                     for (let index = 0; index < publicStaticPaths.length; index += 1) {
@@ -948,7 +949,7 @@
                     publicProfiles: publicProfileCount,
                     publicFilesExpected,
                     publicFilesIncluded,
-                    publicStaticFilesExpected: scope === 'all' ? 6 : 0,
+                    publicStaticFilesExpected: scope === 'all' ? 7 : 0,
                     publicStaticFilesIncluded,
                     note: '不含密码或腾讯云密钥；Supabase Auth 密码由 Supabase 托管，不能从浏览器导出。'
                 };

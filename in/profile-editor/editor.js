@@ -16,6 +16,7 @@
   let avatarPreviewUrl = '';
   let storedFiles = [];
   let pendingFiles = [];
+  let savedFormatRange = null;
 
   function normalizeUsername(value) { return String(value || '').normalize('NFKC').trim().toLowerCase(); }
   function escapeHtml(value) { return String(value || '').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[character])); }
@@ -31,7 +32,36 @@
   function setStatus(message, isError) {
     const target = document.getElementById('save-status');
     target.textContent = message;
-    target.style.color = isError ? '#8a1010' : '#0b2545';
+    target.style.color = isError ? 'var(--danger)' : 'var(--accent)';
+  }
+
+  function rememberFormatSelection() {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount !== 1 || selection.isCollapsed) return;
+    const range = selection.getRangeAt(0);
+    const node = range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
+      ? range.commonAncestorContainer
+      : range.commonAncestorContainer.parentElement;
+    if (node?.closest?.('.editable-text, .editable-rich')) savedFormatRange = range.cloneRange();
+  }
+
+  function restoreFormatSelection() {
+    if (!savedFormatRange) {
+      alert('请先选中需要修改格式的文字。');
+      return false;
+    }
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(savedFormatRange);
+    return true;
+  }
+
+  function applyFormat(command, value) {
+    if (!restoreFormatSelection()) return false;
+    document.execCommand(command, false, value);
+    rememberFormatSelection();
+    setStatus('有尚未保存的文字格式修改', false);
+    return true;
   }
 
   async function gateway(action, payload) {
@@ -215,18 +245,34 @@
     pendingFiles = [];
   }
 
+  document.addEventListener('selectionchange', rememberFormatSelection);
   document.querySelectorAll('[data-command]').forEach(button => button.addEventListener('mousedown', event => {
     event.preventDefault();
-    document.execCommand(button.dataset.command, false);
+    applyFormat(button.dataset.command, null);
   }));
+  document.getElementById('font-size-select').addEventListener('pointerdown', rememberFormatSelection);
+  document.getElementById('font-size-select').addEventListener('change', event => {
+    if (event.target.value) applyFormat('fontSize', event.target.value);
+    event.target.value = '';
+  });
+  document.getElementById('text-color-input').addEventListener('pointerdown', rememberFormatSelection);
+  document.getElementById('text-color-input').addEventListener('change', event => applyFormat('foreColor', event.target.value));
+  document.getElementById('background-color-input').addEventListener('pointerdown', rememberFormatSelection);
+  document.getElementById('background-color-input').addEventListener('change', event => {
+    const command = document.queryCommandSupported?.('hiliteColor') ? 'hiliteColor' : 'backColor';
+    applyFormat(command, event.target.value);
+  });
   document.getElementById('add-link-button').addEventListener('mousedown', event => {
     event.preventDefault();
+    if (!restoreFormatSelection()) return;
     const selection = window.getSelection();
     if (!selection || selection.isCollapsed) return alert('请先选中需要添加链接的文字。');
     const url = prompt('请输入完整网址（以 https:// 开头）或邮箱链接（mailto:）：');
     if (!url) return;
     if (!/^(https?:\/\/|mailto:)/i.test(url.trim())) return alert('链接必须以 https://、http:// 或 mailto: 开头。');
     document.execCommand('createLink', false, url.trim());
+    rememberFormatSelection();
+    setStatus('有尚未保存的链接修改', false);
   });
   document.getElementById('avatar-picker-button').addEventListener('click', () => {
     document.getElementById('profile-avatar-input').click();

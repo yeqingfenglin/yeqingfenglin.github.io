@@ -7,14 +7,18 @@
   <title>修改个人主页</title>
   <link rel="stylesheet" href="/out/assets/out.css">
   <link rel="stylesheet" href="/in/profile-editor/editor.css">
+  <script src="/out/assets/theme.js"></script>
 </head>
 <body>
   <header class="site-header">
     <nav class="nav-wrap" aria-label="编辑器导航">
       <strong id="editor-brand" class="brand">修改个人主页</strong>
-      <div class="nav-links">
-        <a href="/in/">返回内版</a>
-        <a id="preview-link" href="/out/" target="_blank" rel="noopener noreferrer">打开公开主页</a>
+      <div class="nav-actions">
+        <div class="nav-links">
+          <a href="/in/">返回内版</a>
+          <a id="preview-link" href="/out/" target="_blank" rel="noopener noreferrer">打开公开主页</a>
+        </div>
+        <label class="theme-control"><span>主题</span><select data-theme-select aria-label="颜色主题"><option value="system">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option></select></label>
       </div>
     </nav>
   </header>
@@ -26,9 +30,13 @@
   <div class="format-toolbar" role="toolbar" aria-label="文字格式工具">
     <button type="button" data-command="bold"><strong>B</strong> 粗体</button>
     <button type="button" data-command="italic"><em>I</em> 斜体</button>
+    <label class="format-control">字号<select id="font-size-select" aria-label="修改所选文字字号"><option value="">选择</option><option value="2">小</option><option value="3">标准</option><option value="4">大</option><option value="5">特大</option><option value="6">标题</option></select></label>
+    <label class="format-control color-control">文字颜色<input id="text-color-input" type="color" value="#000000" aria-label="修改所选文字颜色"></label>
+    <label class="format-control color-control">文字背景<input id="background-color-input" type="color" value="#fff2a8" aria-label="修改所选文字背景颜色"></label>
     <button type="button" id="add-link-button">增加超链接</button>
     <button type="button" data-command="unlink">取消超链接</button>
-    <span>先选中文字，再点击链接按钮；链接只作用于选中的文字。</span>
+    <button type="button" data-command="removeFormat">清除格式</button>
+    <span>先选中文字，再设置字号、颜色、文字背景或链接；格式只作用于选中的文字。</span>
   </div>
 
   <main id="editor-main" class="profile-page" hidden>
