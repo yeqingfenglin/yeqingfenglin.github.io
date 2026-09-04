@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="登录后访问邓杰与王泊宁的内版主页。">
+  <title>登录 | 内版主页</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 1.25rem; background: linear-gradient(135deg, #fef9f0 0%, #eef2ff 100%); color: #1e2a3e; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft YaHei", sans-serif; }
+    button, input { font: inherit; }
+    .auth-shell { width: min(100%, 430px); }
+    .back-link { display: inline-block; margin-bottom: 1rem; color: #52647c; font-size: .88rem; text-decoration: none; }
+    .back-link:hover { color: #1e4a76; }
+    .auth-card { padding: 2rem; border: 1px solid rgba(210,225,245,.8); border-radius: 1.6rem; background: white; box-shadow: 0 25px 60px rgba(15,23,42,.14); }
+    h1 { margin: 0 0 .35rem; color: #1e3c4c; text-align: center; font-size: 1.7rem; }
+    .subtitle { margin: 0 0 1.4rem; color: #64748b; text-align: center; font-size: .86rem; }
+    .form-group { margin-bottom: 1.1rem; }
+    label { display: block; margin-bottom: .45rem; font-weight: 650; }
+    input { width: 100%; padding: .8rem; border: 1px solid #dbe3ed; border-radius: .8rem; color: #1e2a3e; background: white; }
+    input:focus { outline: 3px solid rgba(44,110,158,.16); border-color: #2c6e9e; }
+    .primary, .secondary { width: 100%; padding: .9rem 1rem; border: 0; border-radius: .8rem; cursor: pointer; font-weight: 700; }
+    .primary { background: #2c6e9e; color: white; }
+    .primary:hover { background: #1e5279; }
+    .primary:disabled { opacity: .6; cursor: wait; }
+    .secondary { margin-top: .7rem; background: #eef2f7; color: #52647c; }
+    .request-link { display: block; margin: 1rem 0 0 auto; padding: 0; border: 0; background: transparent; color: #2c6e9e; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+    .status { display: none; margin-top: .8rem; padding: .75rem .85rem; border-left: 4px solid #2c6e9e; border-radius: .6rem; background: #e9f5ec; color: #285b37; font-size: .84rem; line-height: 1.6; }
+    .status.error { border-left-color: #dc2626; background: #fee2e2; color: #991b1b; }
+    .request-panel { display: none; }
+    .request-panel.active { display: block; }
+    .login-panel.hidden { display: none; }
+    @media (max-width: 480px) { .auth-card { padding: 1.4rem; border-radius: 1.25rem; } }
+  </style>
+</head>
+<body>
+  <main class="auth-shell">
+    <a class="back-link" href="/out/">← 返回外版主页</a>
+    <section class="auth-card" aria-live="polite">
+      <div id="login-panel" class="login-panel">
+        <h1>欢迎来访</h1>
+        <p class="subtitle">登录后才能进入内版主页</p>
+        <form id="login-form">
+          <div class="form-group"><label for="login-username">用户名</label><input id="login-username" type="text" autocomplete="username" placeholder="填写已通过审核的用户名" required></div>
+          <div class="form-group"><label for="login-password">密码</label><input id="login-password" type="password" autocomplete="current-password" placeholder="填写密码" required></div>
+          <button id="login-button" class="primary" type="submit">登录</button>
+          <div id="login-status" class="status" role="status"></div>
+        </form>
+        <button class="request-link" type="button" id="open-request">申请访问</button>
+      </div>
+
+      <div id="request-panel" class="request-panel">
+        <h1>申请访问</h1>
+        <p class="subtitle">提交后需等待管理员审核</p>
+        <form id="request-form">
+          <div class="form-group"><label for="request-username">用户名</label><input id="request-username" type="text" autocomplete="username" placeholder="设置用于登录的用户名" required></div>
+          <div class="form-group"><label for="request-relationship">关系（请填写个人姓名）</label><input id="request-relationship" type="text" placeholder="填写个人姓名及与管理员的关系" required></div>
+          <div class="form-group"><label for="request-password">密码</label><input id="request-password" type="password" autocomplete="new-password" minlength="8" placeholder="至少 8 位；审核通过后用于登录" required></div>
+          <button id="request-button" class="primary" type="submit">注册</button>
+          <div id="request-status" class="status" role="status"></div>
+        </form>
+        <button class="secondary" type="button" id="close-request">返回登录</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="/supabase-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    'use strict';
+
+    const config = window.SITE_SUPABASE_CONFIG || {};
+    let client = null;
+
+    function safeReturnTo() {
+      const requested = new URLSearchParams(window.location.search).get('returnTo');
+      return requested && requested.startsWith('/in') ? requested : '/in/';
+    }
+
+    function normalizeUsername(value) {
+      return String(value || '').normalize('NFKC').trim().toLowerCase();
+    }
+
+    async function usernameToInternalEmail(username) {
+      const bytes = new TextEncoder().encode(normalizeUsername(username));
+      const digest = await window.crypto.subtle.digest('SHA-256', bytes);
+      const hash = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+      return `${hash}@users.example`;
+    }
+
+    function showStatus(id, message, isError) {
+      const target = document.getElementById(id);
+      target.textContent = message;
+      target.classList.toggle('error', Boolean(isError));
+      target.style.display = 'block';
+    }
+
+    async function readProfile(userId) {
+      const { data, error } = await client.from('profiles').select('id, username, status').eq('id', userId).single();
+      if (error) throw new Error(error.message);
+      return data;
+    }
+
+    async function continueWithSession(session) {
+      if (!session?.user) return false;
+      const profile = await readProfile(session.user.id);
+      if (profile.status !== 'approved') {
+        await client.auth.signOut();
+        const pending = profile.status === 'pending';
+        showStatus('login-status', pending ? '您的访问申请仍在等待管理员审核。' : '您的访问申请未通过，请联系管理员。', !pending);
+        return false;
+      }
+      window.location.replace(safeReturnTo());
+      return true;
+    }
+
+    document.getElementById('open-request').addEventListener('click', function () {
+      document.getElementById('login-panel').classList.add('hidden');
+      document.getElementById('request-panel').classList.add('active');
+      document.getElementById('request-username').focus();
+    });
+
+    document.getElementById('close-request').addEventListener('click', function () {
+      document.getElementById('request-panel').classList.remove('active');
+      document.getElementById('login-panel').classList.remove('hidden');
+      document.getElementById('login-username').focus();
+    });
+
+    document.getElementById('login-form').addEventListener('submit', async function (event) {
+      event.preventDefault();
+      const button = document.getElementById('login-button');
+      const username = document.getElementById('login-username').value.trim();
+      const password = document.getElementById('login-password').value;
+      if (!client) return showStatus('login-status', '网站认证尚未配置完成。', true);
+      button.disabled = true;
+      button.textContent = '正在登录…';
+      try {
+        const email = await usernameToInternalEmail(username);
+        const { data, error } = await client.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        await continueWithSession(data.session);
+      } catch (error) {
+        const message = error.message === 'Invalid login credentials' ? '用户名或密码错误。' : error.message;
+        showStatus('login-status', `登录失败：${message}`, true);
+      } finally {
+        button.disabled = false;
+        button.textContent = '登录';
+      }
+    });
+
+    document.getElementById('request-form').addEventListener('submit', async function (event) {
+      event.preventDefault();
+      const button = document.getElementById('request-button');
+      const username = document.getElementById('request-username').value.trim();
+      const relationship = document.getElementById('request-relationship').value.trim();
+      const password = document.getElementById('request-password').value;
+      if (!client) return showStatus('request-status', '网站认证尚未配置完成。', true);
+      if (username.length > 50 || relationship.length > 150) return showStatus('request-status', '用户名或关系内容过长。', true);
+      if (password.length < 8) return showStatus('request-status', '密码至少需要 8 位。', true);
+      button.disabled = true;
+      button.textContent = '正在注册…';
+      try {
+        const email = await usernameToInternalEmail(username);
+        const { error } = await client.auth.signUp({ email, password, options: { data: { username, relationship } } });
+        if (error) throw error;
+        await client.auth.signOut();
+        showStatus('request-status', '已经将您的申请交给管理员，请在管理员审核成功后再次登录尝试。', false);
+        button.style.display = 'none';
+      } catch (error) {
+        showStatus('request-status', `申请提交失败：${error.message}`, true);
+      } finally {
+        button.disabled = false;
+        button.textContent = '注册';
+      }
+    });
+
+    (async function init() {
+      const queryMessage = new URLSearchParams(window.location.search).get('message');
+      if (queryMessage) showStatus('login-status', queryMessage, true);
+      if (!/^https:\/\/.+\.supabase\.co$/i.test(String(config.url || '').replace(/\/$/, '')) || !config.publishableKey || !window.supabase?.createClient) {
+        showStatus('login-status', '网站认证组件尚未正确配置，请稍后再试。', true);
+        return;
+      }
+      client = window.supabase.createClient(String(config.url).replace(/\/$/, ''), config.publishableKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false } });
+      const { data, error } = await client.auth.getSession();
+      if (error) return showStatus('login-status', `读取登录状态失败：${error.message}`, true);
+      if (data.session) {
+        try { await continueWithSession(data.session); }
+        catch (error) { await client.auth.signOut(); showStatus('login-status', `无法读取访问权限：${error.message}`, true); }
+      }
+    })();
+  </script>
+</body>
+</html>

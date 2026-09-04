@@ -1,0 +1,1901 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <base href="/">
+    <title>内版 · 日常集 | 邓杰 & 王泊宁</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.5; color: #1e2a3e; background: #f1f5f9; min-height: 100vh; }
+        button, input, select, textarea { font: inherit; }
+        .app-container { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+        .create-post-btn { display: none; position: fixed; top: 20px; right: 20px; z-index: 1000; background: #1e3c4c; color: white; padding: 10px 20px; border-radius: 50px; font-size: 0.9rem; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: 0.3s; font-weight: 600; cursor: pointer; border: none; }
+        .create-post-btn:hover { background: #e6a157; transform: translateY(-2px); }
+        .section-link { position: absolute; top: 12px; right: 16px; text-decoration: none; font-size: 1.2rem; color: #cbd5e1; transition: 0.3s; font-weight: bold; background: rgba(255,255,240,0.6); border-radius: 30px; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+        .section-link:hover { color: #e6a157; transform: scale(1.2); background: white; }
+        .hero-index { min-height: 85vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: linear-gradient(135deg, #fef9f0 0%, #eef2ff 100%); border-radius: 2.5rem; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1); padding: 2.5rem 1.8rem; }
+        .greeting-tag { font-size: 1rem; letter-spacing: 3px; color: #4b6589; background: rgba(255,255,240,0.7); backdrop-filter: blur(2px); padding: 0.2rem 1rem; border-radius: 40px; display: inline-block; margin-bottom: 1rem; }
+        .main-headline { font-size: 3rem; font-weight: 800; background: linear-gradient(125deg, #1e3c4c, #2c6e9e, #e6a157); background-clip: text; -webkit-background-clip: text; color: transparent; margin-bottom: 0.5rem; }
+        .subhead { color: #5d6f8f; margin-bottom: 3rem; border-bottom: 1px solid #cddfe7; padding-bottom: 0.5rem; display: inline-block; font-weight: 500; }
+        .triple-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem; margin: 2rem 0 1.5rem; }
+        .daily-card { background: white; width: 250px; padding: 1.8rem 1.2rem; border-radius: 2rem; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 0.8rem; box-shadow: 0 10px 20px rgba(0,0,0,0.05); border: 1px solid rgba(210,225,245,0.6); cursor: pointer; }
+        .daily-card:hover { transform: translateY(-8px); box-shadow: 0 25px 35px -12px rgba(0,0,0,0.2); }
+        .card-icon { font-size: 3.6rem; background: #f0f4fe; width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+        .card-name { font-size: 1.8rem; font-weight: 700; color: #1f3b4c; }
+        .card-desc { font-size: 0.8rem; color: #5f7f9e; background: #f5f9ff; padding: 0.2rem 0.8rem; border-radius: 30px; }
+        .detail-page { max-width: 1100px; margin: 0 auto; }
+        .back-home-bar { margin-bottom: 2rem; }
+        .back-home-btn { display: inline-flex; align-items: center; gap: 8px; background: #eef2ff; padding: 0.5rem 1.5rem; border-radius: 40px; font-size: 0.9rem; font-weight: 500; color: #1e4a76; cursor: pointer; border: none; }
+        .irregular-stack { display: flex; flex-direction: column; gap: 2rem; }
+        .block-split-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
+        .shape-card { background: white; padding: 1.8rem 1.2rem; box-shadow: 0 8px 18px rgba(0,0,0,0.06); display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; }
+        .shape-triangle-left { clip-path: polygon(0% 0%, 100% 0%, 85% 100%, 0% 100%); border-radius: 1.5rem 0 0 1.5rem; margin-right: -6px; z-index: 2; }
+        .shape-trapezoid-mid { clip-path: polygon(6% 0%, 94% 0%, 100% 100%, 0% 100%); margin: 0 -6px; z-index: 3; }
+        .shape-reverse-triangle { clip-path: polygon(15% 0%, 100% 0%, 100% 100%, 0% 100%); border-radius: 0 1.5rem 1.5rem 0; margin-left: -6px; }
+        .block-icon { font-size: 2.6rem; margin-bottom: 0.6rem; }
+        .block-single { background: linear-gradient(125deg, #fff8ef, #ffffff); padding: 2rem; clip-path: polygon(4% 0%, 96% 0%, 100% 15%, 100% 85%, 96% 100%, 4% 100%, 0% 85%, 0% 15%); border-radius: 2rem 1rem 2rem 1rem; position: relative; }
+        .single-content { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem; }
+        .single-stats { flex: 1; background: #f7efe3; padding: 1rem; border-radius: 1.5rem; text-align: center; }
+        .block-split-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .dual-left, .dual-right { background: white; padding: 1.8rem; position: relative; border-radius: 1rem; }
+        .hobby-list { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.8rem 0; }
+        .hobby-badge { background: #eef3fc; padding: 0.2rem 0.8rem; border-radius: 30px; font-size: 0.75rem; }
+
+        .column-container { max-width: 1100px; margin: 0 auto; }
+        .column-header { margin-bottom: 2rem; text-align: center; }
+        .posts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.8rem; margin-top: 1.5rem; }
+        .post-card { background: white; border-radius: 1.5rem; padding: 1.5rem 1.5rem 4.2rem; box-shadow: 0 6px 12px rgba(0,0,0,0.05); transition: 0.2s; border: 1px solid #eef2ff; display: flex; flex-direction: column; position: relative; min-height: 160px; }
+        .post-card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px rgba(0,0,0,0.1); }
+        .post-title { font-size: 1.3rem; font-weight: 700; color: #1e3c4c; margin-bottom: 0.3rem; }
+        .post-meta { font-size: 0.75rem; color: #8ba0bc; margin-bottom: 0.5rem; display: flex; gap: 1rem; flex-wrap: wrap; }
+        .post-type-badge { background: #eef2ff; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; color: #2c6e9e; }
+        .read-more-link { position: absolute; bottom: 1.2rem; right: 1.5rem; color: #e6a157; font-weight: 500; text-decoration: none; font-size: 0.85rem; cursor: pointer; background: white; padding: 4px 12px; border-radius: 20px; transition: 0.2s; display: inline-block; border: none; }
+        .read-more-link:hover { background: #e6a157; color: white; }
+        .delete-post-btn { position: absolute; bottom: 1.2rem; left: 1.5rem; color: #b91c1c; font-weight: 600; font-size: 0.82rem; cursor: pointer; background: #fff1f2; padding: 5px 12px; border-radius: 20px; border: 1px solid #fecdd3; transition: 0.2s; }
+        .delete-post-btn:hover { background: #dc2626; color: white; border-color: #dc2626; }
+        .detail-toolbar { margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+        .detail-delete-btn { background: #fff1f2; color: #b91c1c; border: 1px solid #fecdd3; padding: 0.5rem 1rem; border-radius: 40px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+        .detail-delete-btn:hover { background: #dc2626; color: white; border-color: #dc2626; }
+        .comment-create-btn { position: fixed; right: 20px; bottom: 20px; z-index: 1000; background: #2c6e9e; color: white; border: none; border-radius: 50px; padding: 11px 20px; font-size: .9rem; font-weight: 600; cursor: pointer; box-shadow: 0 5px 18px rgba(30,60,76,.28); transition: .2s; }
+        .comment-create-btn:hover { background: #e6a157; transform: translateY(-2px); }
+        .empty-posts { text-align: center; padding: 3rem; background: #faf9fe; border-radius: 2rem; color: #7c8ba0; }
+
+        .article-detail-page { max-width: 900px; margin: 0 auto; background: white; border-radius: 2rem; padding: 2.5rem; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1); }
+        .article-detail-header { text-align: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #eef2ff; }
+        .article-detail-title { font-size: 2.2rem; font-weight: 800; color: #1e3c4c; line-height: 1.3; margin-bottom: 0.8rem; }
+        .article-detail-meta { font-size: 0.85rem; color: #8ba0bc; display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; }
+        .article-detail-content { font-size: 1rem; line-height: 1.8; color: #334e68; margin-top: 1.5rem; }
+        .article-detail-content p { margin-bottom: 1rem; }
+        .article-detail-content img { max-width: 100%; border-radius: 1rem; margin: 1rem 0; cursor: zoom-in; }
+
+        .comments-section { margin-top: 2.5rem; padding-top: 1.8rem; border-top: 1px solid #e2e8f0; }
+        .comments-heading { color: #1e3c4c; font-size: 1.25rem; margin-bottom: 1rem; }
+        .comments-list { display: flex; flex-direction: column; gap: 1rem; }
+        .comment-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 1rem; padding: 1rem 1.1rem 3.2rem; position: relative; }
+        .comment-meta { color: #8ba0bc; font-size: .75rem; margin-bottom: .55rem; display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; }
+        .comment-content { color: #334e68; line-height: 1.75; white-space: pre-wrap; overflow-wrap: anywhere; }
+        .comment-images { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .75rem; margin-top: .9rem; }
+        .comment-images img { display: block; width: 100%; height: 160px; object-fit: cover; border-radius: .8rem; cursor: zoom-in; background: #e2e8f0; }
+        .comments-empty { color: #8ba0bc; text-align: center; background: #f8fafc; border-radius: 1rem; padding: 1.5rem; }
+        .delete-comment-btn { position: absolute; right: .9rem; bottom: .8rem; color: #b91c1c; background: #fff1f2; border: 1px solid #fecdd3; border-radius: 20px; padding: .35rem .8rem; font-size: .76rem; font-weight: 600; cursor: pointer; transition: .2s; }
+        .delete-comment-btn:hover { color: white; background: #dc2626; border-color: #dc2626; }
+
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+        .gallery-card { background: #f8fafc; border-radius: 1rem; overflow: hidden; border: 1px solid #eef2ff; min-height: 180px; }
+        .gallery-card img { display: block; width: 100%; height: 240px; object-fit: cover; cursor: zoom-in; transition: transform .25s ease; }
+        .gallery-card img:hover { transform: scale(1.025); }
+        .gallery-empty { text-align: center; padding: 2.5rem; color: #7c8ba0; background: #f8fafc; border-radius: 1rem; }
+
+        .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000; cursor: pointer; justify-content: center; align-items: center; }
+        .lightbox.active { display: flex; }
+        .lightbox img { max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 8px; }
+        .lightbox-close { position: absolute; top: 20px; right: 30px; color: white; font-size: 2rem; cursor: pointer; }
+
+        #editor-overlay, #delete-overlay, #comment-overlay, #comment-delete-overlay { display: none; position: fixed; inset: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; backdrop-filter: blur(5px); }
+        .editor-modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 90%; max-width: 640px; padding: 2rem; border-radius: 1.5rem; max-height: 90vh; overflow-y: auto; }
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.8rem; border: 1px solid #e2e8f0; border-radius: 0.8rem; background: white; }
+        .form-group textarea { height: 150px; resize: vertical; }
+        .submit-btn { background: #2c6e9e; color: white; border: none; padding: 1rem; width: 100%; border-radius: 0.8rem; cursor: pointer; font-weight: bold; margin-top: 0.5rem; }
+        .submit-btn:disabled { opacity: .6; cursor: wait; }
+        .submit-btn.cancel { background: #94a3b8; }
+        .loading { text-align: center; padding: 2rem; color: #6c8dae; }
+        .upload-guide { background: #e6f7e6; padding: 12px; margin-top: 12px; border-radius: 8px; font-size: 0.82rem; display: none; border-left: 4px solid #2c6e9e; line-height: 1.7; overflow-wrap: anywhere; }
+        .upload-guide.error { background: #fee2e2; border-left-color: #dc2626; color: #991b1b; }
+        .folder-hint { font-size: 0.72rem; color: #8ba0bc; margin-top: 5px; line-height: 1.6; }
+        .token-hint { background: #fff7ed; color: #9a3412; padding: .7rem .8rem; border-radius: .7rem; font-size: .75rem; margin-top: .5rem; }
+        .error-message { color: #dc2626; background: #fee2e2; padding: 12px; border-radius: 8px; margin: 10px 0; }
+        .selected-files { font-size: .75rem; color: #64748b; margin-top: .5rem; max-height: 95px; overflow-y: auto; }
+        .delete-warning { background: #fff7ed; color: #9a3412; padding: .9rem 1rem; border-radius: .8rem; line-height: 1.7; margin-bottom: 1.1rem; border-left: 4px solid #f97316; }
+        .delete-target { background: #f8fafc; border: 1px solid #e2e8f0; padding: .9rem 1rem; border-radius: .8rem; margin-bottom: 1.1rem; overflow-wrap: anywhere; }
+        .checkbox-row { display: flex; align-items: flex-start; gap: .65rem; padding: .75rem 0; color: #475569; font-size: .88rem; }
+        .checkbox-row input { width: auto; margin-top: .2rem; }
+        .submit-btn.danger { background: #dc2626; }
+        .comment-delete-warning { color: #dc2626; font-size: 1.45rem; font-weight: 800; line-height: 1.55; text-align: center; padding: 1rem; margin-bottom: 1.2rem; background: #fff1f2; border: 2px solid #fecaca; border-radius: 1rem; }
+        .dialog-actions { display: flex; gap: .8rem; margin-top: 1rem; }
+        .dialog-actions .submit-btn { flex: 1; width: auto; margin-top: 0; }
+
+        .session-banner { display: none; position: fixed; top: 18px; left: 20px; z-index: 1000; background: rgba(255,255,255,.94); border: 1px solid #dbeafe; border-radius: 1rem; padding: .65rem .85rem; box-shadow: 0 5px 18px rgba(30,60,76,.12); color: #1e3c4c; font-size: .84rem; line-height: 1.5; }
+        .session-actions { display: flex; align-items: center; gap: .45rem; margin-top: .45rem; }
+        .session-action-btn { border: none; border-radius: 20px; padding: .28rem .7rem; font-size: .72rem; cursor: pointer; color: #1e4a76; background: #eef2ff; }
+        .session-action-btn:hover { background: #dbeafe; }
+        .session-action-btn.logout { color: #64748b; background: #f1f5f9; }
+
+        #auth-overlay, #access-request-overlay, #user-manager-overlay, #review-user-overlay { display: none; position: fixed; inset: 0; width: 100%; height: 100%; background: rgba(15,23,42,.7); z-index: 4000; backdrop-filter: blur(7px); }
+        #auth-overlay { display: none; }
+        #access-request-overlay, #review-user-overlay { z-index: 4100; }
+        .auth-modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 430px; background: white; border-radius: 1.6rem; padding: 2rem; box-shadow: 0 25px 60px rgba(15,23,42,.3); }
+        .auth-title { color: #1e3c4c; text-align: center; font-size: 1.7rem; margin-bottom: .35rem; }
+        .auth-subtitle { color: #64748b; text-align: center; font-size: .82rem; margin-bottom: 1.4rem; }
+        .request-access-btn { display: block; margin: 1rem 0 0 auto; border: none; background: transparent; color: #2c6e9e; cursor: pointer; font-size: .82rem; text-decoration: underline; text-underline-offset: 3px; }
+        .request-access-btn:hover { color: #e6a157; }
+        .auth-setup-error { color: #b91c1c; background: #fff1f2; border: 1px solid #fecdd3; border-radius: .8rem; padding: .85rem; font-size: .8rem; line-height: 1.6; }
+        .current-commenter { background: #eef6ff; color: #1e4a76; border-radius: .8rem; padding: .7rem .8rem; margin-bottom: 1rem; font-size: .84rem; }
+
+        .user-manager-modal { max-width: 720px; }
+        .user-list { display: flex; flex-direction: column; gap: .7rem; max-height: 55vh; overflow-y: auto; margin: 1rem 0; }
+        .user-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: .9rem; padding: .75rem .9rem; }
+        .user-row.admin { background: #eef2ff; border-color: #a5b4fc; }
+        .user-row.pending { color: #a16207; background: #fefce8; border-color: #fde68a; cursor: pointer; }
+        .user-row.pending:hover { background: #fef9c3; }
+        .user-name { font-weight: 700; overflow-wrap: anywhere; }
+        .role-badge { display: inline-block; margin-left: .45rem; padding: .12rem .5rem; border-radius: 20px; font-size: .66rem; background: #c7d2fe; color: #3730a3; }
+        .remove-user-btn { border: 1px solid #fecdd3; background: #fff1f2; color: #b91c1c; border-radius: 20px; padding: .3rem .7rem; cursor: pointer; font-size: .72rem; flex: none; }
+        .remove-user-btn:hover { color: white; background: #dc2626; }
+        .protected-admin { color: #6366f1; font-size: .72rem; flex: none; }
+        .review-relationship { background: #f8fafc; border-radius: .9rem; padding: 1rem; margin: 1rem 0; color: #334155; line-height: 1.7; }
+
+        @media (max-width: 780px) {
+            .block-split-3 { grid-template-columns: 1fr; gap: 1rem; }
+            .shape-triangle-left, .shape-trapezoid-mid, .shape-reverse-triangle { clip-path: none; border-radius: 1.5rem; margin: 0; }
+            .block-split-2 { grid-template-columns: 1fr; }
+            .main-headline { font-size: 2.2rem; }
+            .article-detail-page { padding: 1.4rem; }
+            .gallery-grid { grid-template-columns: 1fr; }
+            .gallery-card img { height: auto; max-height: 70vh; object-fit: contain; }
+            .comment-create-btn { right: 14px; bottom: 14px; }
+            .comment-images { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .comment-images img { height: 130px; }
+            .session-banner { position: static; margin: 0 0 1rem; }
+            .create-post-btn { top: 14px; bottom: auto; right: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <button class="create-post-btn" onclick="openEditor()">✍️ 创作文章</button>
+    <div id="session-banner" class="session-banner">
+        <div id="session-greeting"></div>
+        <div class="session-actions">
+            <button id="export-backup-button" class="session-action-btn" onclick="exportCompleteBackup()" style="display:none;">导出完整备份</button>
+            <button id="manage-users-button" class="session-action-btn" onclick="openUserManager()" style="display:none;">管理用户</button>
+            <button class="session-action-btn logout" onclick="logoutCurrentUser()">退出登录</button>
+        </div>
+    </div>
+    <div id="app-root" class="app-container"><div class="loading">📡 正在加载...</div></div>
+
+    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+        <span class="lightbox-close">&times;</span>
+        <img id="lightbox-img" src="" alt="图片预览">
+    </div>
+
+    <div id="editor-overlay">
+        <div class="editor-modal">
+            <h2 style="margin-bottom:1.2rem;">📝 新建专栏</h2>
+
+            <div class="token-hint" style="margin-bottom:1rem;">内容将写入私有腾讯云 COS。上传权限由当前 Supabase 管理员会话校验，网页不会接触腾讯云永久密钥。</div>
+
+            <div class="form-group">
+                <label for="post-target">📌 归属板块</label>
+                <select id="post-target">
+                    <optgroup label="邓杰的日常 → posts/dengjie/">
+                        <option value="dengjie-b1-1" data-folder="dengjie">游戏世界</option>
+                        <option value="dengjie-b1-2" data-folder="dengjie">搞钱日记</option>
+                        <option value="dengjie-b1-3" data-folder="dengjie">补全计划</option>
+                        <option value="dengjie-b2-1" data-folder="dengjie">近期日常</option>
+                        <option value="dengjie-b3-L" data-folder="dengjie">农耕文明</option>
+                        <option value="dengjie-b3-R" data-folder="dengjie">双人联结</option>
+                    </optgroup>
+                    <optgroup label="王泊宁的日常 → posts/wangboning/">
+                        <option value="wang-b1-1" data-folder="wangboning">19-212饮品吧</option>
+                        <option value="wang-b1-2" data-folder="wangboning">体育生√</option>
+                        <option value="wang-b1-3" data-folder="wangboning">Andrea游记</option>
+                        <option value="wang-b2-1" data-folder="wangboning">Daily Life</option>
+                        <option value="wang-b3-L" data-folder="wangboning">Reading</option>
+                        <option value="wang-b3-R" data-folder="wangboning">日常共振</option>
+                    </optgroup>
+                    <optgroup label="两人的共同日常 → posts/together/">
+                        <option value="both-b1-1" data-folder="together">All about MATH</option>
+                        <option value="both-b1-2" data-folder="together">两人食记</option>
+                        <option value="both-b1-3" data-folder="together">娱乐时间</option>
+                        <option value="both-b2-1" data-folder="together">旅行日记</option>
+                        <option value="both-b3-L" data-folder="together">共同兴趣</option>
+                        <option value="both-b3-R" data-folder="together">未来计划</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="post-title">📖 标题</label>
+                <input type="text" id="post-title" placeholder="例如：布达佩斯之旅">
+            </div>
+
+            <div class="form-group">
+                <label for="post-author">✍️ 作者</label>
+                <input type="text" id="post-author" placeholder="邓杰 / 王泊宁">
+            </div>
+
+            <div class="form-group">
+                <label for="post-type">🎨 专栏类型</label>
+                <select id="post-type">
+                    <option value="article">📝 文章专栏</option>
+                    <option value="image-gallery">🖼️ 图片专栏</option>
+                </select>
+            </div>
+
+            <div id="article-fields">
+                <div class="form-group">
+                    <label for="post-content">📄 正文内容</label>
+                    <textarea id="post-content" placeholder="支持 HTML；图片可写为 &lt;img src='assets/images/xxx.jpg'&gt;"></textarea>
+                </div>
+            </div>
+
+            <div id="image-fields" style="display:none;">
+                <div class="form-group">
+                    <label for="image-folder-name">📁 图片文件夹名称</label>
+                    <input type="text" id="image-folder-name" placeholder="例如：budapest 或 paris-2026">
+                    <div class="folder-hint">图片会上传到 <code>assets/images/文件夹名称/</code>。</div>
+                </div>
+                <div class="form-group">
+                    <label for="image-files">🖼️ 选择图片</label>
+                    <input type="file" id="image-files" accept="image/*" multiple>
+                    <div id="selected-files" class="selected-files">尚未选择图片</div>
+                </div>
+            </div>
+
+            <button id="publish-button" class="submit-btn" onclick="publishToCOS()">⬆️ 上传并发布到 COS</button>
+            <div id="upload-guide" class="upload-guide"></div>
+            <button class="submit-btn cancel" onclick="closeEditor()">取消</button>
+        </div>
+    </div>
+
+    <div id="delete-overlay">
+        <div class="editor-modal" style="max-width:560px;">
+            <h2 style="margin-bottom:1.2rem;">🗑️ 删除专栏</h2>
+            <div class="delete-warning">
+                删除会修改私有 COS 内容。请先使用右上角“导出完整备份”；COS 开启版本控制后仍可在控制台恢复历史版本。
+            </div>
+            <div id="delete-target" class="delete-target"></div>
+
+            <label id="delete-images-row" class="checkbox-row" style="display:none;">
+                <input type="checkbox" id="delete-gallery-images">
+                <span>同时删除这个图片专栏引用的 COS 图片。未勾选时只删除专栏，图片仍保留在 <code>assets/images/</code>。</span>
+            </label>
+
+            <label class="checkbox-row">
+                <input type="checkbox" id="delete-confirm-checkbox">
+                <span>我确认要永久删除这个专栏。</span>
+            </label>
+
+            <button id="delete-confirm-button" class="submit-btn danger" onclick="deleteSelectedPost()">永久删除</button>
+            <div id="delete-status" class="upload-guide"></div>
+            <button class="submit-btn cancel" onclick="closeDeleteDialog()">取消</button>
+        </div>
+    </div>
+
+    <div id="comment-overlay">
+        <div class="editor-modal" style="max-width:600px;">
+            <h2 style="margin-bottom:.4rem;">💬 发表评论</h2>
+            <div id="comment-target" style="color:#64748b;font-size:.82rem;margin-bottom:1.2rem;"></div>
+            <div id="comment-current-user" class="current-commenter"></div>
+
+            <div class="form-group">
+                <label for="comment-content">💬 评论</label>
+                <textarea id="comment-content" placeholder="填写评论内容"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="comment-image-files">🖼️ 插入图片（可选）</label>
+                <input type="file" id="comment-image-files" accept="image/*" multiple>
+                <div id="comment-selected-files" class="selected-files">尚未选择图片</div>
+            </div>
+
+            <button id="comment-publish-button" class="submit-btn" onclick="publishComment()">发布评论</button>
+            <div id="comment-status" class="upload-guide"></div>
+            <button class="submit-btn cancel" onclick="closeCommentEditor()">取消</button>
+        </div>
+    </div>
+
+    <div id="comment-delete-overlay">
+        <div class="editor-modal" style="max-width:560px;">
+            <div class="comment-delete-warning">注意！是否确认删除此评论，删除后将无法恢复！请慎重！</div>
+            <div id="comment-delete-target" class="delete-target"></div>
+
+            <div id="comment-delete-status" class="upload-guide"></div>
+            <div class="dialog-actions">
+                <button id="comment-delete-confirm-button" class="submit-btn danger" onclick="deleteSelectedComment()">是</button>
+                <button id="comment-delete-cancel-button" class="submit-btn cancel" onclick="closeCommentDeleteDialog()">否</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="auth-overlay">
+        <div class="auth-modal">
+            <h1 class="auth-title">欢迎来访</h1>
+            <div class="auth-subtitle">登录后才能进入主页</div>
+
+            <div class="form-group">
+                <label for="login-username">用户名</label>
+                <input type="text" id="login-username" autocomplete="username" placeholder="填写已通过审核的用户名">
+            </div>
+            <div class="form-group">
+                <label for="login-password">密码</label>
+                <input type="password" id="login-password" autocomplete="current-password" placeholder="填写密码">
+            </div>
+
+            <button id="login-button" class="submit-btn" onclick="loginUser()">登录</button>
+            <div id="login-status" class="upload-guide"></div>
+            <button class="request-access-btn" onclick="openAccessRequest()">申请访问</button>
+        </div>
+    </div>
+
+    <div id="access-request-overlay">
+        <div class="auth-modal">
+            <h2 class="auth-title" style="font-size:1.45rem;">申请访问</h2>
+
+            <div class="form-group">
+                <label for="request-username">用户名</label>
+                <input type="text" id="request-username" autocomplete="username" placeholder="设置用于登录的用户名">
+            </div>
+            <div class="form-group">
+                <label for="request-relationship">关系（请填写个人姓名）</label>
+                <input type="text" id="request-relationship" placeholder="填写个人姓名及与管理员的关系">
+            </div>
+            <div class="form-group">
+                <label for="request-password">密码</label>
+                <input type="password" id="request-password" autocomplete="new-password" placeholder="至少 8 位；审核通过后用于登录">
+            </div>
+
+            <button id="request-register-button" class="submit-btn" onclick="registerAccessRequest()">注册</button>
+            <div id="request-status" class="upload-guide"></div>
+            <button class="submit-btn cancel" onclick="closeAccessRequest()">返回登录</button>
+        </div>
+    </div>
+
+    <div id="user-manager-overlay">
+        <div class="auth-modal user-manager-modal">
+            <h2 style="color:#1e3c4c;">管理用户</h2>
+            <div id="user-manager-status" class="upload-guide"></div>
+            <div id="user-list" class="user-list"><div class="loading">正在加载用户…</div></div>
+            <button class="submit-btn cancel" onclick="closeUserManager()">关闭</button>
+        </div>
+    </div>
+
+    <div id="review-user-overlay">
+        <div class="auth-modal">
+            <h2 style="color:#a16207;">审核访问申请</h2>
+            <div id="review-user-name" style="font-weight:800;font-size:1.15rem;margin-top:1rem;"></div>
+            <div id="review-user-relationship" class="review-relationship"></div>
+            <div id="review-user-status" class="upload-guide"></div>
+            <div class="dialog-actions">
+                <button id="approve-user-button" class="submit-btn" onclick="reviewPendingUser('approve')">同意</button>
+                <button id="reject-user-button" class="submit-btn danger" onclick="reviewPendingUser('reject')">不同意</button>
+            </div>
+            <button class="submit-btn cancel" onclick="closeReviewUser()">返回</button>
+        </div>
+    </div>
+
+    <script src="/supabase-config.js"></script>
+    <script src="/content-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script>
+        'use strict';
+
+        const pinyinMap = {
+            '网': 'wang', '球': 'qiu', '布': 'bu', '达': 'da', '佩': 'pei', '斯': 'si', '旅': 'lv', '游': 'you',
+            '东': 'dong', '京': 'jing', '巴': 'ba', '黎': 'li', '伦': 'lun', '敦': 'dun', '纽': 'niu', '约': 'yue',
+            '悉': 'xi', '尼': 'ni', '罗': 'luo', '马': 'ma', '咖': 'ka', '啡': 'fei', '胶': 'jiao', '片': 'pian',
+            '暗': 'an', '房': 'fang', '骑': 'qi', '行': 'xing', '漫': 'man', '手': 'shou', '冲': 'chong', '哲': 'zhe',
+            '学': 'xue', '数': 'shu', '字': 'zi', '画': 'hua', '播': 'bo', '客': 'ke', '雪': 'xue', '山': 'shan',
+            '灵': 'ling', '感': 'gan', '创': 'chuang', '意': 'yi', '工': 'gong', '具': 'ju', '双': 'shuang', '人': 'ren',
+            '联': 'lian', '结': 'jie', '开': 'kai', '源': 'yuan', '协': 'xie', '作': 'zuo', '食': 'shi', '记': 'ji',
+            '共': 'gong', '同': 'tong', '里': 'li', '程': 'cheng', '碑': 'bei', '兴': 'xing', '趣': 'qu', '未': 'wei',
+            '来': 'lai', '计': 'ji', '划': 'hua', '技': 'ji', '能': 'neng', '热': 're', '爱': 'ai', '日': 'ri',
+            '常': 'chang', '生': 'sheng', '活': 'huo', '合': 'he', '伙': 'huo', '伴': 'ban', '公': 'gong', '路': 'lu',
+            '厨': 'chu', '艺': 'yi', '植': 'zhi', '物': 'wu', '养': 'yang', '护': 'hu', '小': 'xiao', '报': 'bao',
+            '坊': 'fang', '教': 'jiao', '练': 'lian', '场': 'chang', '地': 'di', '图': 'tu', '近': 'jin', '期': 'qi'
+        };
+
+        const SUPABASE_CONFIG = window.SITE_SUPABASE_CONFIG || {};
+        const CONTENT_CONFIG = window.SITE_CONTENT_CONFIG || {};
+
+        const personsData = {
+            dengjie: { id: 'dengjie', name: '邓杰', titleNote: '🌿 邓杰的日常', roleDesc: '孤寂行者',
+                block1Items: [
+                    { icon: '🖥️', title: '游戏世界', desc: '每个男生的墓志铭上都会有一个二维码', blockId: 'dengjie-b1-1' },
+                    { icon: '📈', title: '搞钱日记', desc: '', blockId: 'dengjie-b1-2' },
+                    { icon: '❤️❤️❤️', title: '补全计划', desc: '看完所有动漫', blockId: 'dengjie-b1-3' }
+                ],
+                singleTitle: '📻 近期日常', singleDesc: '与王泊宁共同维护「两人食光机」小程序', singleStat: '🎞️ 胶片计划', singleBlockId: 'dengjie-b2-1',
+                leftTitle: '🌱 农耕文明', leftHobbies: ['花', '草'], leftQuote: '所有中国人的梦想', leftBlockId: 'dengjie-b3-L',
+                rightTitle: '🤝 双人联结', rightHobbies: ['热爱生活', '双人游戏'], rightQuote: '吃吃玩玩', rightBlockId: 'dengjie-b3-R'
+            },
+            wangboning: { id: 'wangboning', name: '王泊宁', titleNote: '🎨 王泊宁的日常', roleDesc: '☕ · 体育 · 羊羊游记',
+                block1Items: [
+                    { icon: '☕', title: '咖啡、饮料、美食……', desc: '19-212饮品吧？', blockId: 'wang-b1-1' },
+                    { icon: '🏃‍♂️', title: '博士生× 体育生√', desc: '', blockId: 'wang-b1-2' },
+                    { icon: '🐑', title: '羊羊游记', desc: 'Andrea、Andrew和Alessio的游记', blockId: 'wang-b1-3' }
+                ],
+                singleTitle: 'Daily Life', singleDesc: '杂谈', singleStat: '追寻自由中', singleBlockId: 'wang-b2-1',
+                leftTitle: '✨ Reading', leftHobbies: ['小说', '世界'], leftQuote: '阅读丈量世界', leftBlockId: 'wang-b3-L',
+                rightTitle: '💞 日常共振', rightHobbies: ['热爱生活', '双人食记'], rightQuote: '平凡日子过成展览', rightBlockId: 'wang-b3-R'
+            },
+            together: { id: 'together', name: '邓杰 & 王泊宁', titleNote: '✨ 两人的共同日常', roleDesc: '生活合伙人',
+                block1Items: [
+                    { icon: '♾️∑ ∫ √ π', title: 'All about MATH', desc: '数学系phd的日常', blockId: 'both-b1-1' },
+                    { icon: '🍜', title: '两人食记', desc: '美食IP', blockId: 'both-b1-2' },
+                    { icon: '🥳', title: '娱乐时间', desc: '读博就是要玩玩玩', blockId: 'both-b1-3' }
+                ],
+                singleTitle: '✈️ 旅行日记', singleDesc: '', singleStat: '', singleBlockId: 'both-b2-1',
+                leftTitle: '🌈 共同兴趣', leftHobbies: ['公路旅行', '双人厨艺'], leftQuote: '一起发呆或徒步', leftBlockId: 'both-b3-L',
+                rightTitle: '🌱 未来计划', rightHobbies: ['两人小报', '工作坊'], rightQuote: '记录日常微光', rightBlockId: 'both-b3-R'
+            }
+        };
+
+        let postsDB = new Map();
+        let currentPage = 'index';
+        let currentBlockId = null;
+        let currentBlockTitle = null;
+        let currentPost = null;
+        let pendingDeletePost = null;
+        let currentComments = [];
+        let pendingDeleteComment = null;
+        let supabaseClient = null;
+        let currentUser = null;
+        let managedUsers = [];
+        let pendingReviewUser = null;
+        let contentManifest = { schemaVersion: 1, posts: [], legacyComments: [] };
+        const signedObjectUrlCache = new Map();
+
+        function setPanelStatus(elementId, html, isError = false) {
+            const status = document.getElementById(elementId);
+            status.style.display = 'block';
+            status.classList.toggle('error', isError);
+            status.innerHTML = html;
+        }
+
+        function isSupabaseConfigured() {
+            return /^https:\/\/.+\.supabase\.co$/i.test(String(SUPABASE_CONFIG.url || '').replace(/\/$/, ''))
+                && String(SUPABASE_CONFIG.publishableKey || '').length > 20
+                && !String(SUPABASE_CONFIG.publishableKey).startsWith('YOUR_');
+        }
+
+        function normalizeUsername(value) {
+            return String(value || '').normalize('NFKC').trim().toLowerCase();
+        }
+
+        function sha256Fallback(value) {
+            const encoded = unescape(encodeURIComponent(String(value)));
+            const bytes = Array.from(encoded, character => character.charCodeAt(0));
+            const bitLength = bytes.length * 8;
+            bytes.push(0x80);
+            while (bytes.length % 64 !== 56) bytes.push(0);
+            const highLength = Math.floor(bitLength / 0x100000000);
+            const lowLength = bitLength >>> 0;
+            for (let shift = 24; shift >= 0; shift -= 8) bytes.push((highLength >>> shift) & 0xff);
+            for (let shift = 24; shift >= 0; shift -= 8) bytes.push((lowLength >>> shift) & 0xff);
+
+            const constants = [
+                0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+                0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+                0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+                0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+                0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+                0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+                0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+                0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+            ];
+            const hash = [
+                0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+                0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
+            ];
+            const rotateRight = (number, amount) => (number >>> amount) | (number << (32 - amount));
+
+            for (let offset = 0; offset < bytes.length; offset += 64) {
+                const words = new Array(64);
+                for (let index = 0; index < 16; index += 1) {
+                    const position = offset + index * 4;
+                    words[index] = (
+                        (bytes[position] << 24)
+                        | (bytes[position + 1] << 16)
+                        | (bytes[position + 2] << 8)
+                        | bytes[position + 3]
+                    ) >>> 0;
+                }
+                for (let index = 16; index < 64; index += 1) {
+                    const first = rotateRight(words[index - 15], 7) ^ rotateRight(words[index - 15], 18) ^ (words[index - 15] >>> 3);
+                    const second = rotateRight(words[index - 2], 17) ^ rotateRight(words[index - 2], 19) ^ (words[index - 2] >>> 10);
+                    words[index] = (words[index - 16] + first + words[index - 7] + second) >>> 0;
+                }
+
+                let [a, b, c, d, e, f, g, h] = hash;
+                for (let index = 0; index < 64; index += 1) {
+                    const sumOne = rotateRight(e, 6) ^ rotateRight(e, 11) ^ rotateRight(e, 25);
+                    const choose = (e & f) ^ (~e & g);
+                    const temporaryOne = (h + sumOne + choose + constants[index] + words[index]) >>> 0;
+                    const sumZero = rotateRight(a, 2) ^ rotateRight(a, 13) ^ rotateRight(a, 22);
+                    const majority = (a & b) ^ (a & c) ^ (b & c);
+                    const temporaryTwo = (sumZero + majority) >>> 0;
+                    h = g;
+                    g = f;
+                    f = e;
+                    e = (d + temporaryOne) >>> 0;
+                    d = c;
+                    c = b;
+                    b = a;
+                    a = (temporaryOne + temporaryTwo) >>> 0;
+                }
+                hash[0] = (hash[0] + a) >>> 0;
+                hash[1] = (hash[1] + b) >>> 0;
+                hash[2] = (hash[2] + c) >>> 0;
+                hash[3] = (hash[3] + d) >>> 0;
+                hash[4] = (hash[4] + e) >>> 0;
+                hash[5] = (hash[5] + f) >>> 0;
+                hash[6] = (hash[6] + g) >>> 0;
+                hash[7] = (hash[7] + h) >>> 0;
+            }
+            return hash.map(number => number.toString(16).padStart(8, '0')).join('');
+        }
+
+        async function sha256Hex(value) {
+            if (window.crypto && window.crypto.subtle && typeof window.crypto.subtle.digest === 'function' && typeof TextEncoder !== 'undefined') {
+                try {
+                    const digest = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(value)));
+                    return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+                } catch (error) {
+                    console.warn('当前设备无法使用 Web Crypto，改用兼容模式。', error);
+                }
+            }
+            return sha256Fallback(value);
+        }
+
+        async function usernameToInternalEmail(username) {
+            const normalized = normalizeUsername(username);
+            const hash = await sha256Hex(normalized);
+            return `${hash}@users.example`;
+        }
+
+        function showLoginScreen(message = '', isError = false) {
+            const query = message ? `?message=${encodeURIComponent(message)}&returnTo=${encodeURIComponent('/in/')}` : `?returnTo=${encodeURIComponent('/in/')}`;
+            window.location.replace(`/login/${query}`);
+        }
+
+        async function loadCurrentProfile(userId) {
+            const { data, error } = await supabaseClient
+                .from('profiles')
+                .select('id, username, relationship, role, status')
+                .eq('id', userId)
+                .single();
+            if (error) throw new Error(error.message);
+            return data;
+        }
+
+        async function enterSite(session, profile) {
+            currentUser = {
+                id: session.user.id,
+                username: profile.username,
+                role: profile.role,
+                status: profile.status
+            };
+            document.getElementById('auth-overlay').style.display = 'none';
+            document.getElementById('access-request-overlay').style.display = 'none';
+            document.getElementById('session-banner').style.display = 'block';
+            const isAdmin = currentUser.role === 'admin';
+            document.getElementById('session-greeting').textContent = isAdmin
+                ? '欢迎回家，请随意创作'
+                : `欢迎你的来访，“${currentUser.username}”`;
+            document.getElementById('manage-users-button').style.display = isAdmin ? 'inline-block' : 'none';
+            document.getElementById('export-backup-button').style.display = isAdmin ? 'inline-block' : 'none';
+            document.querySelector('.create-post-btn').style.display = isAdmin ? 'block' : 'none';
+
+            await loadAndRenderSiteContent();
+        }
+
+        function isEdgeFunctionNetworkError(error) {
+            const message = String(error?.message || error || '');
+            return /failed to send a request to the edge function|failed to fetch|networkerror|load failed|functionsfetcherror/i.test(message);
+        }
+
+        async function loadAndRenderSiteContent() {
+            const root = document.getElementById('app-root');
+            root.innerHTML = '<div class="loading">📡 正在从私有 COS 加载专栏...</div>';
+            try {
+                postsDB = await loadAllPostsFromCOS();
+                await renderApp();
+            } catch (error) {
+                console.error('内容服务连接失败', error);
+                const detail = isEdgeFunctionNetworkError(error)
+                    ? '当前网络暂时无法连接内容服务。请切换 Wi-Fi 或移动网络后重试。'
+                    : String(error?.message || '内容加载失败，请稍后重试。');
+                root.innerHTML = `
+                    <div class="error-message">
+                        <strong>登录成功，但内容暂时加载失败。</strong><br>
+                        ${escapeHtml(detail)}
+                        <div style="margin-top: 14px;">
+                            <button class="submit-btn" type="button" onclick="loadAndRenderSiteContent()">重新连接</button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        async function handleAuthenticatedSession(session) {
+            if (!session?.user) {
+                currentUser = null;
+                showLoginScreen();
+                return;
+            }
+
+            try {
+                const profile = await loadCurrentProfile(session.user.id);
+                if (profile.status !== 'approved') {
+                    await supabaseClient.auth.signOut();
+                    const message = profile.status === 'pending'
+                        ? '您的访问申请仍在等待管理员审核。'
+                        : '您的访问申请未通过，请联系管理员。';
+                    showLoginScreen(message, profile.status !== 'pending');
+                    return;
+                }
+                await enterSite(session, profile);
+            } catch (error) {
+                await supabaseClient.auth.signOut();
+                showLoginScreen(`无法读取访问权限：${error.message}`, true);
+            }
+        }
+
+        async function initializeAuthentication() {
+            if (!isSupabaseConfigured()) {
+                showLoginScreen('网站尚未完成 Supabase 配置。请先填写 supabase-config.js。', true);
+                return;
+            }
+            if (!window.supabase?.createClient) {
+                showLoginScreen('认证组件加载失败，请检查网络后刷新。', true);
+                return;
+            }
+
+            supabaseClient = window.supabase.createClient(
+                String(SUPABASE_CONFIG.url).replace(/\/$/, ''),
+                SUPABASE_CONFIG.publishableKey,
+                { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false } }
+            );
+            const { data, error } = await supabaseClient.auth.getSession();
+            if (error) {
+                showLoginScreen(`读取登录状态失败：${error.message}`, true);
+                return;
+            }
+            await handleAuthenticatedSession(data.session);
+        }
+
+        async function loginUser() {
+            const button = document.getElementById('login-button');
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value;
+            if (!supabaseClient) { setPanelStatus('login-status', '网站认证尚未配置完成。', true); return; }
+            if (!username || !password) { setPanelStatus('login-status', '请填写用户名和密码。', true); return; }
+
+            button.disabled = true;
+            button.textContent = '正在登录…';
+            try {
+                const email = await usernameToInternalEmail(username);
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) throw error;
+                await handleAuthenticatedSession(data.session);
+            } catch (error) {
+                setPanelStatus('login-status', `登录失败：${escapeHtml(error.message === 'Invalid login credentials' ? '用户名或密码错误。' : error.message)}`, true);
+            } finally {
+                button.disabled = false;
+                button.textContent = '登录';
+            }
+        }
+
+        function openAccessRequest() {
+            document.getElementById('request-username').value = '';
+            document.getElementById('request-relationship').value = '';
+            document.getElementById('request-password').value = '';
+            document.getElementById('request-status').style.display = 'none';
+            document.getElementById('request-register-button').style.display = 'block';
+            document.getElementById('access-request-overlay').style.display = 'block';
+        }
+
+        function closeAccessRequest() {
+            document.getElementById('access-request-overlay').style.display = 'none';
+        }
+
+        async function registerAccessRequest() {
+            const button = document.getElementById('request-register-button');
+            const username = document.getElementById('request-username').value.trim();
+            const relationship = document.getElementById('request-relationship').value.trim();
+            const password = document.getElementById('request-password').value;
+            if (!supabaseClient) { setPanelStatus('request-status', '网站认证尚未配置完成。', true); return; }
+            if (!username || !relationship || !password) { setPanelStatus('request-status', '请完整填写用户名、关系和密码。', true); return; }
+            if (username.length > 50 || relationship.length > 150) { setPanelStatus('request-status', '用户名或关系内容过长。', true); return; }
+            if (password.length < 8) { setPanelStatus('request-status', '密码至少需要 8 位。', true); return; }
+
+            button.disabled = true;
+            button.textContent = '正在注册…';
+            try {
+                const email = await usernameToInternalEmail(username);
+                const { error } = await supabaseClient.auth.signUp({
+                    email,
+                    password,
+                    options: { data: { username, relationship } }
+                });
+                if (error) throw error;
+                await supabaseClient.auth.signOut();
+                setPanelStatus('request-status', '已经将您的申请交给管理员，请在管理员审核成功后再次登录尝试');
+                button.style.display = 'none';
+            } catch (error) {
+                setPanelStatus('request-status', `申请提交失败：${escapeHtml(error.message)}`, true);
+            } finally {
+                button.disabled = false;
+                button.textContent = '注册';
+            }
+        }
+
+        async function logoutCurrentUser() {
+            if (supabaseClient) await supabaseClient.auth.signOut();
+            currentUser = null;
+            currentComments = [];
+            closeUserManager();
+            showLoginScreen();
+        }
+
+        async function readAllRows(table, columns, orderColumn) {
+            const rows = [];
+            const pageSize = 1000;
+            for (let offset = 0; ; offset += pageSize) {
+                let query = supabaseClient.from(table).select(columns).range(offset, offset + pageSize - 1);
+                if (orderColumn) query = query.order(orderColumn, { ascending: true });
+                const { data, error } = await query;
+                if (error) throw error;
+                rows.push(...(data || []));
+                if (!data || data.length < pageSize) return rows;
+            }
+        }
+
+        async function exportCompleteBackup() {
+            if (!ensureAdmin()) return;
+            const button = document.getElementById('export-backup-button');
+            button.disabled = true;
+            button.textContent = '正在导出…';
+            try {
+                if (!window.JSZip) throw new Error('备份组件加载失败，请检查网络后重试。');
+                const [comments, profiles] = await Promise.all([
+                    readAllRows('comments', 'id, post_path, author_id, author_name, content, images, created_at', 'created_at'),
+                    readAllRows('profiles', 'id, username, relationship, role, status, created_at, approved_at, approved_by', 'created_at')
+                ]);
+                const zip = new JSZip();
+                zip.file('content-index.json', `${JSON.stringify(contentManifest, null, 2)}\n`);
+                zip.file('comments.json', `${JSON.stringify(comments, null, 2)}\n`);
+                zip.file('profiles.json', `${JSON.stringify(profiles, null, 2)}\n`);
+                const imagePaths = [...new Set(comments.flatMap(comment => Array.isArray(comment.images) ? comment.images : []))];
+                const imageErrors = [];
+                for (let index = 0; index < imagePaths.length; index += 1) {
+                    const imagePath = imagePaths[index];
+                    button.textContent = `备份图片 ${index + 1}/${imagePaths.length}`;
+                    const { data, error } = await supabaseClient.storage.from('comment-images').download(imagePath);
+                    if (error || !data) imageErrors.push(`${imagePath}: ${error?.message || '下载失败'}`);
+                    else zip.file(`supabase-comment-images/${imagePath}`, data, { compression: 'STORE' });
+                }
+                const backupManifest = {
+                    schemaVersion: 1,
+                    exportedAt: new Date().toISOString(),
+                    comments: comments.length,
+                    profiles: profiles.length,
+                    commentImagesExpected: imagePaths.length,
+                    commentImagesIncluded: imagePaths.length - imageErrors.length,
+                    note: '不含密码或腾讯云密钥；Supabase Auth 密码由 Supabase 托管，不能从浏览器导出。'
+                };
+                zip.file('backup-manifest.json', `${JSON.stringify(backupManifest, null, 2)}\n`);
+                zip.file('README.txt', '这是网站管理员导出的评论、评论图片、用户资料与当前 COS 内容索引备份。请离线保存，不要上传到公开 GitHub。\n');
+                if (imageErrors.length) zip.file('_ERRORS.txt', `${imageErrors.join('\n')}\n`);
+                const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `yqfl-complete-backup-${getTaipeiDate()}.zip`;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(url);
+                alert(imageErrors.length
+                    ? `备份已导出，但有 ${imageErrors.length} 张评论图片下载失败；详情见压缩包内 _ERRORS.txt。请不要删除原数据。`
+                    : `完整备份已导出：${comments.length} 条评论、${imagePaths.length} 张评论图片。`);
+            } catch (error) {
+                console.error(error);
+                alert(`备份导出失败：${error.message}\n原数据没有被修改。`);
+            } finally {
+                button.disabled = false;
+                button.textContent = '导出完整备份';
+            }
+        }
+
+        function ensureAdmin() {
+            if (currentUser?.role === 'admin') return true;
+            alert('只有管理员可以进行此操作。');
+            return false;
+        }
+
+        function setUserManagerStatus(html, isError = false) {
+            setPanelStatus('user-manager-status', html, isError);
+        }
+
+        async function openUserManager() {
+            if (!ensureAdmin()) return;
+            document.getElementById('user-manager-overlay').style.display = 'block';
+            document.getElementById('user-manager-status').style.display = 'none';
+            await loadManagedUsers();
+        }
+
+        function closeUserManager() {
+            document.getElementById('user-manager-overlay').style.display = 'none';
+            closeReviewUser();
+        }
+
+        async function loadManagedUsers() {
+            const list = document.getElementById('user-list');
+            list.innerHTML = '<div class="loading">正在加载用户…</div>';
+            const { data, error } = await supabaseClient
+                .from('profiles')
+                .select('id, username, relationship, role, status, created_at')
+                .in('status', ['approved', 'pending']);
+            if (error) {
+                list.innerHTML = `<div class="error-message">加载用户失败：${escapeHtml(error.message)}</div>`;
+                return;
+            }
+
+            managedUsers = (data || []).sort((a, b) => {
+                const statusOrder = { approved: 0, pending: 1 };
+                const roleOrder = { admin: 0, visitor: 1 };
+                return statusOrder[a.status] - statusOrder[b.status]
+                    || roleOrder[a.role] - roleOrder[b.role]
+                    || String(a.created_at).localeCompare(String(b.created_at));
+            });
+            list.innerHTML = managedUsers.length ? managedUsers.map(user => {
+                if (user.status === 'pending') {
+                    return `
+                        <div class="user-row pending" onclick="openReviewUser('${user.id}')">
+                            <div class="user-name">${escapeHtml(user.username)}（待审核）</div>
+                            <span>查看申请 →</span>
+                        </div>
+                    `;
+                }
+                return `
+                    <div class="user-row ${user.role === 'admin' ? 'admin' : ''}">
+                        <div class="user-name">
+                            ${escapeHtml(user.username)}
+                            ${user.role === 'admin' ? '<span class="role-badge">管理员</span>' : ''}
+                        </div>
+                        ${user.role === 'admin'
+                            ? '<span class="protected-admin">固定管理员</span>'
+                            : `<button class="remove-user-btn" onclick="removeUserAccess('${user.id}')">删除访问权限</button>`}
+                    </div>
+                `;
+            }).join('') : '<div class="comments-empty">暂无用户。</div>';
+        }
+
+        function openReviewUser(userId) {
+            if (!ensureAdmin()) return;
+            const user = managedUsers.find(item => item.id === userId && item.status === 'pending');
+            if (!user) { alert('找不到待审核用户，请刷新后重试。'); return; }
+            pendingReviewUser = user;
+            document.getElementById('review-user-name').textContent = `${user.username}（待审核）`;
+            document.getElementById('review-user-relationship').textContent = `关系：${user.relationship || '未填写'}`;
+            document.getElementById('review-user-status').style.display = 'none';
+            document.getElementById('review-user-overlay').style.display = 'block';
+        }
+
+        function closeReviewUser() {
+            document.getElementById('review-user-overlay').style.display = 'none';
+            pendingReviewUser = null;
+        }
+
+        async function invokeAdminUserAction(action, targetUserId) {
+            const { data, error } = await supabaseClient.functions.invoke('admin-users', {
+                body: { action, targetUserId }
+            });
+            if (error) {
+                let detail = error.message;
+                try {
+                    const body = await error.context.json();
+                    detail = body.error || detail;
+                } catch (_) {}
+                throw new Error(detail);
+            }
+            if (!data?.ok) throw new Error(data?.error || '用户管理操作失败');
+            return data;
+        }
+
+        async function reviewPendingUser(action) {
+            if (!ensureAdmin() || !pendingReviewUser) return;
+            const approveButton = document.getElementById('approve-user-button');
+            const rejectButton = document.getElementById('reject-user-button');
+            approveButton.disabled = true;
+            rejectButton.disabled = true;
+            try {
+                const result = await invokeAdminUserAction(action, pendingReviewUser.id);
+                setPanelStatus('review-user-status', escapeHtml(result.message));
+                await loadManagedUsers();
+                setTimeout(closeReviewUser, 700);
+            } catch (error) {
+                setPanelStatus('review-user-status', escapeHtml(error.message), true);
+            } finally {
+                approveButton.disabled = false;
+                rejectButton.disabled = false;
+            }
+        }
+
+        async function removeUserAccess(userId) {
+            if (!ensureAdmin()) return;
+            const user = managedUsers.find(item => item.id === userId);
+            if (!user || user.role === 'admin') return;
+            if (!confirm(`确认删除“${user.username}”的访问权限吗？`)) return;
+            try {
+                const result = await invokeAdminUserAction('delete', userId);
+                setUserManagerStatus(escapeHtml(result.message));
+                await loadManagedUsers();
+            } catch (error) {
+                setUserManagerStatus(escapeHtml(error.message), true);
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>'"]/g, character => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+            })[character]);
+        }
+
+        function chineseToPinyin(text) {
+            if (!text) return '';
+            let result = '';
+            for (const character of text) {
+                if (/[a-zA-Z0-9]/.test(character)) result += character;
+                else if (pinyinMap[character]) result += pinyinMap[character];
+                else result += '-';
+            }
+            return result.replace(/-+/g, '-').replace(/^-|-$/g, '').toLowerCase();
+        }
+
+        function sanitizePathPart(value, fallback = 'gallery') {
+            const cleaned = String(value || '')
+                .trim()
+                .replace(/[\\/]+/g, '-')
+                .replace(/\.\.+/g, '.')
+                .replace(/[^a-zA-Z0-9._\-\u4e00-\u9fff]/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/^[-.]+|[-.]+$/g, '');
+            return cleaned || fallback;
+        }
+
+        function sanitizeFileName(name, index) {
+            const lastDot = name.lastIndexOf('.');
+            const rawBase = lastDot > 0 ? name.slice(0, lastDot) : name;
+            const rawExt = lastDot > 0 ? name.slice(lastDot + 1) : 'jpg';
+            const base = sanitizePathPart(rawBase, `image-${String(index + 1).padStart(2, '0')}`);
+            const ext = rawExt.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'jpg';
+            return `${String(index + 1).padStart(2, '0')}-${base}.${ext}`;
+        }
+
+        function isContentGatewayConfigured() {
+            return CONTENT_CONFIG.provider === 'tencent-cos'
+                && typeof CONTENT_CONFIG.gatewayFunction === 'string'
+                && CONTENT_CONFIG.gatewayFunction.length > 0;
+        }
+
+        async function contentGateway(action, payload = {}) {
+            if (!supabaseClient || !currentUser) throw new Error('登录已失效，请重新登录。');
+            if (!isContentGatewayConfigured()) throw new Error('content-config.js 尚未配置完成。');
+            const canRetry = action === 'get-manifest' || action === 'get-urls';
+            const attempts = canRetry ? 3 : 1;
+            let lastError = null;
+
+            for (let attempt = 0; attempt < attempts; attempt += 1) {
+                try {
+                    const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+                    if (sessionError || !sessionData.session?.access_token) throw new Error('登录已失效，请重新登录。');
+                    const { data, error } = await supabaseClient.functions.invoke(CONTENT_CONFIG.gatewayFunction, {
+                        body: { action, ...payload },
+                        headers: { Authorization: `Bearer ${sessionData.session.access_token}` }
+                    });
+                    if (error) {
+                        let detail = error.message || 'COS 网关请求失败';
+                        try {
+                            const responseBody = await error.context?.json();
+                            if (responseBody?.error) detail = responseBody.error;
+                        } catch (_) {}
+                        throw new Error(detail);
+                    }
+                    if (data?.error) throw new Error(data.error);
+                    return data || {};
+                } catch (error) {
+                    lastError = error;
+                    if (!canRetry || !isEdgeFunctionNetworkError(error) || attempt === attempts - 1) break;
+                    await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+                }
+            }
+
+            if (isEdgeFunctionNetworkError(lastError)) {
+                throw new Error('当前网络暂时无法连接内容服务。请切换 Wi-Fi 或移动网络后重试。');
+            }
+            throw lastError || new Error('内容服务请求失败');
+        }
+
+        async function getSignedObjectUrls(paths) {
+            const uniquePaths = [...new Set((paths || []).filter(path => typeof path === 'string' && path && !/^https?:\/\//i.test(path)))];
+            const now = Date.now();
+            const missing = uniquePaths.filter(path => {
+                const cached = signedObjectUrlCache.get(path);
+                return !cached || cached.expiresAt - now < 60_000;
+            });
+            for (let offset = 0; offset < missing.length; offset += 100) {
+                const { items = [] } = await contentGateway('get-urls', { keys: missing.slice(offset, offset + 100) });
+                for (const item of items) {
+                    signedObjectUrlCache.set(item.key, {
+                        url: item.url,
+                        expiresAt: new Date(item.expiresAt).getTime()
+                    });
+                }
+            }
+            return new Map(uniquePaths.map(path => [path, signedObjectUrlCache.get(path)?.url || '']));
+        }
+
+        function getTaipeiDate() {
+            const parts = new Intl.DateTimeFormat('en-CA', {
+                timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit'
+            }).formatToParts(new Date());
+            const values = Object.fromEntries(parts.map(part => [part.type, part.value]));
+            return `${values.year}-${values.month}-${values.day}`;
+        }
+
+        async function putJsonToCOS(key, data) {
+            return contentGateway('put-json', { key, data });
+        }
+
+        function setUploadStatus(html, isError = false) {
+            const guide = document.getElementById('upload-guide');
+            guide.style.display = 'block';
+            guide.classList.toggle('error', isError);
+            guide.innerHTML = html;
+        }
+
+        document.getElementById('post-type').addEventListener('change', function () {
+            const isImageGallery = this.value === 'image-gallery';
+            document.getElementById('article-fields').style.display = isImageGallery ? 'none' : 'block';
+            document.getElementById('image-fields').style.display = isImageGallery ? 'block' : 'none';
+        });
+
+        document.getElementById('image-files').addEventListener('change', function () {
+            const files = Array.from(this.files || []);
+            const list = document.getElementById('selected-files');
+            if (!files.length) {
+                list.textContent = '尚未选择图片';
+                return;
+            }
+            list.innerHTML = files.map(file => `${escapeHtml(file.name)}（${(file.size / 1024 / 1024).toFixed(2)} MB）`).join('<br>');
+        });
+
+        document.getElementById('comment-image-files').addEventListener('change', function () {
+            const files = Array.from(this.files || []);
+            const list = document.getElementById('comment-selected-files');
+            if (!files.length) {
+                list.textContent = '尚未选择图片';
+                return;
+            }
+            list.innerHTML = files.map(file => `${escapeHtml(file.name)}（${(file.size / 1024 / 1024).toFixed(2)} MB）`).join('<br>');
+        });
+
+        async function loadAllPostsFromCOS() {
+            const allPosts = new Map();
+            const { manifest } = await contentGateway('get-manifest');
+            if (!manifest || !Array.isArray(manifest.posts)) throw new Error('COS 内容索引格式不正确。');
+            contentManifest = {
+                schemaVersion: manifest.schemaVersion || 1,
+                generatedAt: manifest.generatedAt || new Date().toISOString(),
+                source: manifest.source || 'tencent-cos',
+                posts: manifest.posts,
+                legacyComments: Array.isArray(manifest.legacyComments) ? manifest.legacyComments : []
+            };
+            for (const post of contentManifest.posts) {
+                if (!post?.blockId || !post?.path) continue;
+                if (!allPosts.has(post.blockId)) allPosts.set(post.blockId, []);
+                allPosts.get(post.blockId).push({
+                    id: post.id || String(post.path).split('/').pop(),
+                    path: post.path,
+                    title: post.title || '无标题',
+                    author: post.author || '未知作者',
+                    date: post.date || String(post.id || '').slice(0, 10),
+                    type: post.type || 'article',
+                    content: post.content || '',
+                    imageFolder: post.imageFolder || '',
+                    images: Array.isArray(post.images) ? post.images : [],
+                    blockId: post.blockId
+                });
+            }
+
+            for (const posts of allPosts.values()) {
+                posts.sort((a, b) => String(b.date).localeCompare(String(a.date)) || String(b.id).localeCompare(String(a.id)));
+            }
+            return allPosts;
+        }
+
+        function formatCommentTime(value) {
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return String(value || '未知时间');
+            return new Intl.DateTimeFormat('zh-CN', {
+                timeZone: 'Asia/Taipei',
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit', second: '2-digit',
+                hour12: false
+            }).format(date);
+        }
+
+        async function loadCommentsForPost(post) {
+            if (!supabaseClient || !currentUser) return [];
+            const { data, error } = await supabaseClient
+                .from('comments')
+                .select('id, post_path, author_id, author_name, content, images, created_at')
+                .eq('post_path', post.path || post.id)
+                .order('created_at', { ascending: true });
+            if (error) throw new Error(error.message);
+
+            const liveComments = await Promise.all((data || []).map(async row => {
+                const imagePaths = Array.isArray(row.images) ? row.images : [];
+                const imageItems = await Promise.all(imagePaths.map(async path => {
+                    const { data: signedData, error: signedError } = await supabaseClient
+                        .storage
+                        .from('comment-images')
+                        .createSignedUrl(path, 60 * 60);
+                    if (signedError) {
+                        console.warn(`评论图片签名失败：${path}`, signedError);
+                        return null;
+                    }
+                    return { path, url: signedData.signedUrl };
+                }));
+                return {
+                    id: row.id,
+                    authorId: row.author_id,
+                    author: row.author_name,
+                    createdAt: row.created_at,
+                    content: row.content || '',
+                    images: imagePaths,
+                    imageItems: imageItems.filter(Boolean),
+                    source: 'supabase'
+                };
+            }));
+
+            const legacyRows = (contentManifest.legacyComments || [])
+                .filter(comment => comment.postPath === (post.path || post.id));
+            const legacyPaths = legacyRows.flatMap(comment => Array.isArray(comment.images) ? comment.images : []);
+            const legacyUrls = await getSignedObjectUrls(legacyPaths);
+            const legacyComments = legacyRows.map(comment => ({
+                id: comment.id,
+                authorId: null,
+                author: comment.author || '历史评论',
+                createdAt: comment.createdAt,
+                content: comment.content || '',
+                images: Array.isArray(comment.images) ? comment.images : [],
+                imageItems: (comment.images || []).map(path => ({ path, url: legacyUrls.get(path) })).filter(item => item.url),
+                source: 'legacy'
+            }));
+            return [...liveComments, ...legacyComments]
+                .sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
+        }
+
+        async function renderCommentsSection(post) {
+            try {
+                const comments = await loadCommentsForPost(post);
+                currentComments = comments;
+                const commentsHtml = comments.length
+                    ? `<div class="comments-list">${comments.map(comment => {
+                        const images = comment.imageItems
+                            .map(image => {
+                                const encodedUrl = encodeURIComponent(image.url);
+                                return `<img src="${escapeHtml(image.url)}" alt="评论图片" loading="lazy" onclick="openLightbox(decodeURIComponent('${encodedUrl}'))">`;
+                            }).join('');
+                        const canDelete = comment.source !== 'legacy'
+                            && (currentUser?.role === 'admin' || comment.authorId === currentUser?.id);
+                        return `
+                            <article class="comment-item">
+                                <div class="comment-meta">
+                                    <span>✍️ ${escapeHtml(comment.author)}</span>
+                                    <span>🕒 ${escapeHtml(formatCommentTime(comment.createdAt))}</span>
+                                </div>
+                                ${comment.content ? `<div class="comment-content">${escapeHtml(comment.content)}</div>` : ''}
+                                ${images ? `<div class="comment-images">${images}</div>` : ''}
+                                ${canDelete ? `<button class="delete-comment-btn" onclick="openCommentDeleteDialog('${comment.id}')">删除评论</button>` : ''}
+                            </article>
+                        `;
+                    }).join('')}</div>`
+                    : '<div class="comments-empty">还没有评论，点击右下角“评论”留下第一条。</div>';
+
+                return `
+                    <section class="comments-section">
+                        <h2 class="comments-heading">💬 评论（${comments.length}）</h2>
+                        ${commentsHtml}
+                    </section>
+                `;
+            } catch (error) {
+                console.error('评论加载失败：', error);
+                currentComments = [];
+                return `
+                    <section class="comments-section">
+                        <h2 class="comments-heading">💬 评论</h2>
+                        <div class="error-message">评论加载失败：${escapeHtml(error.message)}</div>
+                    </section>
+                `;
+            }
+        }
+
+        function setCommentStatus(html, isError = false) {
+            const status = document.getElementById('comment-status');
+            status.style.display = 'block';
+            status.classList.toggle('error', isError);
+            status.innerHTML = html;
+        }
+
+        function openCommentEditor() {
+            if (!currentPost) {
+                alert('当前文章不存在，请刷新页面后重试。');
+                return;
+            }
+            if (!currentUser) {
+                showLoginScreen('请先登录后再发表评论。', true);
+                return;
+            }
+            document.getElementById('comment-target').textContent = `评论文章：${currentPost.title}`;
+            document.getElementById('comment-current-user').textContent = `评论人：${currentUser.username}`;
+            document.getElementById('comment-content').value = '';
+            document.getElementById('comment-image-files').value = '';
+            document.getElementById('comment-selected-files').textContent = '尚未选择图片';
+            document.getElementById('comment-status').style.display = 'none';
+            document.getElementById('comment-overlay').style.display = 'block';
+        }
+
+        function closeCommentEditor() {
+            document.getElementById('comment-overlay').style.display = 'none';
+        }
+
+        async function publishComment() {
+            const button = document.getElementById('comment-publish-button');
+            const content = document.getElementById('comment-content').value.trim();
+            const files = Array.from(document.getElementById('comment-image-files').files || []);
+            const post = currentPost;
+
+            if (!post) { setCommentStatus('当前文章不存在，请刷新页面后重试。', true); return; }
+            if (!currentUser || !supabaseClient) { setCommentStatus('登录已失效，请重新登录。', true); return; }
+            if (!content && !files.length) { setCommentStatus('请填写评论内容或选择至少一张图片。', true); return; }
+            if (files.some(file => !file.type.startsWith('image/'))) { setCommentStatus('所选文件中包含非图片文件。', true); return; }
+            if (files.some(file => file.size > 25 * 1024 * 1024)) { setCommentStatus('单张图片不能超过 25 MB。', true); return; }
+
+            const commentId = window.crypto.randomUUID();
+            const imagePaths = [];
+
+            button.disabled = true;
+            button.textContent = '正在发布…';
+
+            try {
+                for (let index = 0; index < files.length; index += 1) {
+                    const file = files[index];
+                    const fileName = sanitizeFileName(file.name, index);
+                    const imagePath = `${currentUser.id}/${commentId}/${fileName}`;
+                    setCommentStatus(`正在上传第 ${index + 1}/${files.length} 张评论图片：<code>${escapeHtml(fileName)}</code>`);
+                    const { error: uploadError } = await supabaseClient
+                        .storage
+                        .from('comment-images')
+                        .upload(imagePath, file, { contentType: file.type, upsert: false });
+                    if (uploadError) throw uploadError;
+                    imagePaths.push(imagePath);
+                }
+
+                setCommentStatus('正在发布评论…');
+                const { error: insertError } = await supabaseClient.from('comments').insert({
+                    id: commentId,
+                    post_path: post.path || post.id,
+                    content,
+                    images: imagePaths
+                });
+                if (insertError) throw insertError;
+
+                setCommentStatus('<strong>评论发布成功。</strong>');
+                document.getElementById('comment-content').value = '';
+                document.getElementById('comment-image-files').value = '';
+                document.getElementById('comment-selected-files').textContent = '尚未选择图片';
+                await renderApp();
+            } catch (error) {
+                console.error(error);
+                if (imagePaths.length) {
+                    await supabaseClient.storage.from('comment-images').remove(imagePaths).catch(() => {});
+                }
+                setCommentStatus(`<strong>评论发布失败：</strong>${escapeHtml(error.message)}`, true);
+            } finally {
+                button.disabled = false;
+                button.textContent = '发布评论';
+            }
+        }
+
+        function setCommentDeleteStatus(html, isError = false) {
+            const status = document.getElementById('comment-delete-status');
+            status.style.display = 'block';
+            status.classList.toggle('error', isError);
+            status.innerHTML = html;
+        }
+
+        function openCommentDeleteDialog(commentId) {
+            const comment = currentComments.find(item => item.id === commentId);
+            if (!comment) {
+                alert('找不到要删除的评论，请刷新页面后重试。');
+                return;
+            }
+            if (currentUser?.role !== 'admin' && comment.authorId !== currentUser?.id) {
+                alert('您只能删除自己的评论。');
+                return;
+            }
+
+            pendingDeleteComment = comment;
+            document.getElementById('comment-delete-target').innerHTML = `
+                <strong>${escapeHtml(comment.author)}</strong>
+                <span style="color:#8ba0bc;font-size:.78rem;"> · ${escapeHtml(formatCommentTime(comment.createdAt))}</span><br>
+                <span style="color:#475569;font-size:.86rem;">${escapeHtml(comment.content || '（图片评论）')}</span>
+            `;
+            document.getElementById('comment-delete-status').style.display = 'none';
+            document.getElementById('comment-delete-overlay').style.display = 'block';
+        }
+
+        function closeCommentDeleteDialog() {
+            document.getElementById('comment-delete-overlay').style.display = 'none';
+            pendingDeleteComment = null;
+        }
+
+        async function deleteSelectedComment() {
+            const confirmButton = document.getElementById('comment-delete-confirm-button');
+            const cancelButton = document.getElementById('comment-delete-cancel-button');
+            const comment = pendingDeleteComment;
+
+            if (!comment) { setCommentDeleteStatus('没有选中待删除的评论。', true); return; }
+            if (!currentUser || !supabaseClient) { setCommentDeleteStatus('登录已失效，请重新登录。', true); return; }
+            if (currentUser.role !== 'admin' && comment.authorId !== currentUser.id) { setCommentDeleteStatus('您只能删除自己的评论。', true); return; }
+
+            confirmButton.disabled = true;
+            cancelButton.disabled = true;
+            confirmButton.textContent = '正在删除…';
+
+            try {
+                if (comment.images.length) {
+                    setCommentDeleteStatus(`正在删除 ${comment.images.length} 张评论图片…`);
+                    const { error: imageError } = await supabaseClient.storage.from('comment-images').remove(comment.images);
+                    if (imageError) throw imageError;
+                }
+
+                setCommentDeleteStatus('正在删除评论…');
+                const { data, error: deleteError } = await supabaseClient
+                    .from('comments')
+                    .delete()
+                    .eq('id', comment.id)
+                    .select('id');
+                if (deleteError) throw deleteError;
+                if (!data?.length) throw new Error('没有删除权限，或评论已经被删除。');
+
+                currentComments = currentComments.filter(item => item.id !== comment.id);
+                pendingDeleteComment = null;
+                document.getElementById('comment-delete-overlay').style.display = 'none';
+                await renderApp();
+            } catch (error) {
+                console.error(error);
+                setCommentDeleteStatus(`<strong>删除评论失败：</strong>${escapeHtml(error.message)}`, true);
+            } finally {
+                confirmButton.disabled = false;
+                cancelButton.disabled = false;
+                confirmButton.textContent = '是';
+            }
+        }
+
+        async function publishToCOS() {
+            if (!ensureAdmin()) return;
+            const button = document.getElementById('publish-button');
+            const selectElement = document.getElementById('post-target');
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            const targetBlock = selectElement.value;
+            const targetFolder = selectedOption.dataset.folder;
+            const title = document.getElementById('post-title').value.trim();
+            const author = document.getElementById('post-author').value.trim();
+            const type = document.getElementById('post-type').value;
+
+            if (!title || !author) { setUploadStatus('请填写标题和作者。', true); return; }
+
+            const date = getTaipeiDate();
+            let slug = chineseToPinyin(title) || 'post';
+            slug = sanitizePathPart(slug, 'post').slice(0, 60);
+            const postPath = `posts/${targetFolder}/${date}_${slug}.json`;
+            let articleJSON;
+
+            button.disabled = true;
+            button.textContent = '正在上传…';
+
+            try {
+                if (type === 'image-gallery') {
+                    const rawFolderName = document.getElementById('image-folder-name').value.trim();
+                    const folderName = sanitizePathPart(rawFolderName, 'gallery');
+                    const files = Array.from(document.getElementById('image-files').files || []);
+
+                    if (!rawFolderName) throw new Error('请填写图片文件夹名称。');
+                    if (!files.length) throw new Error('请选择至少一张图片。');
+                    if (files.some(file => !file.type.startsWith('image/'))) throw new Error('所选文件中包含非图片文件。');
+                    if (files.some(file => file.size > 25 * 1024 * 1024)) throw new Error('单张图片不能超过 25 MB。');
+
+                    const imageFolder = `assets/images/${folderName}`;
+                    const imagePaths = [];
+                    const uploadObjects = files.map((file, index) => ({
+                        key: `${imageFolder}/${sanitizeFileName(file.name, index)}`,
+                        size: file.size,
+                        contentType: file.type || 'application/octet-stream'
+                    }));
+                    const { items: uploadItems = [] } = await contentGateway('get-upload-urls', { objects: uploadObjects });
+                    const uploadByKey = new Map(uploadItems.map(item => [item.key, item]));
+
+                    for (let index = 0; index < files.length; index += 1) {
+                        const file = files[index];
+                        const imagePath = uploadObjects[index].key;
+                        const fileName = imagePath.split('/').pop();
+                        const upload = uploadByKey.get(imagePath);
+                        if (!upload?.url) throw new Error(`没有取得 ${imagePath} 的上传链接。`);
+                        setUploadStatus(`正在上传第 ${index + 1}/${files.length} 张图片：<code>${escapeHtml(fileName)}</code>`);
+                        const response = await fetch(upload.url, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': upload.contentType },
+                            body: file
+                        });
+                        if (!response.ok) throw new Error(`COS 图片上传失败：${response.status} ${response.statusText}`);
+                        imagePaths.push(imagePath);
+                    }
+
+                    articleJSON = {
+                        type: 'image-gallery',
+                        title,
+                        author,
+                        date,
+                        imageFolder,
+                        images: imagePaths,
+                        blockId: targetBlock
+                    };
+                } else {
+                    const content = document.getElementById('post-content').value.trim();
+                    if (!content) throw new Error('文章模式需要填写正文内容。');
+                    articleJSON = {
+                        type: 'article',
+                        title,
+                        author,
+                        date,
+                        content,
+                        blockId: targetBlock
+                    };
+                }
+
+                setUploadStatus(`正在发布专栏配置：<code>${escapeHtml(postPath)}</code>`);
+                await putJsonToCOS(postPath, articleJSON);
+                const manifestPost = { id: postPath.split('/').pop(), path: postPath, ...articleJSON };
+                const nextPosts = (contentManifest.posts || []).filter(item => item.path !== postPath);
+                nextPosts.push(manifestPost);
+                nextPosts.sort((a, b) => String(b.date).localeCompare(String(a.date)) || String(b.path).localeCompare(String(a.path)));
+                const nextManifest = {
+                    ...contentManifest,
+                    schemaVersion: 1,
+                    generatedAt: new Date().toISOString(),
+                    posts: nextPosts,
+                    legacyComments: Array.isArray(contentManifest.legacyComments) ? contentManifest.legacyComments : []
+                };
+                await putJsonToCOS(CONTENT_CONFIG.manifestKey || 'content/index.json', nextManifest);
+                contentManifest = nextManifest;
+
+                setUploadStatus(`
+                    <strong>发布成功。</strong><br>
+                    配置文件：<code>${escapeHtml(postPath)}</code><br>
+                    COS 内容索引已经同步更新。
+                `);
+
+                document.getElementById('post-title').value = '';
+                document.getElementById('post-author').value = '';
+                document.getElementById('post-content').value = '';
+                document.getElementById('image-folder-name').value = '';
+                document.getElementById('image-files').value = '';
+                document.getElementById('selected-files').textContent = '尚未选择图片';
+
+                postsDB = await loadAllPostsFromCOS();
+                if (currentPage === 'column_list') await renderApp();
+            } catch (error) {
+                console.error(error);
+                setUploadStatus(`<strong>上传失败：</strong>${escapeHtml(error.message)}<br>请检查 COS 跨域规则、Supabase Edge Function 和管理员权限。`, true);
+            } finally {
+                button.disabled = false;
+                button.textContent = '⬆️ 上传并发布到 COS';
+            }
+        }
+
+        function getPostsByBlock(blockId) {
+            return postsDB.get(blockId) || [];
+        }
+
+        function openLightbox(imageSource) {
+            document.getElementById('lightbox-img').src = imageSource;
+            document.getElementById('lightbox').classList.add('active');
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+            document.getElementById('lightbox-img').src = '';
+        }
+
+        async function normalizeArticleImageSources(content) {
+            const source = String(content || '');
+            const paths = [];
+            source.replace(/src\s*=\s*(['"])(assets\/images\/.*?)\1/gi, (match, quote, objectPath) => {
+                paths.push(objectPath);
+                return match;
+            });
+            const urls = await getSignedObjectUrls(paths);
+            return source.replace(
+                /src\s*=\s*(['"])(assets\/images\/.*?)\1/gi,
+                (match, quote, objectPath) => urls.get(objectPath) ? `src=${quote}${urls.get(objectPath)}${quote}` : match
+            );
+        }
+
+        async function renderArticleDetailPage(post) {
+            const content = await normalizeArticleImageSources(post.content || '');
+            const commentsHtml = await renderCommentsSection(post);
+            const deleteButton = currentUser?.role === 'admin'
+                ? `<button class="detail-delete-btn" onclick="openDeleteDialog('${encodeURIComponent(post.id)}')">🗑️ 删除专栏</button>`
+                : '';
+            return `
+                <div>
+                    <button class="comment-create-btn" onclick="openCommentEditor()">💬 评论</button>
+                    <div class="detail-toolbar">
+                        <button class="back-home-btn" onclick="goBackToColumnList()">← 返回专栏</button>
+                        ${deleteButton}
+                    </div>
+                    <div class="article-detail-page">
+                        <div class="article-detail-header">
+                            <h1 class="article-detail-title">${escapeHtml(post.title)}</h1>
+                            <div class="article-detail-meta">
+                                <span>✍️ ${escapeHtml(post.author)}</span>
+                                <span>📅 ${escapeHtml(post.date || '未知日期')}</span>
+                            </div>
+                        </div>
+                        <div id="article-content" class="article-detail-content">${content || '暂无内容'}</div>
+                        ${commentsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadGalleryImages(post) {
+            if (Array.isArray(post.images) && post.images.length) {
+                const objectPaths = post.images.filter(path => !/^https?:\/\//i.test(path));
+                const urls = await getSignedObjectUrls(objectPaths);
+                return post.images.map(path => ({
+                    name: String(path).split('/').pop() || 'image',
+                    url: /^https?:\/\//i.test(path) ? path : urls.get(path)
+                }));
+            }
+
+            return [];
+        }
+
+        async function renderImageGalleryPage(post) {
+            const deleteButton = currentUser?.role === 'admin'
+                ? `<button class="detail-delete-btn" onclick="openDeleteDialog('${encodeURIComponent(post.id)}')">🗑️ 删除专栏</button>`
+                : '';
+            try {
+                const images = await loadGalleryImages(post);
+                const commentsHtml = await renderCommentsSection(post);
+                const galleryHtml = images.length
+                    ? `<div class="gallery-grid">${images.map(image => {
+                        const encodedUrl = encodeURIComponent(image.url);
+                        return `<figure class="gallery-card"><img src="${escapeHtml(image.url)}" alt="${escapeHtml(image.name)}" loading="lazy" onclick="openLightbox(decodeURIComponent('${encodedUrl}'))"></figure>`;
+                    }).join('')}</div>`
+                    : '<div class="gallery-empty">图片专栏中还没有可显示的图片。</div>';
+
+                return `
+                    <div>
+                        <button class="comment-create-btn" onclick="openCommentEditor()">💬 评论</button>
+                        <div class="detail-toolbar">
+                            <button class="back-home-btn" onclick="goBackToColumnList()">← 返回专栏</button>
+                            ${deleteButton}
+                        </div>
+                        <div class="article-detail-page">
+                            <div class="article-detail-header">
+                                <h1 class="article-detail-title">${escapeHtml(post.title)}</h1>
+                                <div class="article-detail-meta">
+                                    <span>✍️ ${escapeHtml(post.author)}</span>
+                                    <span>📅 ${escapeHtml(post.date || '未知日期')}</span>
+                                    <span>🖼️ ${images.length} 张图片</span>
+                                </div>
+                            </div>
+                            ${galleryHtml}
+                            ${commentsHtml}
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                return `
+                    <div>
+                        <button class="comment-create-btn" onclick="openCommentEditor()">💬 评论</button>
+                        <div class="detail-toolbar">
+                            <button class="back-home-btn" onclick="goBackToColumnList()">← 返回专栏</button>
+                            ${deleteButton}
+                        </div>
+                        <div class="article-detail-page">
+                            <div class="error-message">图片加载失败：${escapeHtml(error.message)}</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        async function renderColumnListPage(blockId, blockTitle) {
+            const posts = getPostsByBlock(blockId);
+            if (!posts.length) {
+                return `
+                    <div class="column-container">
+                        <div class="back-home-bar"><button class="back-home-btn" onclick="backToHome()">← 返回主页</button></div>
+                        <div class="column-header"><h2>📂 ${escapeHtml(blockTitle)}</h2></div>
+                        <div class="empty-posts">${currentUser?.role === 'admin' ? '暂无内容，点击右上角“创作文章”发布。' : '暂无内容。'}</div>
+                    </div>
+                `;
+            }
+
+            const postsHtml = posts.map(post => `
+                <div class="post-card">
+                    <div class="post-title">${escapeHtml(post.title)}</div>
+                    <div class="post-meta">
+                        <span>✍️ ${escapeHtml(post.author)}</span>
+                        <span>📅 ${escapeHtml(post.date || '未知日期')}</span>
+                        <span class="post-type-badge">${post.type === 'image-gallery' ? '🖼️ 图片专栏' : '📝 文章'}</span>
+                    </div>
+                    ${currentUser?.role === 'admin' ? `<button class="delete-post-btn" onclick="openDeleteDialog('${encodeURIComponent(post.id)}')">🗑️ 删除</button>` : ''}
+                    <button class="read-more-link" onclick="viewArticleDetail('${encodeURIComponent(post.id)}')">阅读原文 →</button>
+                </div>
+            `).join('');
+
+            return `
+                <div class="column-container">
+                    <div class="back-home-bar"><button class="back-home-btn" onclick="backToHome()">← 返回主页</button></div>
+                    <div class="column-header"><h2>📂 ${escapeHtml(blockTitle)}</h2><p style="color:#6c8dae;">共 ${posts.length} 个专栏</p></div>
+                    <div class="posts-grid">${postsHtml}</div>
+                </div>
+            `;
+        }
+
+        function setDeleteStatus(html, isError = false) {
+            const status = document.getElementById('delete-status');
+            status.style.display = 'block';
+            status.classList.toggle('error', isError);
+            status.innerHTML = html;
+        }
+
+        function findPostInCurrentBlock(encodedPostId) {
+            const postId = decodeURIComponent(encodedPostId);
+            return getPostsByBlock(currentBlockId).find(item => item.id === postId) || null;
+        }
+
+        function openDeleteDialog(encodedPostId) {
+            if (!ensureAdmin()) return;
+            const post = findPostInCurrentBlock(encodedPostId);
+            if (!post) {
+                alert('找不到要删除的专栏。请刷新页面后重试。');
+                return;
+            }
+
+            pendingDeletePost = post;
+            document.getElementById('delete-target').innerHTML = `
+                <strong>${escapeHtml(post.title)}</strong><br>
+                <span style="color:#64748b;font-size:.8rem;">${escapeHtml(post.path || post.id)}</span>
+            `;
+            document.getElementById('delete-images-row').style.display = post.type === 'image-gallery' ? 'flex' : 'none';
+            document.getElementById('delete-gallery-images').checked = false;
+            document.getElementById('delete-confirm-checkbox').checked = false;
+            document.getElementById('delete-status').style.display = 'none';
+            document.getElementById('delete-overlay').style.display = 'block';
+        }
+
+        function closeDeleteDialog() {
+            document.getElementById('delete-overlay').style.display = 'none';
+            pendingDeletePost = null;
+        }
+
+        function getPostImagePaths(post) {
+            const directPaths = Array.isArray(post?.images)
+                ? post.images.filter(path => typeof path === 'string' && path && !/^https?:\/\//i.test(path))
+                : [];
+            const embedded = [];
+            String(post?.content || '').replace(/src\s*=\s*(['"])(assets\/images\/.*?)\1/gi, (match, quote, path) => {
+                embedded.push(path);
+                return match;
+            });
+            return [...new Set([...directPaths, ...embedded])];
+        }
+
+        async function deleteSelectedPost() {
+            if (!ensureAdmin()) return;
+            const button = document.getElementById('delete-confirm-button');
+            const confirmed = document.getElementById('delete-confirm-checkbox').checked;
+            const deleteImages = document.getElementById('delete-gallery-images').checked;
+            const post = pendingDeletePost;
+
+            if (!post) { setDeleteStatus('没有选中待删除的专栏。', true); return; }
+            if (!confirmed) { setDeleteStatus('请先勾选删除确认。', true); return; }
+            if (!post.path) { setDeleteStatus('当前专栏缺少 COS 文件路径，请刷新页面后重试。', true); return; }
+
+            button.disabled = true;
+            button.textContent = '正在删除…';
+
+            try {
+                let imagePaths = [];
+                if (post.type === 'image-gallery' && deleteImages) {
+                    const referencedElsewhere = new Set(
+                        (contentManifest.posts || [])
+                            .filter(item => item.path !== post.path)
+                            .flatMap(getPostImagePaths)
+                    );
+                    imagePaths = getPostImagePaths(post).filter(path => !referencedElsewhere.has(path));
+                }
+
+                setDeleteStatus(`正在更新内容索引：<code>${escapeHtml(post.path)}</code>`);
+                const nextManifest = {
+                    ...contentManifest,
+                    generatedAt: new Date().toISOString(),
+                    posts: (contentManifest.posts || []).filter(item => item.path !== post.path)
+                };
+                await putJsonToCOS(CONTENT_CONFIG.manifestKey || 'content/index.json', nextManifest);
+                contentManifest = nextManifest;
+                setDeleteStatus(`正在删除 COS 对象；被其他专栏引用的共享图片会自动保留。`);
+                await contentGateway('delete-objects', { keys: [post.path, ...imagePaths] });
+
+                postsDB = await loadAllPostsFromCOS();
+                currentPage = 'column_list';
+                currentPost = null;
+                pendingDeletePost = null;
+                document.getElementById('delete-overlay').style.display = 'none';
+                await renderApp();
+            } catch (error) {
+                console.error(error);
+                setDeleteStatus(`<strong>删除失败：</strong>${escapeHtml(error.message)}<br>请检查 COS 网关、管理员权限和网络状态。`, true);
+            } finally {
+                button.disabled = false;
+                button.textContent = '永久删除';
+            }
+        }
+
+        function viewArticleDetail(encodedPostId) {
+            const postId = decodeURIComponent(encodedPostId);
+            const post = getPostsByBlock(currentBlockId).find(item => item.id === postId);
+            if (!post) { alert('文章不存在'); return; }
+            currentPage = 'article_detail';
+            currentPost = post;
+            renderApp();
+        }
+
+        function goBackToColumnList() {
+            currentPage = 'column_list';
+            currentPost = null;
+            renderApp();
+        }
+
+        function goToColumnList(blockId, blockTitle) {
+            currentPage = 'column_list';
+            currentBlockId = blockId;
+            currentBlockTitle = blockTitle;
+            currentPost = null;
+            renderApp();
+        }
+
+        function backToHome() {
+            currentPage = 'index';
+            currentBlockId = null;
+            currentBlockTitle = null;
+            currentPost = null;
+            renderApp();
+        }
+
+        function attachArticleImageLightbox() {
+            document.querySelectorAll('#article-content img').forEach(image => {
+                image.addEventListener('click', () => openLightbox(image.currentSrc || image.src));
+            });
+        }
+
+        async function renderApp() {
+            const root = document.getElementById('app-root');
+
+            if (currentPage === 'index') {
+                root.innerHTML = `
+                    <div class="hero-index">
+                        <div class="greeting-tag">✦ 双人宇宙 ✦</div>
+                        <div class="main-headline">邓杰 · 王泊宁<br>两人的日常</div>
+                        <div class="subhead">独立轨迹 · 交叠星光</div>
+                        <div class="triple-links">
+                            <div class="daily-card" data-person="dengjie"><div class="card-icon">🌿</div><div class="card-name">邓杰的日常</div><div class="card-desc">全栈 · 光影收集者</div></div>
+                            <div class="daily-card" data-person="wangboning"><div class="card-icon">🎨</div><div class="card-name">王泊宁的日常</div><div class="card-desc">创意开发 · 设计思维</div></div>
+                            <div class="daily-card" data-person="together"><div class="card-icon">✨🤝✨</div><div class="card-name">两人的共同日常</div><div class="card-desc">共同项目 · 双城灵感</div></div>
+                        </div>
+                        <div class="footer-note">点击卡片进入 · 支持文章专栏和图片专栏</div>
+                    </div>
+                `;
+                document.querySelectorAll('.daily-card').forEach(card => {
+                    card.addEventListener('click', () => { currentPage = card.dataset.person; renderApp(); });
+                });
+                return;
+            }
+
+            if (currentPage === 'column_list') {
+                root.innerHTML = await renderColumnListPage(currentBlockId, currentBlockTitle);
+                return;
+            }
+
+            if (currentPage === 'article_detail') {
+                root.innerHTML = '<div class="loading">正在加载内容...</div>';
+                if (currentPost?.type === 'image-gallery') {
+                    root.innerHTML = await renderImageGalleryPage(currentPost);
+                } else {
+                    root.innerHTML = await renderArticleDetailPage(currentPost || {});
+                    attachArticleImageLightbox();
+                }
+                return;
+            }
+
+            const data = personsData[currentPage];
+            if (!data) { backToHome(); return; }
+            const block1Html = `<div class="block-split-3">${data.block1Items.map((item, index) => `
+                <div class="shape-card ${index === 0 ? 'shape-triangle-left' : index === 1 ? 'shape-trapezoid-mid' : 'shape-reverse-triangle'}">
+                    <a class="section-link" onclick="goToColumnList('${item.blockId}','${escapeHtml(item.title)}')">↗</a>
+                    <div class="block-icon">${item.icon}</div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.desc)}</p>
+                </div>
+            `).join('')}</div>`;
+            const block2Html = `<div class="block-single"><a class="section-link" onclick="goToColumnList('${data.singleBlockId}','${escapeHtml(data.singleTitle)}')">↗</a><div class="single-content"><div><h2>${escapeHtml(data.singleTitle)}</h2>${data.singleDesc ? `<p>${escapeHtml(data.singleDesc)}</p>` : ''}</div>${data.singleStat ? `<div class="single-stats">✨ ${escapeHtml(data.singleStat)}</div>` : ''}</div></div>`;
+            const block3Html = `<div class="block-split-2"><div class="dual-left"><a class="section-link" onclick="goToColumnList('${data.leftBlockId}','${escapeHtml(data.leftTitle)}')">↗</a><h3>${escapeHtml(data.leftTitle)}</h3><div class="hobby-list">${data.leftHobbies.map(hobby => `<span class="hobby-badge">${escapeHtml(hobby)}</span>`).join('')}</div><p>“${escapeHtml(data.leftQuote)}”</p></div><div class="dual-right"><a class="section-link" onclick="goToColumnList('${data.rightBlockId}','${escapeHtml(data.rightTitle)}')">↗</a><h3>${escapeHtml(data.rightTitle)}</h3><div class="hobby-list">${data.rightHobbies.map(hobby => `<span class="hobby-badge">${escapeHtml(hobby)}</span>`).join('')}</div><p>“${escapeHtml(data.rightQuote)}”</p></div></div>`;
+            root.innerHTML = `<div class="detail-page"><div class="back-home-bar"><button class="back-home-btn" onclick="backToHome()">← 返回首页</button></div><div style="text-align:center;margin-bottom:1rem;"><h1>${escapeHtml(data.name)}</h1><div>${escapeHtml(data.titleNote)}</div><div style="color:#6c8dae;">${escapeHtml(data.roleDesc)}</div></div><div class="irregular-stack">${block1Html}${block2Html}${block3Html}</div><div class="detail-footer" style="text-align:center;margin-top:2rem;font-size:0.75rem;color:#8ba0bc;">点击 ↗ 进入专栏 · 支持文章和图片两种类型</div></div>`;
+        }
+
+        function openEditor() {
+            if (!ensureAdmin()) return;
+            document.getElementById('editor-overlay').style.display = 'block';
+            document.getElementById('upload-guide').style.display = 'none';
+            document.getElementById('post-type').dispatchEvent(new Event('change'));
+        }
+
+        function closeEditor() {
+            document.getElementById('editor-overlay').style.display = 'none';
+        }
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') {
+                closeLightbox();
+                closeEditor();
+                closeDeleteDialog();
+                closeCommentEditor();
+                closeCommentDeleteDialog();
+                closeAccessRequest();
+                closeUserManager();
+            }
+        });
+
+        (async function init() {
+            try {
+                await initializeAuthentication();
+            } catch (error) {
+                console.error('初始化失败：', error);
+                showLoginScreen(`初始化失败：${error.message}`, true);
+            }
+        })();
+    </script>
+</body>
+</html>
