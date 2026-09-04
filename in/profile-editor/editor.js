@@ -3,7 +3,7 @@
 
   const config = window.SITE_SUPABASE_CONFIG || {};
   const contentConfig = window.SITE_CONTENT_CONFIG || {};
-  const editorAssignments = new Map([['lena', 'wangboning'], ['叶清枫林', 'dengjie']]);
+  const editorAssignments = new Map([['lena11', 'wangboning'], ['叶清枫林', 'dengjie']]);
   const defaults = {
     dengjie: { profileId: 'dengjie', displayName: 'Jie Deng', initials: 'JD' },
     wangboning: { profileId: 'wangboning', displayName: 'Boning Wang', initials: 'BW' }
