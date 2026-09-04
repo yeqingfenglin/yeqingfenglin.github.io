@@ -123,7 +123,7 @@
         .session-action-btn:hover { background: #dbeafe; }
         .session-action-btn.logout { color: #64748b; background: #f1f5f9; }
 
-        #auth-overlay, #access-request-overlay, #user-manager-overlay, #review-user-overlay { display: none; position: fixed; inset: 0; width: 100%; height: 100%; background: rgba(15,23,42,.7); z-index: 4000; backdrop-filter: blur(7px); }
+        #auth-overlay, #access-request-overlay, #user-manager-overlay, #review-user-overlay, #backup-options-overlay { display: none; position: fixed; inset: 0; width: 100%; height: 100%; background: rgba(15,23,42,.7); z-index: 4000; backdrop-filter: blur(7px); }
         #auth-overlay { display: none; }
         #access-request-overlay, #review-user-overlay { z-index: 4100; }
         .auth-modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 430px; background: white; border-radius: 1.6rem; padding: 2rem; box-shadow: 0 25px 60px rgba(15,23,42,.3); }
@@ -168,12 +168,23 @@
     <div id="session-banner" class="session-banner">
         <div id="session-greeting"></div>
         <div class="session-actions">
-            <button id="export-backup-button" class="session-action-btn" onclick="exportCompleteBackup()" style="display:none;">导出完整备份</button>
+            <button id="edit-profile-button" class="session-action-btn" onclick="openProfileEditor()" style="display:none;">修改个人主页</button>
+            <button id="export-backup-button" class="session-action-btn" onclick="openBackupOptions()" style="display:none;">导出备份</button>
             <button id="manage-users-button" class="session-action-btn" onclick="openUserManager()" style="display:none;">管理用户</button>
             <button class="session-action-btn logout" onclick="logoutCurrentUser()">退出登录</button>
         </div>
     </div>
     <div id="app-root" class="app-container"><div class="loading">📡 正在加载...</div></div>
+
+    <div id="backup-options-overlay">
+        <div class="auth-modal">
+            <h2 class="auth-title" style="font-size:1.45rem;">选择备份范围</h2>
+            <div class="auth-subtitle">备份文件不会包含密码、COS 密钥或 Supabase 服务端密钥。</div>
+            <button class="submit-btn" onclick="exportCompleteBackup('all')">备份全部内容（内版 + 外版）</button>
+            <button class="submit-btn" onclick="exportCompleteBackup('internal')">仅备份内版内容</button>
+            <button class="submit-btn cancel" onclick="closeBackupOptions()">取消</button>
+        </div>
+    </div>
 
     <div id="lightbox" class="lightbox" onclick="closeLightbox()">
         <span class="lightbox-close">&times;</span>
@@ -593,14 +604,32 @@
             document.getElementById('access-request-overlay').style.display = 'none';
             document.getElementById('session-banner').style.display = 'block';
             const isAdmin = currentUser.role === 'admin';
+            const editableProfile = getEditableProfileId(currentUser.username);
             document.getElementById('session-greeting').textContent = isAdmin
                 ? '欢迎回家，请随意创作'
                 : `欢迎你的来访，“${currentUser.username}”`;
             document.getElementById('manage-users-button').style.display = isAdmin ? 'inline-block' : 'none';
             document.getElementById('export-backup-button').style.display = isAdmin ? 'inline-block' : 'none';
+            document.getElementById('edit-profile-button').style.display = isAdmin && editableProfile ? 'inline-block' : 'none';
             document.querySelector('.create-post-btn').style.display = isAdmin ? 'block' : 'none';
 
             await loadAndRenderSiteContent();
+        }
+
+        function getEditableProfileId(username) {
+            const normalized = normalizeUsername(username);
+            if (normalized === 'lena') return 'wangboning';
+            if (normalized === '叶清枫林') return 'dengjie';
+            return '';
+        }
+
+        function openProfileEditor() {
+            const profileId = currentUser?.role === 'admin' ? getEditableProfileId(currentUser.username) : '';
+            if (!profileId) {
+                alert('当前账号没有被分配个人主页编辑权限。');
+                return;
+            }
+            window.location.href = '/in/profile-editor/';
         }
 
         function isEdgeFunctionNetworkError(error) {
@@ -765,8 +794,18 @@
             }
         }
 
-        async function exportCompleteBackup() {
+        function openBackupOptions() {
             if (!ensureAdmin()) return;
+            document.getElementById('backup-options-overlay').style.display = 'block';
+        }
+
+        function closeBackupOptions() {
+            document.getElementById('backup-options-overlay').style.display = 'none';
+        }
+
+        async function exportCompleteBackup(scope = 'internal') {
+            if (!ensureAdmin()) return;
+            closeBackupOptions();
             const button = document.getElementById('export-backup-button');
             button.disabled = true;
             button.textContent = '正在导出…';
@@ -781,44 +820,147 @@
                 zip.file('comments.json', `${JSON.stringify(comments, null, 2)}\n`);
                 zip.file('profiles.json', `${JSON.stringify(profiles, null, 2)}\n`);
                 const imagePaths = [...new Set(comments.flatMap(comment => Array.isArray(comment.images) ? comment.images : []))];
-                const imageErrors = [];
+                const backupErrors = [];
                 for (let index = 0; index < imagePaths.length; index += 1) {
                     const imagePath = imagePaths[index];
                     button.textContent = `备份图片 ${index + 1}/${imagePaths.length}`;
                     const { data, error } = await supabaseClient.storage.from('comment-images').download(imagePath);
-                    if (error || !data) imageErrors.push(`${imagePath}: ${error?.message || '下载失败'}`);
+                    if (error || !data) backupErrors.push(`supabase-comment-images/${imagePath}: ${error?.message || '下载失败'}`);
                     else zip.file(`supabase-comment-images/${imagePath}`, data, { compression: 'STORE' });
                 }
+
+                const internalCosKeys = new Set();
+                for (const post of contentManifest.posts || []) {
+                    if (post.path) internalCosKeys.add(post.path);
+                    for (const image of Array.isArray(post.images) ? post.images : []) {
+                        if (typeof image === 'string' && image && !/^https?:\/\//i.test(image)) internalCosKeys.add(image);
+                    }
+                    String(post.content || '').replace(/src\s*=\s*(['"])(assets\/images\/.*?)\1/gi, (match, quote, image) => {
+                        internalCosKeys.add(image);
+                        return match;
+                    });
+                }
+                for (const comment of contentManifest.legacyComments || []) {
+                    if (comment.sourcePath) internalCosKeys.add(comment.sourcePath);
+                    for (const image of Array.isArray(comment.images) ? comment.images : []) {
+                        if (typeof image === 'string' && image && !/^https?:\/\//i.test(image)) internalCosKeys.add(image);
+                    }
+                }
+                const internalKeys = [...internalCosKeys];
+                let internalCosIncluded = 0;
+                if (internalKeys.length) {
+                    const signedUrls = await getSignedObjectUrls(internalKeys);
+                    for (let index = 0; index < internalKeys.length; index += 1) {
+                        const key = internalKeys[index];
+                        button.textContent = `备份内版 COS 内容 ${index + 1}/${internalKeys.length}`;
+                        try {
+                            const url = signedUrls.get(key);
+                            if (!url) throw new Error('缺少下载链接');
+                            const response = await fetch(url);
+                            if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+                            zip.file(`cos-site-content/${key}`, await response.blob(), { compression: 'STORE' });
+                            internalCosIncluded += 1;
+                        } catch (error) {
+                            backupErrors.push(`cos-site-content/${key}: ${error.message}`);
+                        }
+                    }
+                }
+
+                let publicProfileCount = 0;
+                let publicFilesExpected = 0;
+                let publicFilesIncluded = 0;
+                let publicStaticFilesIncluded = 0;
+                if (scope === 'all') {
+                    button.textContent = '正在备份外版个人主页…';
+                    const publicStaticPaths = [
+                        '/out/index.html',
+                        '/out/dengjie/index.html',
+                        '/out/wangboning/index.html',
+                        '/out/tool/index.html',
+                        '/out/assets/out.css',
+                        '/out/assets/public-profile.js'
+                    ];
+                    for (let index = 0; index < publicStaticPaths.length; index += 1) {
+                        const path = publicStaticPaths[index];
+                        button.textContent = `备份外版页面 ${index + 1}/${publicStaticPaths.length}`;
+                        try {
+                            const response = await fetch(path, { cache: 'no-store' });
+                            if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+                            zip.file(`public-site${path}`, await response.blob());
+                            publicStaticFilesIncluded += 1;
+                        } catch (error) {
+                            backupErrors.push(`public-site${path}: ${error.message}`);
+                        }
+                    }
+                    const { profiles: publicProfiles = [] } = await contentGateway('get-profile-backup');
+                    publicProfileCount = publicProfiles.length;
+                    for (const publicProfile of publicProfiles) {
+                        const profileId = publicProfile.profileId || 'unknown';
+                        const files = Array.isArray(publicProfile.files) ? publicProfile.files : [];
+                        const cleanProfile = {
+                            ...publicProfile,
+                            files: files.map(({ url, expiresAt, ...file }) => file)
+                        };
+                        zip.file(`public-profiles/${profileId}/profile.json`, `${JSON.stringify(cleanProfile, null, 2)}\n`);
+                        publicFilesExpected += files.length;
+                        for (let index = 0; index < files.length; index += 1) {
+                            const file = files[index];
+                            button.textContent = `备份外版文件 ${publicFilesIncluded + 1}/${publicFilesExpected}`;
+                            try {
+                                if (!file.url) throw new Error('缺少下载链接');
+                                const response = await fetch(file.url);
+                                if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+                                const safeName = String(file.name || `file-${index + 1}`).replace(/[\\/:*?"<>|]/g, '-');
+                                zip.file(`public-profiles/${profileId}/files/${String(index + 1).padStart(2, '0')}-${safeName}`, await response.blob(), { compression: 'STORE' });
+                                publicFilesIncluded += 1;
+                            } catch (error) {
+                                backupErrors.push(`public-profiles/${profileId}/${file.name || file.key}: ${error.message}`);
+                            }
+                        }
+                    }
+                }
                 const backupManifest = {
-                    schemaVersion: 1,
+                    schemaVersion: 2,
+                    scope,
                     exportedAt: new Date().toISOString(),
                     comments: comments.length,
                     profiles: profiles.length,
                     commentImagesExpected: imagePaths.length,
-                    commentImagesIncluded: imagePaths.length - imageErrors.length,
+                    commentImagesIncluded: imagePaths.length - backupErrors.filter(item => item.startsWith('supabase-comment-images/')).length,
+                    internalCosObjectsExpected: internalKeys.length,
+                    internalCosObjectsIncluded: internalCosIncluded,
+                    publicProfiles: publicProfileCount,
+                    publicFilesExpected,
+                    publicFilesIncluded,
+                    publicStaticFilesExpected: scope === 'all' ? 6 : 0,
+                    publicStaticFilesIncluded,
                     note: '不含密码或腾讯云密钥；Supabase Auth 密码由 Supabase 托管，不能从浏览器导出。'
                 };
                 zip.file('backup-manifest.json', `${JSON.stringify(backupManifest, null, 2)}\n`);
-                zip.file('README.txt', '这是网站管理员导出的评论、评论图片、用户资料与当前 COS 内容索引备份。请离线保存，不要上传到公开 GitHub。\n');
-                if (imageErrors.length) zip.file('_ERRORS.txt', `${imageErrors.join('\n')}\n`);
+                zip.file('README.txt', scope === 'all'
+                    ? '这是网站管理员导出的内版数据与外版个人主页完整备份。请离线保存，不要上传到公开 GitHub。\n'
+                    : '这是网站管理员导出的内版评论、评论图片、用户资料与当前 COS 内容索引备份。外版个人主页未包含。请离线保存，不要上传到公开 GitHub。\n');
+                if (backupErrors.length) zip.file('_ERRORS.txt', `${backupErrors.join('\n')}\n`);
                 const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = `yqfl-complete-backup-${getTaipeiDate()}.zip`;
+                link.download = `yqfl-${scope === 'all' ? 'all-content' : 'internal'}-backup-${getTaipeiDate()}.zip`;
                 document.body.appendChild(link);
                 link.click();
                 link.remove();
                 URL.revokeObjectURL(url);
-                alert(imageErrors.length
-                    ? `备份已导出，但有 ${imageErrors.length} 张评论图片下载失败；详情见压缩包内 _ERRORS.txt。请不要删除原数据。`
-                    : `完整备份已导出：${comments.length} 条评论、${imagePaths.length} 张评论图片。`);
+                alert(backupErrors.length
+                    ? `备份已导出，但有 ${backupErrors.length} 个文件下载失败；详情见压缩包内 _ERRORS.txt。请不要删除原数据。`
+                    : scope === 'all'
+                        ? `全部内容备份已导出：内版数据、${publicProfileCount} 个外版个人主页和 ${publicFilesIncluded} 个外版文件。`
+                        : `内版备份已导出：${comments.length} 条评论、${imagePaths.length} 张评论图片。`);
             } catch (error) {
                 console.error(error);
                 alert(`备份导出失败：${error.message}\n原数据没有被修改。`);
             } finally {
                 button.disabled = false;
-                button.textContent = '导出完整备份';
+                button.textContent = '导出备份';
             }
         }
 
@@ -1885,6 +2027,7 @@
                 closeCommentDeleteDialog();
                 closeAccessRequest();
                 closeUserManager();
+                closeBackupOptions();
             }
         });
 

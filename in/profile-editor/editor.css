@@ -1,0 +1,28 @@
+body { padding-bottom: 96px; }
+.editor-notice { width: min(calc(100% - 2rem), 1080px); margin: 1.25rem auto .75rem; padding: .9rem 1rem; border-left: 4px solid #0b2545; background: #f3f6f9; color: #000; font-size: .9rem; }
+.format-toolbar { position: sticky; top: 69px; z-index: 15; width: min(calc(100% - 2rem), 1080px); margin: 0 auto; padding: .65rem; display: flex; align-items: center; gap: .45rem; flex-wrap: wrap; border: 1px solid #dce2ea; background: rgba(255,255,255,.97); box-shadow: 0 8px 20px rgba(11,37,69,.07); }
+.format-toolbar button { padding: .4rem .65rem; border: 1px solid #0b2545; background: #fff; color: #0b2545; cursor: pointer; }
+.format-toolbar button:hover, .format-toolbar button:focus-visible { background: #0b2545; color: #fff; }
+.format-toolbar span { margin-left: .35rem; color: #0b2545; font-size: .82rem; }
+.editable-text, .editable-rich { border-radius: .2rem; outline: 1px dashed rgba(11,37,69,.38); outline-offset: .25rem; }
+.editable-text:hover, .editable-rich:hover { outline-color: #0b2545; }
+.editable-text:focus, .editable-rich:focus { outline: 2px solid #0b2545; background: #fff; }
+.inline-edit { display: inline-block; min-width: 8rem; }
+.editor-sidebar-list li { min-height: 1.4rem; }
+.editor-state { width: min(calc(100% - 2rem), 1080px); margin: 3rem auto; padding: 1rem; color: #0b2545; text-align: center; }
+.editor-state.error { border: 1px solid #b91c1c; background: #fff1f2; color: #8a1010; }
+.file-hint { margin: 0 0 1rem; color: #0b2545; }
+#profile-files-input { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.file-picker { display: inline-block; padding: .55rem .9rem; border: 1px solid #0b2545; color: #0b2545; cursor: pointer; }
+.file-picker:hover { background: #0b2545; color: #fff; }
+.editor-file-list { margin: 1rem 0 0; padding: 0; list-style: none; }
+.editor-file-item { padding: .75rem 0; display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 1px solid #dce2ea; }
+.editor-file-meta { color: #0b2545; font-size: .84rem; }
+.remove-file { border: 0; background: transparent; color: #8a1010; cursor: pointer; text-decoration: underline; }
+.save-bar { position: fixed; right: 1rem; bottom: 1rem; z-index: 30; max-width: calc(100% - 2rem); padding: .75rem; display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; justify-content: flex-end; border: 1px solid #dce2ea; background: rgba(255,255,255,.97); box-shadow: 0 14px 40px rgba(11,37,69,.18); }
+.save-bar span { margin-right: .35rem; color: #0b2545; font-size: .84rem; }
+.save-bar button { padding: .65rem .95rem; border: 1px solid #0b2545; cursor: pointer; font-weight: 700; }
+.restore-button { background: #fff; color: #0b2545; }
+.save-button { background: #0b2545; color: #fff; }
+.save-bar button:disabled { opacity: .55; cursor: wait; }
+@media (max-width: 500px) { .format-toolbar { top: 111px; } .save-bar { left: .75rem; right: .75rem; } .save-bar span { width: 100%; } }

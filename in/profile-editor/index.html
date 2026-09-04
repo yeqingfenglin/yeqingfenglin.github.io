@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>修改个人主页</title>
+  <link rel="stylesheet" href="/out/assets/out.css">
+  <link rel="stylesheet" href="/in/profile-editor/editor.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav-wrap" aria-label="编辑器导航">
+      <strong id="editor-brand" class="brand">修改个人主页</strong>
+      <div class="nav-links">
+        <a href="/in/">返回内版</a>
+        <a id="preview-link" href="/out/" target="_blank" rel="noopener noreferrer">打开公开主页</a>
+      </div>
+    </nav>
+  </header>
+
+  <div class="editor-notice">
+    <strong>编辑提示：</strong>点击主页中的文字即可修改。选中个别文字后可用工具栏增加超链接。保存时，文字和文件索引会写入腾讯云 COS；单个文件上限 25 MB。
+  </div>
+
+  <div class="format-toolbar" role="toolbar" aria-label="文字格式工具">
+    <button type="button" data-command="bold"><strong>B</strong> 粗体</button>
+    <button type="button" data-command="italic"><em>I</em> 斜体</button>
+    <button type="button" id="add-link-button">增加超链接</button>
+    <button type="button" data-command="unlink">取消超链接</button>
+    <span>先选中文字，再点击链接按钮；链接只作用于选中的文字。</span>
+  </div>
+
+  <main id="editor-main" class="profile-page" hidden>
+    <aside class="academic-sidebar" aria-label="个人资料编辑">
+      <div class="portrait-placeholder" aria-label="头像位置">—</div>
+      <h2 class="sidebar-name editable-text" data-field="displayName" contenteditable="true" spellcheck="true"></h2>
+      <p class="sidebar-role editable-text" data-field="title" contenteditable="true" spellcheck="true"></p>
+      <ul class="sidebar-links editor-sidebar-list">
+        <li class="editable-text" data-field="location" contenteditable="true" spellcheck="true"></li>
+        <li class="editable-text" data-field="email" contenteditable="true" spellcheck="false"></li>
+        <li class="editable-rich" data-field="linksHtml" contenteditable="true" spellcheck="true"></li>
+      </ul>
+    </aside>
+
+    <article class="academic-main">
+      <section id="about">
+        <h1 class="editable-text" data-field="aboutHeading" contenteditable="true" spellcheck="true"></h1>
+        <p class="last-updated">Changes remain private until you select “保存修改”.</p>
+        <div class="lead editable-rich" data-field="aboutHtml" contenteditable="true" spellcheck="true"></div>
+      </section>
+
+      <section id="research">
+        <h2 class="editable-text" data-field="researchHeading" contenteditable="true" spellcheck="true"></h2>
+        <div class="pending-copy editable-rich" data-field="researchHtml" contenteditable="true" spellcheck="true"></div>
+      </section>
+
+      <section id="publications">
+        <h2 class="editable-text" data-field="publicationsHeading" contenteditable="true" spellcheck="true"></h2>
+        <ul class="academic-list editable-rich" data-field="publicationsHtml" contenteditable="true" spellcheck="true"></ul>
+      </section>
+
+      <section id="education">
+        <h2 class="editable-text" data-field="educationHeading" contenteditable="true" spellcheck="true"></h2>
+        <ul class="academic-list editable-rich" data-field="educationHtml" contenteditable="true" spellcheck="true"></ul>
+      </section>
+
+      <section id="files">
+        <h2 class="editable-text" data-field="documentsHeading" contenteditable="true" spellcheck="true"></h2>
+        <p class="file-hint">可直接添加 PDF、Word、PowerPoint、Excel、纯文本及常见图片文件。文件将保存到当前个人主页专属的 COS 目录，并在公开主页生成下载链接。</p>
+        <label class="file-picker" for="profile-files-input">选择文件</label>
+        <input id="profile-files-input" type="file" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.md,.csv,.zip,.png,.jpg,.jpeg,.webp">
+        <ul id="editor-files" class="editor-file-list"></ul>
+      </section>
+    </article>
+  </main>
+
+  <div id="editor-loading" class="editor-state">正在核验权限并加载主页…</div>
+  <div id="editor-error" class="editor-state error" hidden></div>
+
+  <div id="save-bar" class="save-bar" hidden>
+    <span id="save-status" role="status">尚未保存新的修改</span>
+    <button id="restore-button" type="button" class="restore-button">恢复已保存内容</button>
+    <button id="save-button" type="button" class="save-button">保存修改</button>
+  </div>
+
+  <script src="/supabase-config.js"></script>
+  <script src="/content-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/in/profile-editor/editor.js"></script>
+</body>
+</html>

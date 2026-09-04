@@ -7,16 +7,16 @@
   <title>Jie Deng | Academic Profile</title>
   <link rel="stylesheet" href="/out/assets/out.css">
 </head>
-<body>
+<body data-profile-id="dengjie">
   <a class="skip-link" href="#main">Skip to main content</a>
   <header class="site-header">
     <nav class="nav-wrap" aria-label="Main navigation">
-      <a class="brand" href="/out/dengjie/">Jie Deng</a>
+      <a class="brand" href="/out/dengjie/" data-profile-name>Jie Deng</a>
       <div class="nav-links">
         <a href="#about">About</a>
         <a href="#research">Research</a>
         <a href="#publications">Publications</a>
-        <a href="#cv">CV</a>
+        <a href="#education">Education</a>
         <a href="/out/">Profiles</a>
         <a href="/out/tool/">Tools</a>
       </div>
@@ -26,45 +26,52 @@
   <main id="main" class="profile-page">
     <aside class="academic-sidebar" aria-label="Profile information">
       <div class="portrait-placeholder" aria-label="Portrait placeholder for Jie Deng">JD</div>
-      <h2 class="sidebar-name">Jie Deng</h2>
-      <p class="sidebar-role">Academic title and affiliation to be added</p>
+      <h2 id="profile-name" class="sidebar-name">Jie Deng</h2>
+      <p id="profile-title" class="sidebar-role">Academic title and affiliation to be added</p>
       <ul class="sidebar-links">
-        <li>Location to be added</li>
-        <li>Email to be added</li>
-        <li>Google Scholar to be added</li>
-        <li>ORCID to be added</li>
-        <li>GitHub to be added</li>
+        <li id="profile-location">Location to be added</li>
+        <li id="profile-email">Email to be added</li>
+        <li id="profile-links">Academic links to be added</li>
       </ul>
     </aside>
 
     <article class="academic-main">
       <section id="about">
-        <h1>About Jie Deng</h1>
-        <p class="last-updated">Profile content is being prepared</p>
-        <p class="lead">A concise academic biography will appear here, including current work, academic background, research interests, and opportunities for collaboration.</p>
+        <h1 id="profile-about-heading">About Jie Deng</h1>
+        <p id="profile-updated" class="last-updated">Profile content is being prepared</p>
+        <div id="profile-about" class="lead"><p>A concise academic biography will appear here, including current work, academic background, research interests, and opportunities for collaboration.</p></div>
       </section>
 
       <section id="research">
-        <h2>Research Interests</h2>
-        <p class="pending-copy">Research areas, current questions, methods, and ongoing projects will be listed here.</p>
+        <h2 id="profile-research-heading">Research Interests</h2>
+        <div id="profile-research" class="pending-copy"><p>Research areas, current questions, methods, and ongoing projects will be listed here.</p></div>
       </section>
 
       <section id="publications">
-        <h2>Selected Publications</h2>
-        <ul class="academic-list">
+        <h2 id="profile-publications-heading">Selected Publications</h2>
+        <ul id="profile-publications" class="academic-list">
           <li class="academic-item"><span class="academic-year">Paper</span><div><h3>Publication title to be added</h3><p>Authors, journal or conference, year, abstract, PDF, and related links.</p></div></li>
         </ul>
       </section>
 
-      <section id="cv">
-        <h2>Education & Experience</h2>
-        <ul class="academic-list">
+      <section id="education">
+        <h2 id="profile-education-heading">Education</h2>
+        <ul id="profile-education" class="academic-list">
           <li class="academic-item"><span class="academic-year">Year</span><div><h3>Institution to be added</h3><p>Degree, field of study, or academic position.</p></div></li>
         </ul>
+      </section>
+
+      <section id="files" class="profile-files-section" hidden>
+        <h2 id="profile-documents-heading">Documents</h2>
+        <ul id="profile-files" class="academic-list"></ul>
       </section>
     </article>
   </main>
 
-  <footer class="site-footer"><div class="footer-wrap">Jie Deng · Academic Profile</div></footer>
+  <footer class="site-footer"><div class="footer-wrap"><span data-profile-name>Jie Deng</span> · Academic Profile</div></footer>
+  <script src="/supabase-config.js"></script>
+  <script src="/content-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/out/assets/public-profile.js"></script>
 </body>
 </html>
