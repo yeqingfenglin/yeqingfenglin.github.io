@@ -70,10 +70,10 @@
     const active = activeRows.get(field);
     let index = active?.isConnected ? active.rowIndex : table.rows.length - 1;
     if (action === 'add') {
-      const row = table.insertRow(index + 1);
+      const row = table.insertRow(0);
       row.insertCell().innerHTML = '<br>';
       row.insertCell().innerHTML = '<br>';
-      index += 1;
+      index = 0;
     } else {
       if (!active?.isConnected) return alert('请先点击要删除的经历所在行。');
       if (active.textContent.trim() && !confirm('删除这一行经历及其中的内容？')) return;
