@@ -7,6 +7,8 @@
   --paper: #ffffff;
   --accent: #0b2545;
   --accent-2: #0b2545;
+  --link: #176b87;
+  --link-hover: #104d63;
   --header-bg: rgba(255, 255, 255, .94);
   --hover-border: #7b8ca3;
   --surface-shadow: rgba(11, 37, 69, .12);
@@ -24,6 +26,8 @@
   --paper: #000000;
   --accent: #a9c8ef;
   --accent-2: #a9c8ef;
+  --link: #79cddd;
+  --link-hover: #b3eaf2;
   --header-bg: rgba(0, 0, 0, .94);
   --hover-border: #6f88a6;
   --surface-shadow: rgba(0, 0, 0, .55);
@@ -183,6 +187,25 @@ a { color: inherit; }
 .sidebar-detail-text[contenteditable]:empty::before { content: attr(data-placeholder); color: var(--muted); pointer-events: none; }
 .sidebar-links a { color: var(--accent); text-decoration: none; }
 .sidebar-links a:hover { text-decoration: underline; text-underline-offset: .2em; }
+.academic-main a[href], .academic-sidebar a[href] {
+  color: var(--link) !important;
+  text-decoration: underline;
+  text-decoration-thickness: .06em;
+  text-underline-offset: .2em;
+  text-decoration-skip-ink: auto;
+}
+/* Rich-text colour spans must follow the link's active theme colour. */
+.academic-main a[href] *, .academic-sidebar a[href] * { color: inherit !important; }
+.academic-main a[href]:hover, .academic-sidebar a[href]:hover,
+.academic-main a[href]:focus-visible, .academic-sidebar a[href]:focus-visible {
+  color: var(--link-hover) !important;
+  text-decoration-thickness: .1em;
+}
+.academic-main a[href]:focus-visible, .academic-sidebar a[href]:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
 .academic-main { min-width: 0; }
 .academic-main > section { scroll-margin-top: 90px; }
 .academic-main > section + section { margin-top: 3.25rem; }
