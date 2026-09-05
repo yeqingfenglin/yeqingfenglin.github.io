@@ -221,6 +221,23 @@ a { color: inherit; }
 .academic-item h3 { margin: 0 0 .25rem; font-size: 1rem; }
 .academic-item p { margin: 0; color: var(--muted); font-size: .94rem; }
 
+/* Keep the editor and public profile typography consistent. */
+.academic-main :is(#profile-about, #profile-research, #profile-publications, #profile-education, #profile-teaching, .editable-rich),
+.academic-main .experience-table td + td {
+  text-align: justify;
+  text-align-last: start;
+  text-justify: inter-word;
+  word-spacing: .02em;
+  hyphens: auto;
+  overflow-wrap: break-word;
+}
+.academic-main .experience-table td:first-child,
+.academic-main .academic-year {
+  text-align: start;
+  word-spacing: normal;
+  hyphens: none;
+}
+
 .tools-heading { padding: clamp(3.5rem, 8vw, 6rem) 0 2.5rem; border-bottom: 1px solid var(--line); }
 .tools-heading h1 { margin: 0 0 .75rem; font: 650 clamp(2.6rem, 6vw, 4.6rem)/1.15 inherit; }
 .tools-heading p { max-width: 680px; margin: 0; color: var(--muted); }

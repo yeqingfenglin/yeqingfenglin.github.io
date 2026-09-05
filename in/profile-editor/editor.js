@@ -299,6 +299,22 @@
     return profile;
   }
 
+  async function uploadError(response, label) {
+    let code = '';
+    try {
+      const xml = new DOMParser().parseFromString(await response.text(), 'application/xml');
+      const value = xml.querySelector('Code')?.textContent || '';
+      if (/^[A-Za-z0-9_-]{1,80}$/.test(value)) code = value;
+    } catch (_) { /* Preserve the HTTP status when COS supplies no readable XML. */ }
+    const hints = {
+      SignatureDoesNotMatch: '上传签名不匹配，请更新 cos-content 后台函数后重试。',
+      AccessDenied: 'COS 拒绝写入，请检查后台密钥对 site-content/profiles/ 目录的上传权限。',
+      RequestTimeTooSkewed: '签名时间异常，请重试并检查后台时钟。',
+      ExpiredToken: '上传凭证已过期，请重新上传。'
+    };
+    return new Error(`${label}上传失败：${response.status}${code ? `（${code}）` : ''}${hints[code] ? `。${hints[code]}` : ''}`);
+  }
+
   async function uploadPendingAvatar() {
     if (!pendingAvatarFile) return;
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -311,7 +327,7 @@
     if (!item?.url) throw new Error('无法取得头像上传地址。');
     setStatus(`正在上传头像：${pendingAvatarFile.name}`, false);
     const response = await fetch(item.url, { method: 'PUT', headers: { 'Content-Type': item.contentType }, body: pendingAvatarFile });
-    if (!response.ok) throw new Error(`头像上传失败：${response.status}`);
+    if (!response.ok) throw await uploadError(response, '头像');
     storedAvatar = {
       name: pendingAvatarFile.name,
       key: object.key,
@@ -340,7 +356,7 @@
       if (!upload?.url) throw new Error(`无法取得 ${file.name} 的上传地址。`);
       setStatus(`正在上传 ${index + 1}/${pendingFiles.length}：${file.name}`, false);
       const response = await fetch(upload.url, { method: 'PUT', headers: { 'Content-Type': upload.contentType }, body: file });
-      if (!response.ok) throw new Error(`${file.name} 上传失败：${response.status}`);
+      if (!response.ok) throw await uploadError(response, `${file.name} `);
       storedFiles.push({ name: file.name, key: object.key, size: file.size, contentType: object.contentType, addedAt: new Date().toISOString() });
       pendingFiles.splice(pendingFiles.indexOf(file), 1);
     }
