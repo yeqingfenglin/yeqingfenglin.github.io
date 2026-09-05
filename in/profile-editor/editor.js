@@ -18,75 +18,14 @@
   let pendingFiles = [];
   let savedFormatRange = null;
   let fileUploadBusy = false;
-  let savedEditorRange = null;
 
   function twoColumnTable() {
     return '<table class="experience-table"><tbody><tr><td><br></td><td><br></td></tr></tbody></table>';
   }
 
   function normalizeRichContent(html) {
-    const template = document.createElement('template');
-    template.innerHTML = String(html || '');
-    template.content.querySelectorAll('.academic-year').forEach(element => {
-      if (/^(Paper|Year)$/i.test(element.textContent.trim())) element.textContent = '';
-    });
-    const value = template.innerHTML;
-    return /^\s*<li\b/i.test(value) ? `<ul class="academic-list">${value}</ul>` : value;
-  }
-
-  function rememberEditorSelection() {
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount !== 1) return;
-    const range = selection.getRangeAt(0);
-    const node = range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE ? range.commonAncestorContainer : range.commonAncestorContainer.parentElement;
-    if (node?.closest?.('.editable-rich')) savedEditorRange = range.cloneRange();
-    else if (node?.closest?.('.editable-text')) savedEditorRange = null;
-  }
-
-  function tableContext() {
-    if (!savedEditorRange || !savedEditorRange.commonAncestorContainer.isConnected) {
-      alert('请先点击正文文本框中的插入位置。');
-      return null;
-    }
-    const node = savedEditorRange.commonAncestorContainer.nodeType === Node.ELEMENT_NODE ? savedEditorRange.commonAncestorContainer : savedEditorRange.commonAncestorContainer.parentElement;
-    const editor = node?.closest?.('.editable-rich');
-    if (!editor) return null;
-    const selection = window.getSelection();
-    editor.focus();
-    selection.removeAllRanges();
-    selection.addRange(savedEditorRange);
-    return { node, editor };
-  }
-
-  function editTable(action) {
-    const context = tableContext();
-    if (!context) return;
-    const table = context.node.closest('table');
-    if (action === 'insert') {
-      if (table) return alert('当前位置已在表格中。可使用“增加一行”。');
-      const selection = window.getSelection();
-      selection.collapseToEnd();
-      document.execCommand('insertHTML', false, `${twoColumnTable()}<p><br></p>`);
-    } else {
-      const row = context.node.closest('tr');
-      if (!table || !row) return alert('请先点击要操作的表格行。');
-      if (action === 'add') {
-        const added = table.insertRow(row.rowIndex + 1);
-        added.insertCell().innerHTML = '<br>';
-        added.insertCell().innerHTML = '<br>';
-        const range = document.createRange();
-        range.selectNodeContents(added.cells[0]);
-        window.getSelection().removeAllRanges();
-        window.getSelection().addRange(range);
-      } else {
-        if (!confirm('删除当前行及其中的内容？')) return;
-        if (table.rows.length === 1) table.replaceWith(document.createElement('p'));
-        else row.remove();
-        savedEditorRange = null;
-      }
-    }
-    rememberEditorSelection();
-    setStatus('有尚未保存的表格修改', false);
+    const value = window.ProfileContent.cleanLegacy(html);
+    return /^\s*<li\b/i.test(value) ? '<ul class="academic-list">' + value + '</ul>' : value;
   }
 
   function downloadLink(file) {
@@ -130,11 +69,13 @@
   }
 
   function restoreFormatSelection() {
-    if (!savedFormatRange) {
+    if (!savedFormatRange || !savedFormatRange.commonAncestorContainer.isConnected) {
       alert('请先选中需要修改格式的文字。');
       return false;
     }
     const selection = window.getSelection();
+    const node = savedFormatRange.startContainer.nodeType === Node.ELEMENT_NODE ? savedFormatRange.startContainer : savedFormatRange.startContainer.parentElement;
+    node.closest('[contenteditable="true"]')?.focus();
     selection.removeAllRanges();
     selection.addRange(savedFormatRange);
     return true;
@@ -142,9 +83,53 @@
 
   function applyFormat(command, value) {
     if (!restoreFormatSelection()) return false;
-    document.execCommand(command, false, value);
+    const styles = {
+      foreColor: ['color', value], hiliteColor: ['backgroundColor', value], backColor: ['backgroundColor', value],
+      fontSize: ['fontSize', { 2: '13px', 3: '16px', 4: '18px', 5: '24px', 6: '32px' }[value]]
+    };
+    if (styles[command]) {
+      if (!applySelectedStyle(...styles[command])) return false;
+    } else if (!document.execCommand(command, false, value)) {
+      setStatus('未能应用格式，请重新选中文字后再试。', true);
+      return false;
+    }
     rememberFormatSelection();
     setStatus('有尚未保存的文字格式修改', false);
+    return true;
+  }
+
+  function applySelectedStyle(property, value) {
+    const range = savedFormatRange.cloneRange();
+    const start = range.startContainer.nodeType === Node.ELEMENT_NODE ? range.startContainer : range.startContainer.parentElement;
+    const editor = start.closest('[data-field]');
+    if (!editor || range.collapsed || !value) return false;
+    const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT);
+    const pieces = [];
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      if (!range.intersectsNode(node)) continue;
+      const from = node === range.startContainer ? range.startOffset : 0;
+      const to = node === range.endContainer ? range.endOffset : node.length;
+      if (to > from) pieces.push({ node, from, to });
+    }
+    if (!pieces.length) return false;
+    const selected = [];
+    // Work backwards so offsets of earlier text remain stable; leave table/paragraph structure intact.
+    for (const { node, from, to } of pieces.reverse()) {
+      if (to < node.length) node.splitText(to);
+      const text = from ? node.splitText(from) : node;
+      const span = document.createElement('span');
+      span.style[property] = value;
+      text.replaceWith(span);
+      span.appendChild(text);
+      selected.unshift(text);
+    }
+    const updated = document.createRange();
+    updated.setStart(selected[0], 0);
+    updated.setEnd(selected[selected.length - 1], selected[selected.length - 1].length);
+    savedFormatRange = updated.cloneRange();
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(updated);
     return true;
   }
 
@@ -181,7 +166,7 @@
       documentsHeading: 'Documents',
       aboutHtml: '<p>A concise academic biography will appear here, including current work, academic background, research interests, and opportunities for collaboration.</p>',
       researchHtml: '<p>Research areas, current questions, methods, and ongoing projects will be listed here.</p>',
-      publicationsHtml: '<li class="academic-item"><span class="academic-year"></span><div><h3>Publication title to be added</h3><p>Authors, journal or conference, year, abstract, PDF, and related links.</p></div></li>',
+      publicationsHtml: '',
       educationHtml: twoColumnTable(),
       teachingHtml: twoColumnTable(),
       files: []
@@ -190,7 +175,6 @@
 
   function applyProfile(profile) {
     savedFormatRange = null;
-    savedEditorRange = null;
     const merged = { ...defaultProfile(profileId), ...(profile || {}) };
     for (const field of ['title', 'location', 'email', 'linksHtml']) {
       const probe = document.createElement('div');
@@ -208,8 +192,14 @@
       const field = element.dataset.field;
       const value = merged[field] || '';
       if (field.endsWith('Html')) element.innerHTML = normalizeRichContent(value);
-      else element.textContent = value;
+      else {
+        const formatted = document.createElement('div');
+        formatted.innerHTML = window.ProfileContent.sanitizeHtml(merged.textFormats?.[field] || '');
+        if (formatted.textContent.trim() === String(value).trim() && formatted.innerHTML) element.innerHTML = formatted.innerHTML;
+        else element.textContent = value;
+      }
     });
+    window.ExperienceEditor.prepareAll();
     renderAvatar();
     document.getElementById('editor-brand').textContent = `修改 ${merged.displayName || defaults[profileId].displayName} 的主页`;
     document.getElementById('preview-link').href = `/out/${profileId}/`;
@@ -298,10 +288,11 @@
   }
 
   function collectProfile() {
-    const profile = { ...savedProfile, schemaVersion: 1, profileId, avatar: storedAvatar, files: storedFiles };
+    const profile = { ...savedProfile, schemaVersion: 1, profileId, avatar: storedAvatar, files: storedFiles, textFormats: {} };
     document.querySelectorAll('[data-field]').forEach(element => {
       const field = element.dataset.field;
-      profile[field] = field.endsWith('Html') ? element.innerHTML.trim() : element.textContent.trim();
+      profile[field] = field.endsWith('Html') ? window.ProfileContent.sanitizeHtml(element.innerHTML).trim() : element.textContent.trim();
+      if (!field.endsWith('Html')) profile.textFormats[field] = window.ProfileContent.sanitizeHtml(element.innerHTML).trim();
     });
     profile.displayName = document.querySelector('[data-field="displayName"]').textContent.trim();
     profile.initials = savedProfile?.initials || defaults[profileId].initials;
@@ -357,11 +348,8 @@
   }
 
   document.addEventListener('selectionchange', rememberFormatSelection);
-  document.addEventListener('selectionchange', rememberEditorSelection);
-  document.querySelectorAll('[data-table-action]').forEach(button => {
-    button.addEventListener('mousedown', event => event.preventDefault());
-    button.addEventListener('click', () => editTable(button.dataset.tableAction));
-  });
+  document.getElementById('editor-main').addEventListener('pointerup', rememberFormatSelection);
+  document.getElementById('editor-main').addEventListener('keyup', rememberFormatSelection);
   document.querySelectorAll('[data-command]').forEach(button => button.addEventListener('mousedown', event => {
     event.preventDefault();
     applyFormat(button.dataset.command, null);
@@ -372,7 +360,7 @@
     event.target.value = '';
   });
   document.getElementById('text-color-input').addEventListener('pointerdown', rememberFormatSelection);
-  document.getElementById('text-color-input').addEventListener('change', event => applyFormat('foreColor', event.target.value));
+  ['input', 'change'].forEach(type => document.getElementById('text-color-input').addEventListener(type, event => applyFormat('foreColor', event.target.value)));
   document.getElementById('background-color-input').addEventListener('pointerdown', rememberFormatSelection);
   document.getElementById('background-color-input').addEventListener('change', event => {
     const command = document.queryCommandSupported?.('hiliteColor') ? 'hiliteColor' : 'backColor';
@@ -473,8 +461,8 @@
       await uploadPendingFiles();
       const profile = collectProfile();
       const { profile: saved } = await gateway('put-profile', { profileId, profile });
-      if (saved && (!Object.hasOwn(saved, 'teachingHtml') || !Object.hasOwn(saved, 'teachingHeading'))) {
-        throw new Error('后台尚未支持 Teaching，请先更新 cos-content 函数。当前编辑内容仍保留在页面中，请勿关闭页面。');
+      if (saved && (!Object.hasOwn(saved, 'teachingHtml') || !Object.hasOwn(saved, 'textFormats'))) {
+        throw new Error('后台尚未支持最新表格和文字格式，请先更新 cos-content 函数。当前编辑内容仍保留在页面中，请勿关闭页面。');
       }
       applyProfile(saved || profile);
       setStatus('修改已保存到 COS，公开主页刷新后即可看到', false);

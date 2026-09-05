@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
   <title>修改个人主页</title>
-  <link rel="stylesheet" href="/out/assets/out.css">
-  <link rel="stylesheet" href="/in/profile-editor/editor.css">
+  <link rel="stylesheet" href="/out/assets/out.css?v=20260905-fixed-tables">
+  <link rel="stylesheet" href="/in/profile-editor/editor.css?v=20260905-fixed-tables">
   <script src="/out/assets/theme.js"></script>
 </head>
 <body>
@@ -24,7 +24,7 @@
   </header>
 
   <div class="editor-notice">
-    <strong>编辑提示：</strong>拖动文本框右下角可调整编辑大小。点击正文后可插入两列表格，左列填写年份，右列填写经历；点击单元格后可增删行。点击头像可选择照片，点击主页中的文字即可修改。选中个别文字后可用工具栏增加超链接。可在“增加超链接”中上传文件，给 PDF 等文字添加下载链接。文件不会自动显示在公开主页；保存修改后链接生效。头像上限 10 MB，普通文件上限 25 MB。
+    <strong>编辑提示：</strong>拖动文本框右下角可调整编辑大小。Education 和 Teaching 直接填写两列表格；将鼠标移到两列之间可拖动调整宽度。点击头像可选择照片，点击主页中的文字即可修改。选中个别文字后可用工具栏增加超链接。可在“增加超链接”中上传文件，给 PDF 等文字添加下载链接。文件不会自动显示在公开主页；保存修改后链接生效。头像上限 10 MB，普通文件上限 25 MB。
   </div>
 
   <div class="format-toolbar" role="toolbar" aria-label="文字格式工具">
@@ -36,9 +36,6 @@
     <button type="button" id="add-link-button">增加超链接</button>
     <button type="button" data-command="unlink">取消超链接</button>
     <button type="button" data-command="removeFormat">清除格式</button>
-    <button type="button" data-table-action="insert">插入两列表格</button>
-    <button type="button" data-table-action="add">表格增加一行</button>
-    <button type="button" data-table-action="delete">删除当前行</button>
     <span>先选中文字，再设置字号、颜色、文字背景或链接；格式只作用于选中的文字。</span>
   </div>
 
@@ -84,13 +81,21 @@
 
       <section id="education">
         <h2 class="editable-text" data-field="educationHeading" contenteditable="true" spellcheck="true"></h2>
-        <div class="editable-rich" data-field="educationHtml" contenteditable="true" spellcheck="true"></div>
+        <div class="experience-shell">
+          <div class="editable-rich fixed-experience" data-field="educationHtml"></div>
+          <div class="column-resizer" role="separator" tabindex="0" aria-orientation="vertical" aria-label="调整 Education 时间列宽度" aria-valuemin="12" aria-valuemax="55" aria-valuenow="22" title="拖动调整两列宽度；也可使用左右方向键"></div>
+        </div>
+        <div class="experience-actions"><button type="button" data-experience-field="educationHtml" data-experience-action="add">增加经历</button><button type="button" data-experience-field="educationHtml" data-experience-action="delete">删除当前行</button><span>左列：时间 · 右列：内容 · 两列之间可拖动</span></div>
       </section>
 
       <section id="teaching">
         <h2 class="editable-text" data-field="teachingHeading" contenteditable="true" spellcheck="true"></h2>
-        <p class="editor-field-hint">填写助教、授课经历。表格左列填写年份，右列填写课程、学校及职责；也可以直接输入普通正文。</p>
-        <div class="editable-rich" data-field="teachingHtml" contenteditable="true" spellcheck="true"></div>
+        
+        <div class="experience-shell">
+          <div class="editable-rich fixed-experience" data-field="teachingHtml"></div>
+          <div class="column-resizer" role="separator" tabindex="0" aria-orientation="vertical" aria-label="调整 Teaching 时间列宽度" aria-valuemin="12" aria-valuemax="55" aria-valuenow="22" title="拖动调整两列宽度；也可使用左右方向键"></div>
+        </div>
+        <div class="experience-actions"><button type="button" data-experience-field="teachingHtml" data-experience-action="add">增加经历</button><button type="button" data-experience-field="teachingHtml" data-experience-action="delete">删除当前行</button><span>左列：时间 · 右列：内容 · 两列之间可拖动</span></div>
       </section>
 
       <section id="files">
@@ -125,7 +130,9 @@
   <script src="/supabase-config.js"></script>
   <script src="/content-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/in/profile-editor/editor.js"></script>
+  <script src="/out/assets/profile-content.js?v=20260905-fixed-tables"></script>
+  <script src="/in/profile-editor/experience-editor.js?v=20260905-fixed-tables"></script>
+  <script src="/in/profile-editor/editor.js?v=20260905-fixed-tables"></script>
 </body>
 </html>
 
