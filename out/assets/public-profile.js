@@ -4,7 +4,7 @@
   const profileId = document.body.dataset.profileId;
   const config = window.SITE_SUPABASE_CONFIG || {};
   const contentConfig = window.SITE_CONTENT_CONFIG || { gatewayFunction: 'cos-content' };
-  const allowedTags = new Set(['P', 'BR', 'STRONG', 'B', 'EM', 'I', 'A', 'UL', 'OL', 'LI', 'H3', 'SPAN', 'DIV', 'FONT']);
+  const allowedTags = new Set(['P', 'BR', 'STRONG', 'B', 'EM', 'I', 'A', 'UL', 'OL', 'LI', 'H3', 'SPAN', 'DIV', 'FONT', 'TABLE', 'TBODY', 'THEAD', 'TFOOT', 'TR', 'TD', 'TH']);
 
   function safeUrl(value) {
     const url = String(value || '').trim();
@@ -41,6 +41,7 @@
       for (const child of Array.from(node.childNodes)) {
         if (child.nodeType === Node.ELEMENT_NODE) {
           if (!allowedTags.has(child.tagName)) {
+            clean(child);
             child.replaceWith(...Array.from(child.childNodes));
             continue;
           }
@@ -51,7 +52,12 @@
           const originalSize = child.tagName === 'FONT' ? child.getAttribute('size') : '';
           for (const attribute of Array.from(child.attributes)) child.removeAttribute(attribute.name);
           if (child.tagName === 'LI' && originalClass.split(/\s+/).includes('academic-item')) child.className = 'academic-item';
-          if (child.tagName === 'SPAN' && originalClass.split(/\s+/).includes('academic-year')) child.className = 'academic-year';
+          if (child.tagName === 'UL' && originalClass.split(/\s+/).includes('academic-list')) child.className = 'academic-list';
+          if (child.tagName === 'TABLE') child.className = 'experience-table';
+          if (child.tagName === 'SPAN' && originalClass.split(/\s+/).includes('academic-year')) {
+            child.className = 'academic-year';
+            if (/^(Paper|Year)$/i.test(child.textContent.trim())) child.textContent = '';
+          }
           const safeStyle = safeInlineStyle(originalStyle);
           if (safeStyle) child.setAttribute('style', safeStyle);
           if (child.tagName === 'FONT') {
@@ -82,7 +88,7 @@
 
   function renderRichList(id, html) {
     const element = document.getElementById(id);
-    if (element && typeof html === 'string' && html.trim()) element.innerHTML = sanitizeHtml(html);
+    if (element && typeof html === 'string') element.innerHTML = sanitizeHtml(/^\s*<li\b/i.test(html) ? `<ul class="academic-list">${html}</ul>` : html);
   }
 
   function renderProfile(profile) {
@@ -125,6 +131,7 @@
     setText('profile-research-heading', profile.researchHeading);
     setText('profile-publications-heading', profile.publicationsHeading);
     setText('profile-education-heading', profile.educationHeading);
+    setText('profile-teaching-heading', profile.teachingHeading || 'Teaching');
     setText('profile-documents-heading', profile.documentsHeading);
     setText('profile-location', profile.location);
     const email = document.getElementById('profile-email');
@@ -143,6 +150,7 @@
     renderRichList('profile-research', profile.researchHtml);
     renderRichList('profile-publications', profile.publicationsHtml);
     renderRichList('profile-education', profile.educationHtml);
+    renderRichList('profile-teaching', profile.teachingHtml ?? '<p>to be added</p>');
     if (profile.updatedAt) {
       const updated = new Date(profile.updatedAt);
       if (!Number.isNaN(updated.getTime())) setText('profile-updated', `Last updated: ${updated.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`);

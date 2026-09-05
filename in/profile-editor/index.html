@@ -24,7 +24,7 @@
   </header>
 
   <div class="editor-notice">
-    <strong>编辑提示：</strong>点击头像可选择照片，点击主页中的文字即可修改。选中个别文字后可用工具栏增加超链接。可在“增加超链接”中上传文件，给 PDF 等文字添加下载链接。文件不会自动显示在公开主页；保存修改后链接生效。头像上限 10 MB，普通文件上限 25 MB。
+    <strong>编辑提示：</strong>拖动文本框右下角可调整编辑大小。点击正文后可插入两列表格，左列填写年份，右列填写经历；点击单元格后可增删行。点击头像可选择照片，点击主页中的文字即可修改。选中个别文字后可用工具栏增加超链接。可在“增加超链接”中上传文件，给 PDF 等文字添加下载链接。文件不会自动显示在公开主页；保存修改后链接生效。头像上限 10 MB，普通文件上限 25 MB。
   </div>
 
   <div class="format-toolbar" role="toolbar" aria-label="文字格式工具">
@@ -36,6 +36,9 @@
     <button type="button" id="add-link-button">增加超链接</button>
     <button type="button" data-command="unlink">取消超链接</button>
     <button type="button" data-command="removeFormat">清除格式</button>
+    <button type="button" data-table-action="insert">插入两列表格</button>
+    <button type="button" data-table-action="add">表格增加一行</button>
+    <button type="button" data-table-action="delete">删除当前行</button>
     <span>先选中文字，再设置字号、颜色、文字背景或链接；格式只作用于选中的文字。</span>
   </div>
 
@@ -76,12 +79,18 @@
 
       <section id="publications">
         <h2 class="editable-text" data-field="publicationsHeading" contenteditable="true" spellcheck="true"></h2>
-        <ul class="academic-list editable-rich" data-field="publicationsHtml" contenteditable="true" spellcheck="true"></ul>
+        <div class="editable-rich" data-field="publicationsHtml" contenteditable="true" spellcheck="true"></div>
       </section>
 
       <section id="education">
         <h2 class="editable-text" data-field="educationHeading" contenteditable="true" spellcheck="true"></h2>
-        <ul class="academic-list editable-rich" data-field="educationHtml" contenteditable="true" spellcheck="true"></ul>
+        <div class="editable-rich" data-field="educationHtml" contenteditable="true" spellcheck="true"></div>
+      </section>
+
+      <section id="teaching">
+        <h2 class="editable-text" data-field="teachingHeading" contenteditable="true" spellcheck="true"></h2>
+        <p class="editor-field-hint">填写助教、授课经历。表格左列填写年份，右列填写课程、学校及职责；也可以直接输入普通正文。</p>
+        <div class="editable-rich" data-field="teachingHtml" contenteditable="true" spellcheck="true"></div>
       </section>
 
       <section id="files">

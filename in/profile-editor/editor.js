@@ -18,6 +18,76 @@
   let pendingFiles = [];
   let savedFormatRange = null;
   let fileUploadBusy = false;
+  let savedEditorRange = null;
+
+  function twoColumnTable() {
+    return '<table class="experience-table"><tbody><tr><td><br></td><td><br></td></tr></tbody></table>';
+  }
+
+  function normalizeRichContent(html) {
+    const template = document.createElement('template');
+    template.innerHTML = String(html || '');
+    template.content.querySelectorAll('.academic-year').forEach(element => {
+      if (/^(Paper|Year)$/i.test(element.textContent.trim())) element.textContent = '';
+    });
+    const value = template.innerHTML;
+    return /^\s*<li\b/i.test(value) ? `<ul class="academic-list">${value}</ul>` : value;
+  }
+
+  function rememberEditorSelection() {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount !== 1) return;
+    const range = selection.getRangeAt(0);
+    const node = range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE ? range.commonAncestorContainer : range.commonAncestorContainer.parentElement;
+    if (node?.closest?.('.editable-rich')) savedEditorRange = range.cloneRange();
+    else if (node?.closest?.('.editable-text')) savedEditorRange = null;
+  }
+
+  function tableContext() {
+    if (!savedEditorRange || !savedEditorRange.commonAncestorContainer.isConnected) {
+      alert('请先点击正文文本框中的插入位置。');
+      return null;
+    }
+    const node = savedEditorRange.commonAncestorContainer.nodeType === Node.ELEMENT_NODE ? savedEditorRange.commonAncestorContainer : savedEditorRange.commonAncestorContainer.parentElement;
+    const editor = node?.closest?.('.editable-rich');
+    if (!editor) return null;
+    const selection = window.getSelection();
+    editor.focus();
+    selection.removeAllRanges();
+    selection.addRange(savedEditorRange);
+    return { node, editor };
+  }
+
+  function editTable(action) {
+    const context = tableContext();
+    if (!context) return;
+    const table = context.node.closest('table');
+    if (action === 'insert') {
+      if (table) return alert('当前位置已在表格中。可使用“增加一行”。');
+      const selection = window.getSelection();
+      selection.collapseToEnd();
+      document.execCommand('insertHTML', false, `${twoColumnTable()}<p><br></p>`);
+    } else {
+      const row = context.node.closest('tr');
+      if (!table || !row) return alert('请先点击要操作的表格行。');
+      if (action === 'add') {
+        const added = table.insertRow(row.rowIndex + 1);
+        added.insertCell().innerHTML = '<br>';
+        added.insertCell().innerHTML = '<br>';
+        const range = document.createRange();
+        range.selectNodeContents(added.cells[0]);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+      } else {
+        if (!confirm('删除当前行及其中的内容？')) return;
+        if (table.rows.length === 1) table.replaceWith(document.createElement('p'));
+        else row.remove();
+        savedEditorRange = null;
+      }
+    }
+    rememberEditorSelection();
+    setStatus('有尚未保存的表格修改', false);
+  }
 
   function downloadLink(file) {
     const url = new URL('/out/download/', window.location.origin);
@@ -107,17 +177,20 @@
       researchHeading: 'Research Interests',
       publicationsHeading: 'Selected Publications',
       educationHeading: 'Education',
+      teachingHeading: 'Teaching',
       documentsHeading: 'Documents',
       aboutHtml: '<p>A concise academic biography will appear here, including current work, academic background, research interests, and opportunities for collaboration.</p>',
       researchHtml: '<p>Research areas, current questions, methods, and ongoing projects will be listed here.</p>',
-      publicationsHtml: '<li class="academic-item"><span class="academic-year">Paper</span><div><h3>Publication title to be added</h3><p>Authors, journal or conference, year, abstract, PDF, and related links.</p></div></li>',
-      educationHtml: '<li class="academic-item"><span class="academic-year">Year</span><div><h3>Institution to be added</h3><p>Degree, field of study, or academic position.</p></div></li>',
+      publicationsHtml: '<li class="academic-item"><span class="academic-year"></span><div><h3>Publication title to be added</h3><p>Authors, journal or conference, year, abstract, PDF, and related links.</p></div></li>',
+      educationHtml: twoColumnTable(),
+      teachingHtml: twoColumnTable(),
       files: []
     };
   }
 
   function applyProfile(profile) {
     savedFormatRange = null;
+    savedEditorRange = null;
     const merged = { ...defaultProfile(profileId), ...(profile || {}) };
     for (const field of ['title', 'location', 'email', 'linksHtml']) {
       const probe = document.createElement('div');
@@ -134,7 +207,7 @@
     document.querySelectorAll('[data-field]').forEach(element => {
       const field = element.dataset.field;
       const value = merged[field] || '';
-      if (field.endsWith('Html')) element.innerHTML = value;
+      if (field.endsWith('Html')) element.innerHTML = normalizeRichContent(value);
       else element.textContent = value;
     });
     renderAvatar();
@@ -284,6 +357,11 @@
   }
 
   document.addEventListener('selectionchange', rememberFormatSelection);
+  document.addEventListener('selectionchange', rememberEditorSelection);
+  document.querySelectorAll('[data-table-action]').forEach(button => {
+    button.addEventListener('mousedown', event => event.preventDefault());
+    button.addEventListener('click', () => editTable(button.dataset.tableAction));
+  });
   document.querySelectorAll('[data-command]').forEach(button => button.addEventListener('mousedown', event => {
     event.preventDefault();
     applyFormat(button.dataset.command, null);
@@ -395,6 +473,9 @@
       await uploadPendingFiles();
       const profile = collectProfile();
       const { profile: saved } = await gateway('put-profile', { profileId, profile });
+      if (saved && (!Object.hasOwn(saved, 'teachingHtml') || !Object.hasOwn(saved, 'teachingHeading'))) {
+        throw new Error('后台尚未支持 Teaching，请先更新 cos-content 函数。当前编辑内容仍保留在页面中，请勿关闭页面。');
+      }
       applyProfile(saved || profile);
       setStatus('修改已保存到 COS，公开主页刷新后即可看到', false);
     } catch (error) {
