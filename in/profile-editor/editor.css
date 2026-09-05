@@ -1,4 +1,13 @@
 body { padding-bottom: 96px; }
+.editable-rich a { text-decoration: underline; }
+#link-dialog { width: min(480px, calc(100% - 2rem)); box-sizing: border-box; padding: 1.5rem; border: 1px solid var(--line); background: var(--paper); color: var(--ink); }
+#link-dialog::backdrop { background: rgba(0,0,0,.45); }
+#link-dialog label { display: block; margin: 1rem 0; }
+#link-dialog input, #link-dialog select { display: block; width: 100%; box-sizing: border-box; margin-top: .5rem; padding: .5rem; background: var(--paper); color: var(--ink); border: 1px solid var(--line); }
+#link-upload-status { font-size: .85rem; overflow-wrap: anywhere; }
+.link-dialog-actions { display: flex; gap: .75rem; justify-content: flex-end; }
+.link-dialog-actions button { padding: .55rem .9rem; background: var(--paper); color: var(--accent); border: 1px solid var(--accent); cursor: pointer; }
+.editor-file-item { flex-wrap: wrap; overflow-wrap: anywhere; }
 .editor-notice { width: min(calc(100% - 2rem), 1080px); margin: 1.25rem auto .75rem; padding: .9rem 1rem; border-left: 4px solid var(--accent); background: var(--soft); color: var(--ink); font-size: .9rem; }
 .format-toolbar { position: sticky; top: 69px; z-index: 15; width: min(calc(100% - 2rem), 1080px); margin: 0 auto; padding: .65rem; display: flex; align-items: center; gap: .45rem; flex-wrap: wrap; border: 1px solid var(--line); background: var(--header-bg); box-shadow: 0 8px 20px var(--surface-shadow); }
 .format-toolbar button { padding: .4rem .65rem; border: 1px solid var(--accent); background: var(--paper); color: var(--accent); cursor: pointer; }

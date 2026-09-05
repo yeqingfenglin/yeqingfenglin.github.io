@@ -24,7 +24,7 @@
   </header>
 
   <div class="editor-notice">
-    <strong>编辑提示：</strong>点击头像可选择照片，点击主页中的文字即可修改。选中个别文字后可用工具栏增加超链接。保存时，头像、文字和文件索引会写入腾讯云 COS；头像上限 10 MB，普通文件上限 25 MB。
+    <strong>编辑提示：</strong>点击头像可选择照片，点击主页中的文字即可修改。选中个别文字后可用工具栏增加超链接。可在“增加超链接”中上传文件，给 PDF 等文字添加下载链接。文件不会自动显示在公开主页；保存修改后链接生效。头像上限 10 MB，普通文件上限 25 MB。
   </div>
 
   <div class="format-toolbar" role="toolbar" aria-label="文字格式工具">
@@ -85,14 +85,24 @@
       </section>
 
       <section id="files">
-        <h2 class="editable-text" data-field="documentsHeading" contenteditable="true" spellcheck="true"></h2>
-        <p class="file-hint">可直接添加 PDF、Word、PowerPoint、Excel、纯文本及常见图片文件。文件将保存到当前个人主页专属的 COS 目录，并在公开主页生成下载链接。</p>
-        <label class="file-picker" for="profile-files-input">选择文件</label>
+        <h2>文件下载链接（仅编辑器可见）</h2>
+        <p class="file-hint">上传文件后可复制下载链接，或选中正文中的 PDF 等文字，通过“增加超链接”选择文件。保存修改后链接生效，公开主页不会显示文件列表。</p>
+        <label class="file-picker" for="profile-files-input">上传文件并生成下载链接</label>
         <input id="profile-files-input" type="file" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.md,.csv,.zip,.png,.jpg,.jpeg,.webp">
         <ul id="editor-files" class="editor-file-list"></ul>
       </section>
     </article>
   </main>
+
+  <dialog id="link-dialog" aria-labelledby="link-dialog-title">
+    <h2 id="link-dialog-title">增加超链接</h2>
+    <p>为选中的文字添加网址或文件下载链接，例如 arXiv、PDF。</p>
+    <label>网址或下载链接<input id="link-url-input" type="url" placeholder="https://… 或 mailto:…"></label>
+    <label>使用已上传文件<select id="link-file-select"></select></label>
+    <label class="file-picker">添加文件并生成超链接<input id="link-upload-input" type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.md,.csv,.zip,.png,.jpg,.jpeg,.webp"></label>
+    <p id="link-upload-status" role="status">新文件的下载链接在保存修改后生效。</p>
+    <div class="link-dialog-actions"><button id="link-cancel-button" type="button">取消</button><button id="link-insert-button" type="button">插入链接</button></div>
+  </dialog>
 
   <div id="editor-loading" class="editor-state">正在核验权限并加载主页…</div>
   <div id="editor-error" class="editor-state error" hidden></div>
@@ -109,3 +119,4 @@
   <script src="/in/profile-editor/editor.js"></script>
 </body>
 </html>
+

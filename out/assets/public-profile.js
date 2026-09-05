@@ -140,30 +140,9 @@
       const updated = new Date(profile.updatedAt);
       if (!Number.isNaN(updated.getTime())) setText('profile-updated', `Last updated: ${updated.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`);
     }
-    const files = document.getElementById('profile-files');
+    // Files are managed in the editor and linked explicitly from profile text.
     const section = document.querySelector('.profile-files-section');
-    if (files && section && Array.isArray(profile.files) && profile.files.length) {
-      files.innerHTML = '';
-      profile.files.forEach(file => {
-        const href = safeUrl(file.url);
-        if (!href) return;
-        const item = document.createElement('li');
-        item.className = 'academic-item';
-        const type = document.createElement('span');
-        type.className = 'academic-year';
-        type.textContent = String(file.name || '').split('.').pop()?.toUpperCase() || 'FILE';
-        const details = document.createElement('div');
-        const link = document.createElement('a');
-        link.href = href;
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        link.textContent = file.name || 'Download document';
-        details.appendChild(link);
-        item.append(type, details);
-        files.appendChild(item);
-      });
-      section.hidden = !files.children.length;
-    }
+    if (section) section.hidden = true;
   }
 
   async function loadProfile() {
@@ -180,3 +159,4 @@
 
   loadProfile();
 })();
+

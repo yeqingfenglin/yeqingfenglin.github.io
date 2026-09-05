@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>下载文件</title>
+  <link rel="stylesheet" href="/out/assets/out.css">
+  <script src="/out/assets/theme.js"></script>
+</head>
+<body>
+  <main style="max-width:640px;margin:10vh auto;padding:1.5rem">
+    <h1>下载文件</h1>
+    <p id="download-status" role="status">正在获取下载链接…</p>
+    <button id="download-retry" type="button" hidden>重新下载</button>
+    <p><a id="download-open" hidden target="_blank" rel="noopener noreferrer">直接打开文件</a></p>
+  </main>
+  <script src="/supabase-config.js"></script>
+  <script src="/content-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/out/assets/download.js"></script>
+</body>
+</html>

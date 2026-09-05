@@ -17,6 +17,20 @@
   let storedFiles = [];
   let pendingFiles = [];
   let savedFormatRange = null;
+  let fileUploadBusy = false;
+
+  function downloadLink(file) {
+    const url = new URL('/out/download/', window.location.origin);
+    url.searchParams.set('profile', profileId);
+    url.searchParams.set('key', file.key);
+    return url.href;
+  }
+
+  function updateLinkFiles() {
+    const select = document.getElementById('link-file-select');
+    select.replaceChildren(new Option('选择已上传文件', ''));
+    storedFiles.forEach(file => select.add(new Option(file.name, downloadLink(file))));
+  }
 
   function normalizeUsername(value) { return String(value || '').normalize('NFKC').trim().toLowerCase(); }
   function escapeHtml(value) { return String(value || '').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[character])); }
@@ -103,6 +117,7 @@
   }
 
   function applyProfile(profile) {
+    savedFormatRange = null;
     const merged = { ...defaultProfile(profileId), ...(profile || {}) };
     releaseAvatarPreview();
     savedProfile = structuredClone(merged);
@@ -156,6 +171,7 @@
   }
 
   function renderFiles() {
+    updateLinkFiles();
     const list = document.getElementById('editor-files');
     list.innerHTML = '';
     const allFiles = [
@@ -176,13 +192,27 @@
       const remove = document.createElement('button');
       remove.type = 'button';
       remove.className = 'remove-file';
-      remove.textContent = '从主页移除';
+      remove.textContent = '移除文件链接';
       remove.addEventListener('click', () => {
+        if (fileUploadBusy) return;
+        if (file.source === 'stored' && !confirm('移除并保存后，正文或其他地方已使用的这个下载链接也将失效。继续？')) return;
         if (file.source === 'pending') pendingFiles.splice(file.index, 1);
         else storedFiles.splice(file.index, 1);
         renderFiles();
         setStatus('有尚未保存的修改', false);
       });
+      if (file.source === 'stored') {
+        const copy = document.createElement('button');
+        copy.type = 'button';
+        copy.className = 'file-picker';
+        copy.textContent = '复制下载链接';
+        copy.addEventListener('click', async () => {
+          const url = downloadLink(file);
+          try { await navigator.clipboard.writeText(url); setStatus('下载链接已复制；新上传的文件需保存修改后生效', false); }
+          catch (_) { prompt('复制下载链接（新文件需保存修改后生效）：', url); }
+        });
+        item.appendChild(copy);
+      }
       item.appendChild(remove);
       list.appendChild(item);
     });
@@ -232,8 +262,9 @@
     }));
     const { items = [] } = await gateway('get-profile-upload-urls', { profileId, objects });
     const byKey = new Map(items.map(item => [item.key, item]));
-    for (let index = 0; index < pendingFiles.length; index += 1) {
-      const file = pendingFiles[index];
+    const batch = [...pendingFiles];
+    for (let index = 0; index < batch.length; index += 1) {
+      const file = batch[index];
       const object = objects[index];
       const upload = byKey.get(object.key);
       if (!upload?.url) throw new Error(`无法取得 ${file.name} 的上传地址。`);
@@ -241,6 +272,7 @@
       const response = await fetch(upload.url, { method: 'PUT', headers: { 'Content-Type': upload.contentType }, body: file });
       if (!response.ok) throw new Error(`${file.name} 上传失败：${response.status}`);
       storedFiles.push({ name: file.name, key: object.key, size: file.size, contentType: object.contentType, addedAt: new Date().toISOString() });
+      pendingFiles.splice(pendingFiles.indexOf(file), 1);
     }
     pendingFiles = [];
   }
@@ -262,18 +294,54 @@
     const command = document.queryCommandSupported?.('hiliteColor') ? 'hiliteColor' : 'backColor';
     applyFormat(command, event.target.value);
   });
-  document.getElementById('add-link-button').addEventListener('mousedown', event => {
-    event.preventDefault();
+  document.getElementById('add-link-button').addEventListener('click', () => {
     if (!restoreFormatSelection()) return;
     const selection = window.getSelection();
     if (!selection || selection.isCollapsed) return alert('请先选中需要添加链接的文字。');
-    const url = prompt('请输入完整网址（以 https:// 开头）或邮箱链接（mailto:）：');
-    if (!url) return;
-    if (!/^(https?:\/\/|mailto:)/i.test(url.trim())) return alert('链接必须以 https://、http:// 或 mailto: 开头。');
-    document.execCommand('createLink', false, url.trim());
-    rememberFormatSelection();
-    setStatus('有尚未保存的链接修改', false);
+    document.getElementById('link-url-input').value = '';
+    updateLinkFiles();
+    document.getElementById('link-dialog').showModal();
   });
+  document.getElementById('link-cancel-button').addEventListener('click', () => document.getElementById('link-dialog').close());
+  document.getElementById('link-file-select').addEventListener('change', event => {
+    if (event.target.value) document.getElementById('link-url-input').value = event.target.value;
+  });
+  document.getElementById('link-insert-button').addEventListener('click', () => {
+    const url = document.getElementById('link-url-input').value.trim();
+    if (!/^(https?:\/\/|mailto:)/i.test(url)) return alert('请输入完整网址或选择文件下载链接。');
+    document.getElementById('link-dialog').close();
+    applyFormat('createLink', url);
+  });
+  async function addFiles(event) {
+    const files = Array.from(event.target.files || []);
+    event.target.value = '';
+    if (!files.length || fileUploadBusy) return;
+    if (files.some(file => !/\.(pdf|docx?|pptx?|xlsx?|txt|md|csv|zip|png|jpe?g|webp)$/i.test(file.name) || file.size < 1 || file.size > 25 * 1024 * 1024)) return alert('请选择支持的非空文件，单个文件不能超过 25 MB。');
+    if (files.length + pendingFiles.length > 20 || storedFiles.length + pendingFiles.length + files.length > 100) return alert('每次最多上传 20 个文件，文件库最多保存 100 个。');
+    if ([...pendingFiles, ...files].reduce((sum, file) => sum + file.size, 0) > 150 * 1024 * 1024) return alert('单次上传总量不能超过 150 MB。');
+    pendingFiles.push(...files);
+    fileUploadBusy = true;
+    const controls = ['save-button', 'restore-button', 'profile-files-input', 'link-upload-input', 'link-insert-button'];
+    controls.forEach(id => { document.getElementById(id).disabled = true; });
+    document.getElementById('link-upload-status').textContent = '正在上传文件…';
+    try {
+      await uploadPendingFiles();
+      renderFiles();
+      const url = downloadLink(storedFiles[storedFiles.length - 1]);
+      document.getElementById('link-url-input').value = url;
+      document.getElementById('link-file-select').value = url;
+      document.getElementById('link-upload-status').textContent = '下载链接已生成，插入后请保存修改。';
+      setStatus('下载链接已生成；点击“保存修改”后生效', false);
+    } catch (error) {
+      renderFiles();
+      document.getElementById('link-upload-status').textContent = `上传失败：${error.message}`;
+      setStatus(`上传失败：${error.message}；可点击保存修改重试未完成文件`, true);
+    } finally {
+      fileUploadBusy = false;
+      controls.forEach(id => { document.getElementById(id).disabled = false; });
+    }
+  }
+  document.getElementById('link-upload-input').addEventListener('change', addFiles);
   document.getElementById('avatar-picker-button').addEventListener('click', () => {
     document.getElementById('profile-avatar-input').click();
   });
@@ -302,18 +370,7 @@
     renderAvatar();
     setStatus('头像将被移除，点击“保存修改”确认', false);
   });
-  document.getElementById('profile-files-input').addEventListener('change', event => {
-    const files = Array.from(event.target.files || []);
-    if (files.some(file => file.size > 25 * 1024 * 1024)) {
-      alert('单个文件不能超过 25 MB。');
-      event.target.value = '';
-      return;
-    }
-    pendingFiles.push(...files);
-    event.target.value = '';
-    renderFiles();
-    setStatus('有尚未保存的文件', false);
-  });
+  document.getElementById('profile-files-input').addEventListener('change', addFiles);
   document.getElementById('editor-main').addEventListener('input', () => setStatus('有尚未保存的修改', false));
   document.getElementById('restore-button').addEventListener('click', () => {
     if (!savedProfile || !confirm('恢复为最近一次已保存的内容？本次尚未保存的文字和待上传文件将被放弃。')) return;
@@ -324,6 +381,9 @@
     const restoreButton = document.getElementById('restore-button');
     saveButton.disabled = true;
     restoreButton.disabled = true;
+    fileUploadBusy = true;
+    document.getElementById('profile-files-input').disabled = true;
+    document.getElementById('link-upload-input').disabled = true;
     try {
       await uploadPendingAvatar();
       await uploadPendingFiles();
@@ -335,6 +395,9 @@
       console.error(error);
       setStatus(`保存失败：${error.message}`, true);
     } finally {
+      fileUploadBusy = false;
+      document.getElementById('profile-files-input').disabled = false;
+      document.getElementById('link-upload-input').disabled = false;
       saveButton.disabled = false;
       restoreButton.disabled = false;
     }
