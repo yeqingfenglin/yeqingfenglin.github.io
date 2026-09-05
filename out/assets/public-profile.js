@@ -86,6 +86,13 @@
   }
 
   function renderProfile(profile) {
+    profile = { ...profile };
+    for (const field of ['title', 'location', 'email', 'linksHtml']) {
+      const probe = document.createElement('div');
+      probe.innerHTML = sanitizeHtml(profile[field]);
+      const text = probe.textContent.replace(/\u00a0/g, ' ').trim();
+      if (!text || /^(?:(?:Location|Email|Academic links|Academic title and affiliation)\s+)?to be added$/i.test(text)) profile[field] = 'to be added';
+    }
     setText('profile-name', profile.displayName);
     document.querySelectorAll('[data-profile-name]').forEach(element => {
       if (profile.displayName) element.textContent = profile.displayName;

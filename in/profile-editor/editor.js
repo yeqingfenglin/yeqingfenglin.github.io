@@ -99,10 +99,10 @@
       schemaVersion: 1,
       ...defaults[id],
       avatar: null,
-      title: 'Academic title and affiliation to be added',
-      location: 'Location to be added',
-      email: 'Email to be added',
-      linksHtml: 'Academic links to be added',
+      title: 'to be added',
+      location: 'to be added',
+      email: 'to be added',
+      linksHtml: 'to be added',
       aboutHeading: `About ${defaults[id].displayName}`,
       researchHeading: 'Research Interests',
       publicationsHeading: 'Selected Publications',
@@ -119,6 +119,12 @@
   function applyProfile(profile) {
     savedFormatRange = null;
     const merged = { ...defaultProfile(profileId), ...(profile || {}) };
+    for (const field of ['title', 'location', 'email', 'linksHtml']) {
+      const probe = document.createElement('div');
+      probe.innerHTML = String(merged[field] || '');
+      const text = probe.textContent.replace(/\u00a0/g, ' ').trim();
+      if (!text || /^(?:(?:Location|Email|Academic links|Academic title and affiliation)\s+)?to be added$/i.test(text)) merged[field] = 'to be added';
+    }
     releaseAvatarPreview();
     savedProfile = structuredClone(merged);
     storedAvatar = merged.avatar && typeof merged.avatar === 'object' ? structuredClone(merged.avatar) : null;

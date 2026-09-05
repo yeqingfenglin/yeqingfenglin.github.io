@@ -175,6 +175,12 @@ a { color: inherit; }
 .sidebar-role { margin: 0 0 1.25rem; line-height: 1.55; }
 .sidebar-links { margin: 0; padding: 1rem 0 0; border-top: 1px solid var(--line); list-style: none; }
 .sidebar-links li + li { margin-top: .45rem; }
+.sidebar-detail { display: flex; align-items: flex-start; gap: .6rem; }
+.sidebar-icon { flex: 0 0 1.1rem; width: 1.1rem; height: 1.1rem; margin-top: .2em; color: var(--accent); }
+.sidebar-detail-text { min-width: 0; flex: 1; overflow-wrap: anywhere; }
+.sidebar-detail-text > :first-child { margin-top: 0; }
+.sidebar-detail-text > :last-child { margin-bottom: 0; }
+.sidebar-detail-text[contenteditable]:empty::before { content: attr(data-placeholder); color: var(--muted); pointer-events: none; }
 .sidebar-links a { color: var(--accent); text-decoration: none; }
 .sidebar-links a:hover { text-decoration: underline; text-underline-offset: .2em; }
 .academic-main { min-width: 0; }
