@@ -1,4 +1,4 @@
-import {PEOPLE,EXERCISES,THEMES,validateOperation,materialize,occurs,personalBests,normalizeBackup,trainingType,sameTrainingType,matchingTraining} from './core.mjs?v=20260915-5';
+import {PEOPLE,EXERCISES,THEMES,validateOperation,materialize,occurs,personalBests,normalizeBackup,trainingType,sameTrainingType,matchingTraining,catalogue} from './core.mjs?v=20260915-7';
 const $=id=>document.getElementById(id), local=window.FITNESS_LOCAL===true;
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dateString=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -85,6 +85,7 @@ function render(){
  $('history-list').innerHTML=history.slice(0,historyLimit).map(op=>`<div class="record"><div><strong>${esc(description(op))}</strong><small>${esc(op.actor)} · ${esc(op.at?new Date(op.at).toLocaleString('zh-CN'):'导入记录')}</small><details><summary>查看内容</summary><pre>${esc(JSON.stringify(op.value,null,2))}</pre></details></div>${actionButton('恢复此内容','restore',op.id)}</div>`).join('')||'<div class="empty">还没有修改历史。</div>';
  $('more-history').hidden=history.length<=historyLimit;
  if($('training-detail').open)renderDetail();
+ if($('editor').open)refreshPickers();
 }
 function renderDetail(){
  if(!detailContext)return;const {person:who,date:when,type}=detailContext;
@@ -95,30 +96,63 @@ function renderDetail(){
 function openDetail(who,when,type){detailContext={person:who,date:when,type};selectDate(when);renderDetail();$('training-detail').showModal();}
 function typeSuggestions(){const form=$('edit-form'),who=form.elements.person.value||editing.person,when=form.elements.date?.value||date;
  const titles=records.filter(r=>!r.conflict&&!r.current.deleted&&r.current.kind==='plan'&&r.current.value.person===who&&occurs(r.current.value,when)).map(r=>r.current.value.title);
- $('training-types').innerHTML=[...new Set([...titles,...Object.keys(EXERCISES).map(c=>c+'训练')])].map(title=>`<option value="${esc(title)}"></option>`).join('');
+ $('training-types').innerHTML=[...new Set([...titles,...catalogue(records).categories.map(c=>c+'训练')])].map(title=>`<option value="${esc(title)}"></option>`).join('');
 }
 function field(name,label,type,value,extra=''){return `<label>${label}<input name="${name}" type="${type}" value="${esc(value)}" ${extra}></label>`;}
 function choices(name,label,values,value){return `<label>${label}<select name="${name}">${values.map(x=>`<option value="${esc(x)}" ${x===value?'selected':''}>${esc(x)}</option>`).join('')}</select></label>`;}
-function exerciseOptions(category,selected=''){
- const all=[...new Set([...(EXERCISES[category]||[]),...records.filter(r=>!r.conflict&&!r.current.deleted&&r.current.kind==='exercise'&&r.current.value.category===category).map(r=>r.current.value.name),...(selected?[selected]:[])])];
- return all.map(name=>`<option ${name===selected?'selected':''}>${esc(name)}</option>`).join('');
+function picker(name,label,value){return `<div class="catalog-picker" data-picker="${name}"><span id="${name}-label">${label}</span><input type="hidden" name="${name}" value="${esc(value)}"><button type="button" class="catalog-trigger" aria-labelledby="${name}-label ${name}-chosen" aria-expanded="false" aria-controls="${name}-menu"><span id="${name}-chosen"></span><span>⌄</span></button><div id="${name}-menu" class="catalog-menu" hidden><div class="catalog-options"></div><div class="catalog-create" hidden><label>自定义${label}<input class="catalog-name" maxlength="100" placeholder="输入名称"></label><div class="row"><button type="button" data-catalog-save>添加</button><button type="button" data-catalog-cancel>取消</button></div></div></div></div>`;}
+function refreshPickers(){
+ const cat=catalogue(records),form=$('edit-form');
+ form.querySelectorAll('[data-picker]').forEach(box=>{
+  const key=box.dataset.picker,options=key==='category'?cat.categories:cat.exercises(form.elements.category.value),selected=form.elements[key].value;
+  box.querySelector('.catalog-trigger span').textContent=selected||'请选择';
+  box.querySelector('.catalog-options').innerHTML=options.map(name=>`<div class="catalog-option"><button type="button" data-catalog-select="${esc(name)}" aria-pressed="${name===selected}">${esc(name)}</button><button type="button" class="catalog-delete" data-catalog-delete="${esc(name)}" aria-label="永久删除${esc(name)}选项" title="永久移除此选项">×</button></div>`).join('')+'<button type="button" class="catalog-custom" data-catalog-custom>＋ 自定义</button>';
+ });
 }
+async function catalogEntity(role,category,name){const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(['catalogue',role,category,name]))),hex=[...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('');return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20,32)}`;}
+async function saveOption(role,category,name,deleted=false){
+ const entity=await catalogEntity(role,category,name),r=getRecord(entity);
+ await append('exercise',{person:viewer,category,name,catalogRole:role},entity,r?.heads.map(x=>x.id)||[],deleted);
+}
+function selectOption(key,name){
+ const form=$('edit-form');form.elements[key].value=name;
+ if(key==='category'&&form.elements.exercise)form.elements.exercise.value=catalogue(records).exercises(name)[0]||'';
+ refreshPickers();if(editing.kind==='log')typeSuggestions();
+}
+$('fields').addEventListener('click',async event=>{
+ const button=event.target.closest('button'),box=button?.closest('[data-picker]');if(!box||busy)return;
+ const key=box.dataset.picker,menu=box.querySelector('.catalog-menu'),trigger=box.querySelector('.catalog-trigger'),form=$('edit-form');
+ if(button===trigger||button.closest('.catalog-trigger')){menu.hidden=!menu.hidden;trigger.setAttribute('aria-expanded',String(!menu.hidden));return;}
+ if(button.hasAttribute('data-catalog-select')){selectOption(key,button.dataset.catalogSelect);menu.hidden=true;trigger.setAttribute('aria-expanded','false');trigger.focus();return;}
+ if(button.hasAttribute('data-catalog-custom')){box.querySelector('.catalog-create').hidden=false;box.querySelector('.catalog-name').focus();return;}
+ if(button.hasAttribute('data-catalog-cancel')){box.querySelector('.catalog-create').hidden=true;return;}
+ const deleting=button.hasAttribute('data-catalog-delete');if(!deleting&&!button.hasAttribute('data-catalog-save'))return;
+ const name=(deleting?button.dataset.catalogDelete:box.querySelector('.catalog-name').value).trim(),category=key==='category'?name:form.elements.category.value;
+ if(!name||!category){$('form-error').textContent='请先填写名称并选择身体部位。';return;}
+ if(deleting&&!confirm(`永久从两人的选项中移除“${name}”？已有训练记录会保留。`))return;
+ busy=true;$('save').disabled=true;$('form-error').textContent='';
+ try{await saveOption(key,category,name,deleting);if(!deleting){selectOption(key,name);box.querySelector('.catalog-name').value='';box.querySelector('.catalog-create').hidden=true;menu.hidden=true;trigger.setAttribute('aria-expanded','false');}else if(form.elements[key].value===name){selectOption(key,'');}await sync();}
+ catch(error){$('form-error').textContent=error.message+'；选项未确认保存，请重试。';}
+ finally{busy=false;$('save').disabled=false;}
+});
+$('fields').addEventListener('keydown',event=>{const box=event.target.closest('[data-picker]');if(!box)return;if(event.key==='Escape'&&!box.querySelector('.catalog-menu').hidden){event.preventDefault();event.stopPropagation();box.querySelector('.catalog-menu').hidden=true;box.querySelector('.catalog-trigger').setAttribute('aria-expanded','false');box.querySelector('.catalog-trigger').focus();}if(event.key==='Enter'&&event.target.matches('.catalog-name')){event.preventDefault();box.querySelector('[data-catalog-save]').click();}});
 function openEditor(kind,record=null,initial=null){
- const value=initial||record?.current.value||{person:viewer,date,title:'',interval:0,end:'',category:'胸部',exercise:'杠铃卧推',sets:3,reps:10,weight:0,unit:'kg',name:''};
+ const cat=catalogue(records),defaultCategory=cat.categories[0]||'';
+ const value=initial||record?.current.value||{person:viewer,date,title:'',interval:0,end:'',category:defaultCategory,exercise:cat.exercises(defaultCategory)[0]||'',sets:3,reps:10,weight:0,unit:'kg',name:''};
  editing={kind,entity:record?.id||crypto.randomUUID(),parents:record?.heads.map(x=>x.id)||[],person:value.person,id:crypto.randomUUID(),bases:new Map(records.map(r=>[r.id,r.heads.map(x=>x.id)]))};
  $('dialog-title').textContent=({plan:'训练计划',log:'训练动作',exercise:'自定义动作',best:'修正个人最佳',settings:'显示设置'})[kind];
  let html=kind==='settings'?`<p class="wide muted">${PEOPLE[value.person]} 的显示设置</p>`:`<fieldset class="wide person-picker"><legend>谁的训练</legend>${Object.keys(PEOPLE).map(p=>`<label data-person="${p}"><input type="radio" name="person" value="${p}" ${p===value.person?'checked':''} ${record&&kind==='best'?'disabled':''}>${personBadge(p)}</label>`).join('')}</fieldset>`;
  if(kind==='plan')html+=field('title','训练项目','text',value.title,'required maxlength="200"')+field('date','开始日期','date',value.date,'required')+field('interval','每隔多少天一次（0 = 仅当天）','number',value.interval,'min="0" max="3650" step="1" required')+field('end','结束日期（可不填）','date',value.end||'')+'<p class="wide muted">例如每隔 2 天：9 月 1 日、3 日、5 日。编辑会修改整个重复系列。</p>';
  else if(kind==='settings')html+=field('font','字号','number',value.font,'min="14" max="22" required')+field('theme','配色编号 0–9','number',value.theme,'min="0" max="9" required');
  else {
-  html+=choices('category','身体部位',Object.keys(EXERCISES),value.category);
+  html+=picker('category','身体部位',value.category);
   if(kind==='exercise')html+=field('name','新动作名称','text',value.name,'required maxlength="100"');
-  else {html+=`<label>动作名称<select name="exercise">${exerciseOptions(value.category,value.exercise)}</select></label>`+field('date','日期','date',value.date,'required');if(kind==='log')html+=field('sets','组数','number',value.sets,'min="1" max="1000" step="1" required');html+=field('reps','每组次数','number',value.reps,'min="1" max="10000" step="1" required')+field('weight','重量','number',value.weight,'min="0" max="5000" step="0.01" required')+choices('unit','重量单位',['kg','lb'],value.unit);}
+  else {html+=picker('exercise','动作名称',value.exercise)+field('date','日期','date',value.date,'required');if(kind==='log')html+=field('sets','组数','number',value.sets,'min="1" max="1000" step="1" required');html+=field('reps','每组次数','number',value.reps,'min="1" max="10000" step="1" required')+field('weight','重量','number',value.weight,'min="0" max="5000" step="0.01" required')+choices('unit','重量单位',['kg','lb'],value.unit);}
  }
  if(kind==='log')html+=field('trainingType','训练类型（可选择当天计划或自填）','text',value.trainingType||'', 'list="training-types" maxlength="200" placeholder="留空按身体部位匹配，如背部训练"')+'<datalist id="training-types"></datalist>';
  $('fields').innerHTML=html;$('form-error').textContent='';$('editor').showModal();
  if(kind==='log'){typeSuggestions();$('edit-form').elements.date.onchange=typeSuggestions;$('edit-form').querySelectorAll('[name=person]').forEach(input=>input.onchange=typeSuggestions);}
- const category=$('edit-form').elements.category;if(category&&kind!=='exercise')category.onchange=()=>{$('edit-form').elements.exercise.innerHTML=exerciseOptions(category.value);};
+ refreshPickers();const category=$('edit-form').elements.category;if(category)category.onchange=()=>selectOption('category',category.value);
 }
 async function submit(event){event.preventDefault();if(busy)return;busy=true;$('save').disabled=true;$('form-error').textContent='';
  try{const values=Object.fromEntries(new FormData($('edit-form')));values.person=values.person||editing.person;for(const key of ['interval','sets','reps','weight','font','theme'])if(key in values)values[key]=Number(values[key]);
@@ -129,7 +163,7 @@ async function submit(event){event.preventDefault();if(busy)return;busy=true;$('
    editing.parents=editing.bases.get(editing.entity)||[];
   }
   const payload=JSON.stringify(values);if(editing.lastPayload&&editing.lastPayload!==payload)editing.id=crypto.randomUUID();editing.lastPayload=payload;
-  await append(editing.kind,values,editing.entity,editing.parents,false,editing.id);$('editor').close();await sync();
+  if(editing.kind==='exercise')await saveOption('exercise',values.category,values.name.trim());else await append(editing.kind,values,editing.entity,editing.parents,false,editing.id);$('editor').close();await sync();
  }catch(error){$('form-error').textContent=error.message+'；内容仍保留，可重试。';}finally{busy=false;$('save').disabled=false;}
 }
 async function mutateButton(button,task){if(busy)return;busy=true;button.disabled=true;try{await task();await sync();}catch(error){status(error.message,true);}finally{busy=false;button.disabled=false;}}
@@ -156,7 +190,7 @@ $('refresh').onclick=async()=>{await savePreferences();await sync();};$('export'
 for(const id of ['theme','font','font-family','font-color'])$(id).oninput=()=>{preferenceDirty=true;preferenceSerial++;applyPreferences(Number($('theme').value),Number($('font').value),$('font-family').value,$('font-color').value);clearTimeout(preferenceTimer);preferenceTimer=setTimeout(savePreferences,700);};
 $('close-detail').onclick=()=>$('training-detail').close();
 $('detail-daily').onclick=()=>{$('training-detail').close();selectDate(detailContext.date);switchTab('daily');};
-$('detail-add').onclick=()=>{const v=detailContext,category=Object.keys(EXERCISES).find(c=>sameTrainingType(c,v.type))||'胸部';$('training-detail').close();openEditor('log',null,{person:v.person,date:v.date,trainingType:v.type,category,exercise:EXERCISES[category][0],sets:3,reps:10,weight:0,unit:'kg'});};
+$('detail-add').onclick=()=>{const v=detailContext,cat=catalogue(records),category=cat.categories.find(c=>sameTrainingType(c,v.type))||cat.categories[0]||'';$('training-detail').close();openEditor('log',null,{person:v.person,date:v.date,trainingType:v.type,category,exercise:cat.exercises(category)[0]||'',sets:3,reps:10,weight:0,unit:'kg'});};
 $('more-history').onclick=()=>{historyLimit+=60;render();};
 document.addEventListener('click',event=>{
  const button=event.target.closest('button');if(!button)return;

@@ -1,5 +1,19 @@
 export const PEOPLE = { dengjie: 'Jie Deng', wangboning: 'Boning Wang' };
 export const EXERCISES = { 胸部: ['杠铃卧推','哑铃卧推','上斜卧推','俯卧撑','绳索夹胸'], 背部: ['引体向上','高位下拉','杠铃划船','坐姿划船','硬拉'], 肩部: ['推举','侧平举','面拉'], 手臂: ['哑铃弯举','锤式弯举','绳索下压'], 腿部: ['深蹲','腿举','保加利亚分腿蹲','腿弯举','提踵'], 核心: ['卷腹','悬垂举腿','健腹轮'], 全身: ['波比跳','壶铃摆动'] };
+// Catalogue tombstones hide options, while historical logs keep their original names.
+export function catalogue(records){
+ const categories=new Set(Object.keys(EXERCISES)),items=new Map(Object.entries(EXERCISES).map(([c,n])=>[c,new Set(n)]));
+ const rows=records.filter(r=>r.current.kind==='exercise');
+ for(const r of rows.filter(r=>!r.current.value.catalogRole&&!r.current.deleted&&!r.conflict)){
+  const v=r.current.value;categories.add(v.category);if(!items.has(v.category))items.set(v.category,new Set());items.get(v.category).add(v.name);
+ }
+ for(const r of rows.filter(r=>r.current.value.catalogRole)){
+  const v=r.current.value,removed=r.conflict||r.current.deleted;
+  if(v.catalogRole==='category'){if(removed)categories.delete(v.category);else categories.add(v.category);}
+  else {if(!items.has(v.category))items.set(v.category,new Set());if(removed)items.get(v.category).delete(v.name);else items.get(v.category).add(v.name);}
+ }
+ return {categories:[...categories],exercises:c=>[...(items.get(c)||[])]};
+}
 export const THEMES = [
  ['苔绿','#eef2e9','#ffffff','#193b30','#496c43'],['海盐蓝','#edf3f8','#ffffff','#203849','#306d96'],
  ['赤陶','#f8eee6','#fffcf8','#4f342b','#ad5337'],['薰衣草','#f2eef8','#ffffff','#403253','#7961a5'],
