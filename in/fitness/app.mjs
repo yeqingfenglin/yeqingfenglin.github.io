@@ -3,15 +3,27 @@ const $=id=>document.getElementById(id), local=window.FITNESS_LOCAL===true;
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dateString=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 const today=dateString(new Date());
-let date=today,month=new Date(new Date().getFullYear(),new Date().getMonth(),1),person='dengjie',viewer='dengjie';
+let date=today,month=new Date(new Date().getFullYear(),new Date().getMonth(),1),viewer='dengjie';
 let operations=new Map(),records=[],known=new Set(),client,user,busy=false,syncing=false,active=true,editing=null,historyLimit=60;
 let preferenceTimer,preferenceDirty=false,preferenceSerial=0,preferenceSaving=false,localDB;
 const status=(message,error=false)=>{$('status').textContent=message;$('status').classList.toggle('error',error);};
-const currentRecords=kind=>records.filter(r=>!r.current.deleted&&!r.conflict&&r.current.kind===kind&&r.current.value.person===person);
+const currentRecords=kind=>records.filter(r=>!r.current.deleted&&!r.conflict&&r.current.kind===kind);
 const getRecord=id=>records.find(r=>r.id===id);
 const settingsId=p=>p==='dengjie'?'00000000-0000-4000-8000-000000000001':'00000000-0000-4000-8000-000000000002';
-function applyPreferences(theme,font){const palette=THEMES[theme]||THEMES[0];['--bg','--paper','--ink','--accent'].forEach((key,i)=>document.documentElement.style.setProperty(key,palette[i+1]));document.documentElement.style.fontSize=font+'px';document.documentElement.style.colorScheme=theme>=8?'dark':'light';$('theme').value=theme;$('font').value=font;$('font-value').value=font;}
-function rebuild(){records=materialize([...operations.values()]);if(!preferenceDirty){const setting=getRecord(settingsId(viewer));if(setting&&!setting.current.deleted)applyPreferences(setting.current.value.theme,setting.current.value.font);}render();}
+const PERSON_PALETTES=[['#50765a','#a7617b'],['#487da0','#966892'],['#a85c40','#698052'],['#8664a3','#538783'],['#af627c','#678462'],['#927637','#a16672'],['#3f8774','#92719d'],['#637e95','#977257'],['#94bcec','#d6a9cc'],['#ddbd76','#9bc6b1']];
+const FONTS={round:'"YouYuan", "幼圆", "STYuanti", "Yuanti SC", "Microsoft YaHei", sans-serif',hand:'"KaiTi", "STKaiti", "楷体", cursive',sans:'"Microsoft YaHei", "PingFang SC", sans-serif',serif:'"Songti SC", "SimSun", serif'};
+function applyPreferences(theme,font,fontFamily='round',fontColor='ink'){
+ const palette=THEMES[theme]||THEMES[0],pair=PERSON_PALETTES[theme]||PERSON_PALETTES[0],style=document.documentElement.style;
+ ['--bg','--paper','--ink','--accent'].forEach((key,i)=>style.setProperty(key,palette[i+1]));
+ pair.forEach((color,i)=>style.setProperty('--person-'+(i+1),color));
+ style.setProperty('--font-family',FONTS[fontFamily]||FONTS.round);
+ style.setProperty('--text',fontColor==='primary'?'color-mix(in srgb,var(--ink) 72%,var(--person-1))':fontColor==='secondary'?'color-mix(in srgb,var(--ink) 72%,var(--person-2))':'var(--ink)');
+ style.fontSize='16px';style.setProperty('--reading-size',font+'px');style.colorScheme=theme>=8?'dark':'light';
+ $('theme').value=theme;$('font').value=font;$('font-value').value=font;$('font-family').value=fontFamily;$('font-color').value=fontColor;
+}
+function personBadge(p){return `<span class="person-badge" data-person="${p}">${p==='dengjie'?'●':'◆'} ${PEOPLE[p]}</span>`;}
+function allBests(){return Object.keys(PEOPLE).flatMap(p=>personalBests(records,p));}
+function rebuild(){records=materialize([...operations.values()]);if(!preferenceDirty){const setting=getRecord(settingsId(viewer));if(setting&&!setting.current.deleted)applyPreferences(setting.current.value.theme,setting.current.value.font,setting.current.value.fontFamily,setting.current.value.fontColor);}render();}
 async function gateway(action,payload={}) {
  const {data:{session}}=await client.auth.getSession();
  if(!session) {lock('登录已失效，请返回内板重新登录。');throw Error('登录已失效');}
@@ -50,11 +62,19 @@ function render(){
  const plans=currentRecords('plan'),logs=currentRecords('log');
  const offset=(new Date(month.getFullYear(),month.getMonth(),1).getDay()+6)%7,total=new Date(month.getFullYear(),month.getMonth()+1,0).getDate();
  let html='<div class="day-blank" aria-hidden="true"></div>'.repeat(offset);
- for(let d=1;d<=total;d++){const key=dateString(new Date(month.getFullYear(),month.getMonth(),d)),items=plans.filter(r=>occurs(r.current.value,key)),count=logs.filter(r=>r.current.value.date===key).length;html+=`<button class="day-cell ${key===date?'selected':''} ${key===today?'is-today':''}" data-date="${key}" aria-label="${key}，${items.length}项计划，${count}项训练" aria-pressed="${key===date}"><span class="day-number">${d}</span>${items.slice(0,2).map(r=>`<span class="plan-chip">${esc(r.current.value.title)}</span>`).join('')}${items.length>2?`<span class="plan-chip">+${items.length-2} 项</span>`:''}${count?`<span class="log-dot">● ${count} 项记录</span>`:''}</button>`;}
+ for(let d=1;d<=total;d++){
+  const key=dateString(new Date(month.getFullYear(),month.getMonth(),d)),items=plans.filter(r=>occurs(r.current.value,key)),daily=logs.filter(r=>r.current.value.date===key);
+  const strips=Object.keys(PEOPLE).map(p=>{
+   const pp=items.filter(r=>r.current.value.person===p),ll=daily.filter(r=>r.current.value.person===p),symbol=p==='dengjie'?'●':'◆';
+   return pp.slice(0,2).map(r=>`<span class="plan-chip" data-person="${p}" title="${esc(PEOPLE[p]+' · '+r.current.value.title)}"><b>${symbol}</b> ${esc(r.current.value.title)}</span>`).join('')+(pp.length>2?`<span class="more-chip" data-person="${p}">${symbol} 另 ${pp.length-2} 项计划</span>`:'')+(ll.length?`<span class="plan-chip completed" data-person="${p}" title="${esc(PEOPLE[p]+' · '+ll.map(r=>r.current.value.exercise).join('、'))}"><b>${symbol}</b> ✓ ${esc(ll[0].current.value.exercise)}${ll.length>1?' +'+(ll.length-1):''}</span>`:'');
+  }).join('');
+  html+=`<button class="day-cell ${key===date?'selected':''} ${key===today?'is-today':''}" data-date="${key}" aria-label="${key}，${items.length}项计划，${daily.length}项训练" aria-pressed="${key===date}"><span class="day-number">${d}${key===today?'<small>今天</small>':''}</span><span class="day-strips">${strips}</span></button>`;
+ }
+ html+='<div class="day-blank" aria-hidden="true"></div>'.repeat((7-(offset+total)%7)%7);
  $('month-grid').innerHTML=html;
- $('plans').innerHTML=plans.filter(r=>occurs(r.current.value,date)).map(r=>`<div class="record"><div><strong>${esc(r.current.value.title)}</strong><small>${r.current.value.interval?'每隔 '+r.current.value.interval+' 天 · 从 '+r.current.value.date+' 至 '+(r.current.value.end||'长期'):'仅当天'}</small></div><div class="row">${actionButton('编辑','edit',r.id)}${actionButton('删除'+(r.current.value.interval?'整个系列':''),'delete',r.id)}</div></div>`).join('')||'<div class="empty">给今天安排一点运动吧。</div>';
- $('logs').innerHTML=logs.filter(r=>r.current.value.date===date).map(r=>{const v=r.current.value;return `<tr><td>${esc(v.category)}</td><td><strong>${esc(v.exercise)}</strong></td><td>${v.sets}</td><td>${v.reps}</td><td>${v.weight} ${v.unit}</td><td>${actionButton('编辑','edit',r.id)} ${actionButton('删除','delete',r.id)}</td></tr>`;}).join('')||'<tr><td colspan="6" class="empty">还没有训练记录。完成一组，就是新的开始。</td></tr>';
- $('best-list').innerHTML=personalBests(records,person).map(v=>`<article class="best-card"><small>${esc(v.category)} · ${v.manual?'手动修正':'自动记录'}</small><h3>${esc(v.exercise)}</h3><div class="best-number">${v.weight} <small>${v.unit}</small></div><p>${v.reps} 次 · ${v.date}</p><button data-best="${esc(v.category+' / '+v.exercise)}">修正成绩</button>${v.manual?' '+actionButton('恢复自动','delete',v.entity):''}</article>`).join('')||'<div class="empty">添加训练后，你的个人最佳会出现在这里。</div>';
+ $('plans').innerHTML=plans.filter(r=>occurs(r.current.value,date)).map(r=>`<div class="record plan-record" data-person="${r.current.value.person}"><div>${personBadge(r.current.value.person)}<strong>${esc(r.current.value.title)}</strong><small>${r.current.value.interval?'每隔 '+r.current.value.interval+' 天 · 从 '+r.current.value.date+' 至 '+(r.current.value.end||'长期'):'仅当天'}</small></div><div class="row">${actionButton('编辑','edit',r.id)}${actionButton('删除'+(r.current.value.interval?'整个系列':''),'delete',r.id)}</div></div>`).join('')||'<div class="empty">给今天安排一点运动吧。</div>';
+ $('logs').innerHTML=logs.filter(r=>r.current.value.date===date).map(r=>{const v=r.current.value;return `<tr data-person="${v.person}"><td>${personBadge(v.person)}</td><td>${esc(v.category)}</td><td><strong>${esc(v.exercise)}</strong></td><td>${v.sets}</td><td>${v.reps}</td><td>${v.weight} ${v.unit}</td><td>${actionButton('编辑','edit',r.id)} ${actionButton('删除','delete',r.id)}</td></tr>`;}).join('')||'<tr><td colspan="7" class="empty">还没有训练记录。完成一组，就是新的开始。</td></tr>';
+ $('best-list').innerHTML=allBests().map(v=>`<article class="best-card" data-person="${v.person}">${personBadge(v.person)}<small>${esc(v.category)} · ${v.manual?'手动修正':'自动记录'}</small><h3>${esc(v.exercise)}</h3><div class="best-number">${v.weight} <small>${v.unit}</small></div><p>${v.reps} 次 · ${v.date}</p><button data-best-person="${v.person}" data-best="${esc(v.category+' / '+v.exercise)}">修正成绩</button>${v.manual?' '+actionButton('恢复自动','delete',v.entity):''}</article>`).join('')||'<div class="empty">添加训练后，你的个人最佳会出现在这里。</div>';
  const conflicts=records.filter(r=>r.conflict);$('conflicts').hidden=!conflicts.length;
  $('conflicts').innerHTML=conflicts.length?`<strong>${conflicts.length} 条记录有同时编辑的版本</strong><p>两个版本都已保留。核对后选择采用的版本；也可先导出备份。</p>`+conflicts.map(r=>`<div class="conflict-item">${r.heads.map(op=>`<div><strong>${esc(op.actor)} · ${esc(description(op))}</strong><pre>${esc(JSON.stringify(op.value,null,2))}</pre><button data-resolve="${op.id}" data-entity="${r.id}">采用此版本${op.deleted?'（删除）':''}</button></div>`).join('')}</div>`).join(''):'';
  const history=[...operations.values()].sort((a,b)=>(b.at||'').localeCompare(a.at||'')||b.id.localeCompare(a.id));
@@ -68,10 +88,10 @@ function exerciseOptions(category,selected=''){
  return all.map(name=>`<option ${name===selected?'selected':''}>${esc(name)}</option>`).join('');
 }
 function openEditor(kind,record=null,initial=null){
- const value=initial||record?.current.value||{person,date,title:'',interval:0,end:'',category:'胸部',exercise:'杠铃卧推',sets:3,reps:10,weight:0,unit:'kg',name:''};
+ const value=initial||record?.current.value||{person:viewer,date,title:'',interval:0,end:'',category:'胸部',exercise:'杠铃卧推',sets:3,reps:10,weight:0,unit:'kg',name:''};
  editing={kind,entity:record?.id||crypto.randomUUID(),parents:record?.heads.map(x=>x.id)||[],person:value.person,id:crypto.randomUUID(),bases:new Map(records.map(r=>[r.id,r.heads.map(x=>x.id)]))};
  $('dialog-title').textContent=({plan:'训练计划',log:'训练动作',exercise:'自定义动作',best:'修正个人最佳',settings:'显示设置'})[kind];
- let html=`<p class="wide muted">记录所属人：${PEOPLE[value.person]}</p>`;
+ let html=kind==='settings'?`<p class="wide muted">${PEOPLE[value.person]} 的显示设置</p>`:`<fieldset class="wide person-picker"><legend>谁的训练</legend>${Object.keys(PEOPLE).map(p=>`<label data-person="${p}"><input type="radio" name="person" value="${p}" ${p===value.person?'checked':''} ${record&&kind==='best'?'disabled':''}>${personBadge(p)}</label>`).join('')}</fieldset>`;
  if(kind==='plan')html+=field('title','训练项目','text',value.title,'required maxlength="200"')+field('date','开始日期','date',value.date,'required')+field('interval','每隔多少天一次（0 = 仅当天）','number',value.interval,'min="0" max="3650" step="1" required')+field('end','结束日期（可不填）','date',value.end||'')+'<p class="wide muted">例如每隔 2 天：9 月 1 日、3 日、5 日。编辑会修改整个重复系列。</p>';
  else if(kind==='settings')html+=field('font','字号','number',value.font,'min="14" max="22" required')+field('theme','配色编号 0–9','number',value.theme,'min="0" max="9" required');
  else {
@@ -83,7 +103,7 @@ function openEditor(kind,record=null,initial=null){
  const category=$('edit-form').elements.category;if(category&&kind!=='exercise')category.onchange=()=>{$('edit-form').elements.exercise.innerHTML=exerciseOptions(category.value);};
 }
 async function submit(event){event.preventDefault();if(busy)return;busy=true;$('save').disabled=true;$('form-error').textContent='';
- try{const values=Object.fromEntries(new FormData($('edit-form')));values.person=editing.person;for(const key of ['interval','sets','reps','weight','font','theme'])if(key in values)values[key]=Number(values[key]);
+ try{const values=Object.fromEntries(new FormData($('edit-form')));values.person=values.person||editing.person;for(const key of ['interval','sets','reps','weight','font','theme'])if(key in values)values[key]=Number(values[key]);
   if(editing.kind==='best'){
    const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify([values.person,values.category,values.exercise])));
    const hex=[...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('');
@@ -97,7 +117,7 @@ async function submit(event){event.preventDefault();if(busy)return;busy=true;$('
 async function mutateButton(button,task){if(busy)return;busy=true;button.disabled=true;try{await task();await sync();}catch(error){status(error.message,true);}finally{busy=false;button.disabled=false;}}
 async function savePreferences(){
  if(!preferenceDirty||!active||preferenceSaving)return;const serial=preferenceSerial;preferenceSaving=true;
- const value={person:viewer,theme:Number($('theme').value),font:Number($('font').value)};const record=getRecord(settingsId(viewer));
+ const value={person:viewer,theme:Number($('theme').value),font:Number($('font').value),fontFamily:$('font-family').value,fontColor:$('font-color').value};const record=getRecord(settingsId(viewer));
  try{await append('settings',value,settingsId(viewer),record?.heads.map(x=>x.id)||[]);if(serial===preferenceSerial)preferenceDirty=false;}catch(error){status('显示设置尚未保存：'+error.message+'；点击同步重试。',true);}finally{preferenceSaving=false;if(serial!==preferenceSerial)savePreferences();}
 }
 function exportBackup(){const blob=new Blob([JSON.stringify({format:'training-journal',version:1,operations:[...operations.values()]},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='training-journal-'+today+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
@@ -105,22 +125,22 @@ async function initialize(){
  try{
   $('theme').innerHTML=THEMES.map((t,i)=>`<option value="${i}">${t[0]}</option>`).join('');$('day').value=date;
   if(local){localDB=await openDB();$('gate').textContent='正在读取本地记录…';$('back').textContent='运动记录本 · 本地版';$('back').removeAttribute('href');$('mode-label').textContent='数据保存在当前浏览器 · 请定期导出备份';$('import-label').hidden=false;}
-  else {if(!window.supabase||!window.SITE_SUPABASE_CONFIG)throw Error('登录组件未加载，请检查网络并刷新');const cfg=window.SITE_SUPABASE_CONFIG;client=window.supabase.createClient(cfg.url,cfg.publishableKey);const {data:{session}}=await client.auth.getSession();if(!session)throw Error('请先返回内板登录管理员账号');user=session.user;const profile=await checkAdmin();viewer=profile.username.normalize('NFKC').trim().toLowerCase()==='lena11'?'wangboning':'dengjie';person=viewer;$('person').value=person;client.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT')lock('你已退出登录。请返回内板重新登录。');});}
-  $('gate').hidden=true;$('app').hidden=false;render();await sync();setInterval(()=>{if(!document.hidden)sync();},10000);
+  else {if(!window.supabase||!window.SITE_SUPABASE_CONFIG)throw Error('登录组件未加载，请检查网络并刷新');const cfg=window.SITE_SUPABASE_CONFIG;client=window.supabase.createClient(cfg.url,cfg.publishableKey);const {data:{session}}=await client.auth.getSession();if(!session)throw Error('请先返回内板登录管理员账号');user=session.user;const profile=await checkAdmin();viewer=profile.username.normalize('NFKC').trim().toLowerCase()==='lena11'?'wangboning':'dengjie';client.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT')lock('你已退出登录。请返回内板重新登录。');});}
+  applyPreferences(0,16);$('gate').hidden=true;$('app').hidden=false;render();await sync();setInterval(()=>{if(!document.hidden)sync();},10000);
  }catch(error){lock(error.message);const link=document.createElement('a');link.href='../';link.textContent=' 返回内板';$('gate').appendChild(link);}
 }
 document.querySelectorAll('[data-tab]').forEach(button=>button.onclick=()=>switchTab(button.dataset.tab));
 $('prev').onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()-1,1);render();};$('next').onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()+1,1);render();};$('today').onclick=()=>{month=new Date(new Date().getFullYear(),new Date().getMonth(),1);selectDate(today);};
-$('person').onchange=()=>{person=$('person').value;rebuild();};$('day').onchange=()=>{if($('day').value)selectDate($('day').value);};
+$('day').onchange=()=>{if($('day').value)selectDate($('day').value);};
 $('open-daily').onclick=()=>switchTab('daily');$('add-plan').onclick=()=>openEditor('plan');$('add-log').onclick=()=>openEditor('log');$('add-exercise').onclick=()=>openEditor('exercise');$('add-best').onclick=()=>openEditor('best');
 $('close-dialog').onclick=$('cancel').onclick=()=>{if(!busy)$('editor').close();};$('editor').addEventListener('cancel',event=>{if(busy)event.preventDefault();});$('edit-form').onsubmit=submit;
 $('refresh').onclick=async()=>{await savePreferences();await sync();};$('export').onclick=exportBackup;
-for(const id of ['theme','font'])$(id).oninput=()=>{preferenceDirty=true;preferenceSerial++;applyPreferences(Number($('theme').value),Number($('font').value));clearTimeout(preferenceTimer);preferenceTimer=setTimeout(savePreferences,700);};
+for(const id of ['theme','font','font-family','font-color'])$(id).oninput=()=>{preferenceDirty=true;preferenceSerial++;applyPreferences(Number($('theme').value),Number($('font').value),$('font-family').value,$('font-color').value);clearTimeout(preferenceTimer);preferenceTimer=setTimeout(savePreferences,700);};
 $('more-history').onclick=()=>{historyLimit+=60;render();};
 document.addEventListener('click',event=>{
  const button=event.target.closest('button');if(!button)return;
  if(button.dataset.date)selectDate(button.dataset.date);
- if(button.dataset.best){const v=personalBests(records,person).find(v=>v.category+' / '+v.exercise===button.dataset.best);openEditor('best',v.entity?getRecord(v.entity):null,v);}
+ if(button.dataset.best){const v=personalBests(records,button.dataset.bestPerson).find(v=>v.category+' / '+v.exercise===button.dataset.best);openEditor('best',v.entity?getRecord(v.entity):null,v);}
  if(button.dataset.action){const action=button.dataset.action;
   if(action==='edit')openEditor(getRecord(button.dataset.id).current.kind,getRecord(button.dataset.id));
   if(action==='delete'){const r=getRecord(button.dataset.id);if(confirm(r.current.kind==='best'?'取消手动修正，恢复自动计算？':'删除此记录？重复计划将删除整个系列，历史仍保留。'))mutateButton(button,()=>append(r.current.kind,r.current.value,r.id,r.heads.map(x=>x.id),true));}

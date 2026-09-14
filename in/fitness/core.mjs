@@ -22,7 +22,7 @@ export function validateOperation(input) {
  if (input.kind==='plan') { text('title',200); if(!validDate(v.date)|| (v.end && (!validDate(v.end)||v.end<v.date)))throw Error('日期不正确');num('interval',0,3650,true); }
  if (input.kind==='log'||input.kind==='best') {text('exercise');text('category');num('weight',0,5000);num('reps',1,10000,true);if(!['kg','lb'].includes(v.unit))throw Error('重量单位不正确');if(!validDate(v.date))throw Error('日期不正确'); if(input.kind==='log')num('sets',1,1000,true);}
  if (input.kind==='exercise') { text('name');text('category'); }
- if (input.kind==='settings') { num('theme',0,9,true);num('font',14,22,true); }
+ if (input.kind==='settings') { num('theme',0,9,true);num('font',14,22,true);if(v.fontFamily!==undefined&&!['round','hand','sans','serif'].includes(v.fontFamily))throw Error('字体选项不正确');if(v.fontColor!==undefined&&!['ink','primary','secondary'].includes(v.fontColor))throw Error('字色选项不正确'); }
  if (JSON.stringify(input).length>12000)throw Error('记录过大');
  return {id:input.id,entity:input.entity,kind:input.kind,parents:[...new Set(input.parents)],deleted:input.deleted,value:JSON.parse(JSON.stringify(v))};
 }
