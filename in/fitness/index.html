@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+ <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+ <meta name="robots" content="noindex,nofollow"><title>运动记录本 · Training Journal</title>
+ <link rel="stylesheet" href="fitness.css">
+ <script src="../../supabase-config.js"></script><script src="../../content-config.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+ <script type="module" src="app.mjs"></script>
+</head>
+<body>
+ <div id="gate" role="status">正在验证管理员身份…</div>
+ <div id="app" hidden>
+ <header><a id="back" href="../">← 返回内板</a><div class="preferences"><label>配色 <select id="theme" aria-label="整体配色"></select></label><label>字号 <input id="font" type="range" min="14" max="22" value="16"><output id="font-value">16</output></label></div></header>
+ <main>
+ <section class="hero"><div><p class="eyebrow">OUR TRAINING JOURNAL</p><h1>每一步，都算数。</h1><p class="intro">安排训练，记录进步。慢慢来，也一直向前。</p></div><div class="hero-mark" aria-hidden="true">✳</div></section>
+ <div class="toolbar"><div class="person-control"><span>记录所属人</span><select id="person" aria-label="记录所属人"><option value="dengjie">Jie Deng</option><option value="wangboning">Boning Wang</option></select></div><span id="status" role="status" aria-live="polite">正在读取…</span><button id="refresh">同步</button><button id="export">导出备份</button><label class="button" id="import-label" hidden>导入备份<input id="import" type="file" accept="application/json,.json" hidden></label></div>
+ <div id="conflicts" class="notice" hidden></div>
+ <nav class="tabs" aria-label="记录本栏目"><button data-tab="calendar" aria-selected="true">01 月历计划</button><button data-tab="daily">02 每日训练</button><button data-tab="bests">03 个人最佳</button><button data-tab="history">修改历史</button></nav>
+ <section id="calendar" class="panel">
+  <div class="section-top"><div><p class="eyebrow">MAKE ROOM FOR MOVEMENT</p><h2 id="month-title"></h2></div><div class="row"><button id="prev" aria-label="上个月">←</button><button id="today">今天</button><button id="next" aria-label="下个月">→</button><button class="primary" id="add-plan">＋ 添加计划</button></div></div>
+  <div class="weekdays"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div><div id="month-grid" class="month-grid"></div>
+  <div class="section-top"><h3 id="selected-label"></h3><button id="open-daily">记录当天训练 ↗</button></div><div id="plans"></div>
+ </section>
+ <section id="daily" class="panel" hidden>
+  <div class="section-top"><div><p class="eyebrow">SHOW UP. WRITE IT DOWN.</p><h2>今日的积累</h2></div><div class="row"><label>日期 <input id="day" type="date"></label><button class="primary" id="add-log">＋ 添加动作</button><button id="add-exercise">自定义动作</button></div></div>
+  <p class="muted">每一横栏记录一个动作；若各组次数或重量不同，请分别添加横栏。</p>
+  <div class="table-wrap"><table><thead><tr><th>身体部位</th><th>动作</th><th>组数</th><th>每组次数</th><th>重量</th><th>操作</th></tr></thead><tbody id="logs"></tbody></table></div>
+ </section>
+ <section id="bests" class="panel" hidden><div class="section-top"><div><p class="eyebrow">YOUR OWN BENCHMARK</p><h2>个人最佳成绩</h2></div><button id="add-best">＋ 手动设置最佳</button></div><p class="muted">按单组最大重量自动计算，同重量取次数更多的一组；kg / lb 自动换算比较。手动修正优先，取消修正即可恢复自动结果。有冲突的记录暂不参与计算。</p><div id="best-list" class="best-grid"></div></section>
+ <section id="history" class="panel" hidden><h2>每一次修改，都有迹可循</h2><p class="muted">保留两位管理员的修改与删除历史。恢复将新增一个版本。</p><div id="history-list"></div><button id="more-history" hidden>显示更多历史</button></section>
+ <footer>小小的坚持 · 长长的进步 <span id="mode-label">管理员共享记录 · COS 云端储存</span></footer>
+ </main></div>
+ <dialog id="editor"><form id="edit-form"><div class="section-top"><h2 id="dialog-title"></h2><button type="button" id="close-dialog" aria-label="关闭">×</button></div><div id="fields"></div><p id="form-error" class="error" role="alert"></p><div class="dialog-actions"><button type="button" id="cancel">取消</button><button class="primary" id="save" type="submit">保存记录</button></div></form></dialog>
+</body></html>
