@@ -8,3 +8,25 @@
 .header-links{display:flex;align-items:center;gap:17px;flex:none}.header-links a,.history-link{font-size:calc(var(--reading-size)*.85)}.history-link{border:0;background:transparent;padding:0;border-radius:0;font-weight:400}.history-link:hover,.history-link[aria-selected=true]{background:transparent;text-decoration:underline;text-underline-offset:5px}
 
 @media(max-width:760px){.tabs{grid-template-columns:repeat(3,minmax(0,1fr))}.tabs button{padding:10px 6px;justify-content:center;text-align:center;font-size:calc(var(--reading-size)*.9)}.tabs .nav-symbol{display:none}}
+
+/* Larger calendar text; outer day-cell geometry remains unchanged. */
+.day-number{font-size:calc(var(--reading-size)*1.35);line-height:1;height:32px}
+.plan-chip{font-size:calc(var(--reading-size)*.95);font-weight:600}
+.plan-chip b{font-size:calc(var(--reading-size)*.7)}
+.more-chip{font-size:calc(var(--reading-size)*.8)}
+
+/* Bundled OFL font: wide, rounded Latin letters; Chinese keeps the selected font. */
+@font-face{font-family:JournalDisplay;src:url("Fredoka.ttf") format("truetype");font-weight:300 700;font-stretch:75% 125%;font-style:normal;font-display:swap;unicode-range:U+0000-024F}
+body{font-family:JournalDisplay,var(--font-family);font-stretch:125%;font-variation-settings:"wdth" 125;font-weight:550}
+.eyebrow,.tabs button small,.person-badge{font-weight:650}
+@media(min-width:1101px){main{width:calc(100% - 24px);max-width:none}.journal-layout{grid-template-columns:minmax(0,1fr) 200px;gap:16px}.tabs button{padding:20px 10px;gap:9px}#calendar{padding:16px}}
+@media(min-width:761px) and (max-width:1100px){main{width:calc(100% - 20px)}.journal-layout{grid-template-columns:minmax(0,1fr) 150px;gap:12px}#calendar{padding:12px}.tabs button{padding:16px 8px}}
+
+@font-face{font-family:JournalChinese;src:url("ZCOOLKuaiLe.ttf") format("truetype");font-style:normal;font-weight:400;font-display:swap}
+body{font-family:JournalDisplay,var(--font-family)}
+button,input,select,textarea,option{font-family:inherit}
+.day-number{border:0;background:transparent;width:100%;border-radius:7px;cursor:pointer;padding:0 6px;color:inherit}
+.day-cell.is-today .day-number:hover{background:var(--accent)}
+.plan-chip{cursor:pointer;text-align:left;min-width:0;flex:none}
+.plan-chip:hover{background:color-mix(in srgb,var(--person-color) 30%,var(--paper));border-color:var(--person-color)}
+#training-detail{width:min(900px,94vw)}#detail-title{margin-top:12px}#detail-content .empty{border:2px dashed var(--line);border-radius:14px;padding:26px 15px}#detail-content .detail-summary{display:flex;gap:16px;flex-wrap:wrap;padding:10px 0}

@@ -21,6 +21,7 @@ export function validateOperation(input) {
  if (!PEOPLE[v.person]) throw Error('请选择记录所属人');
  if (input.kind==='plan') { text('title',200); if(!validDate(v.date)|| (v.end && (!validDate(v.end)||v.end<v.date)))throw Error('日期不正确');num('interval',0,3650,true); }
  if (input.kind==='log'||input.kind==='best') {text('exercise');text('category');num('weight',0,5000);num('reps',1,10000,true);if(!['kg','lb'].includes(v.unit))throw Error('重量单位不正确');if(!validDate(v.date))throw Error('日期不正确'); if(input.kind==='log')num('sets',1,1000,true);}
+ if(input.kind==='log'&&v.trainingType!==undefined&&(typeof v.trainingType!=='string'||v.trainingType.length>200))throw Error('训练类型不正确');
  if (input.kind==='exercise') { text('name');text('category'); }
  if (input.kind==='settings') { num('theme',0,9,true);num('font',14,22,true);if(v.fontFamily!==undefined&&!['round','hand','sans','serif'].includes(v.fontFamily))throw Error('字体选项不正确');if(v.fontColor!==undefined&&!['ink','primary','secondary'].includes(v.fontColor))throw Error('字色选项不正确'); }
  if (JSON.stringify(input).length>12000)throw Error('记录过大');
@@ -41,6 +42,14 @@ export function occurs(plan,date) {
  return delta>=0 && (!plan.end||date<=plan.end) && (plan.interval===0?delta===0:delta%plan.interval===0);
 }
 export function kilograms(value) {return value.unit==='lb'?value.weight*0.45359237:value.weight;}
+export function trainingType(value){return String(value.trainingType||'').trim()||value.category+'训练';}
+export function sameTrainingType(a,b){
+ const normalize=x=>String(x||'').normalize('NFKC').replace(/\s+/g,'').replace(/训练$/,'');
+ return normalize(a)===normalize(b);
+}
+export function matchingTraining(records,person,date,type){
+ return records.filter(r=>!r.conflict&&!r.current.deleted&&r.current.kind==='log'&&r.current.value.person===person&&r.current.value.date===date&&sameTrainingType(trainingType(r.current.value),type));
+}
 export function normalizeBackup(data,existing=[]) {
  if(data?.format!=='training-journal'||data.version!==1||!Array.isArray(data.operations)||data.operations.length>50000)throw Error('不是有效的运动记录备份');
  const all=new Map(existing.map(op=>[op.id,op])),result=[];
