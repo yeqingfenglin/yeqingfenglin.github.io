@@ -121,6 +121,10 @@
         .session-actions { display: flex; align-items: center; gap: .45rem; margin-top: .45rem; }
         .session-action-btn { border: none; border-radius: 20px; padding: .28rem .7rem; font-size: .72rem; cursor: pointer; color: #1e4a76; background: #eef2ff; }
         .session-action-btn:hover { background: #dbeafe; }
+        .fitness-entry { display: flex; align-items: center; gap: .5rem; width: fit-content; margin-top: .55rem; text-decoration: none; }
+        .fitness-entry svg { width: 25px; height: 25px; transition: transform .25s; }
+        .fitness-entry:hover svg, .fitness-entry:focus-visible svg { transform: rotate(-25deg); }
+        @media (prefers-reduced-motion: reduce) { .fitness-entry svg { transition: none; } }
         .session-action-btn.logout { color: #64748b; background: #f1f5f9; }
 
         #auth-overlay, #access-request-overlay, #user-manager-overlay, #review-user-overlay, #backup-options-overlay { display: none; position: fixed; inset: 0; width: 100%; height: 100%; background: rgba(15,23,42,.7); z-index: 4000; backdrop-filter: blur(7px); }
@@ -173,6 +177,7 @@
             <button id="manage-users-button" class="session-action-btn" onclick="openUserManager()" style="display:none;">管理用户</button>
             <button class="session-action-btn logout" onclick="logoutCurrentUser()">退出登录</button>
         </div>
+        <a id="fitness-button" class="session-action-btn fitness-entry" href="/in/fitness/" style="display:none;" aria-label="打开运动记录本"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M10 16h12M3 12v8M29 12v8"/><rect x="6" y="8" width="5" height="16" rx="1.5"/><rect x="21" y="8" width="5" height="16" rx="1.5"/></svg><span>运动记录本</span></a>
     </div>
     <div id="app-root" class="app-container"><div class="loading">📡 正在加载...</div></div>
 
@@ -611,6 +616,7 @@
             document.getElementById('manage-users-button').style.display = isAdmin ? 'inline-block' : 'none';
             document.getElementById('export-backup-button').style.display = isAdmin ? 'inline-block' : 'none';
             document.getElementById('edit-profile-button').style.display = isAdmin && editableProfile ? 'inline-block' : 'none';
+            document.getElementById('fitness-button').style.display = isAdmin ? 'flex' : 'none';
             document.querySelector('.create-post-btn').style.display = isAdmin ? 'block' : 'none';
 
             await loadAndRenderSiteContent();
