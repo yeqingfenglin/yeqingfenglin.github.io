@@ -1,4 +1,4 @@
-import {PEOPLE,EXERCISES,THEMES,validateOperation,materialize,occurs,personalBests,normalizeBackup,trainingType,sameTrainingType,matchingTraining,catalogue} from './core.mjs?v=20260915-8';
+import {PEOPLE,EXERCISES,THEMES,validateOperation,materialize,occurs,personalBests,normalizeBackup,trainingType,sameTrainingType,matchingTraining,catalogue} from './core.mjs?v=20260915-9';
 const $=id=>document.getElementById(id), local=window.FITNESS_LOCAL===true;
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dateString=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -27,7 +27,9 @@ function applyPreferences(theme,font,fontFamily='sans',fontColor='ink'){
 function personBadge(p){return `<span class="person-badge" data-person="${p}">${p==='dengjie'?'●':'◆'} ${PEOPLE[p]}</span>`;}
 function allBests(){return Object.keys(PEOPLE).flatMap(p=>personalBests(records,p));}
 function rebuild(){records=materialize([...operations.values()]);if(!preferenceDirty){const setting=getRecord(settingsId(viewer));if(setting&&!setting.current.deleted)applyPreferences(setting.current.value.theme,setting.current.value.font,setting.current.value.appearanceVersion===2?setting.current.value.fontFamily:(setting.current.value.fontFamily==='round'?'sans':setting.current.value.fontFamily||'sans'),setting.current.value.fontColor);}render();}
-async function gateway(action,payload={}) {
+function withTimeout(promise){let timer;return Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('请求超时，界面已解锁；保存结果可能尚未确认，请同步后重试')),15000);})]).finally(()=>clearTimeout(timer));}
+async function gateway(action,payload={}) {return withTimeout(gatewayRequest(action,payload));}
+async function gatewayRequest(action,payload={}) {
  const {data:{session}}=await client.auth.getSession();
  if(!session) {lock('登录已失效，请返回内板重新登录。');throw Error('登录已失效');}
  const {data,error}=await client.functions.invoke(window.SITE_CONTENT_CONFIG?.gatewayFunction||'cos-content',{body:{action,...payload},headers:{Authorization:'Bearer '+session.access_token}});
@@ -35,19 +37,19 @@ async function gateway(action,payload={}) {
  if(data?.error)throw Error(data.error);return data;
 }
 function lock(message){active=false;operations.clear();records=[];$('app').hidden=true;$('gate').hidden=false;$('gate').textContent=message;document.querySelectorAll('#logs,#best-list,#history-list,#plans,#conflicts,#fields').forEach(x=>x.replaceChildren());if($('editor').open)$('editor').close();if($('training-detail').open)$('training-detail').close();detailContext=null;$('detail-content').replaceChildren();}
-async function checkAdmin(){const {data,error}=await client.from('profiles').select('username,role,status').eq('id',user.id).single();if(error||data?.role!=='admin'||data?.status!=='approved'){lock('仅已获准的管理员可查看。请返回内板登录。');throw Error('管理员身份验证失败');}return data;}
+async function checkAdmin(){const {data,error}=await withTimeout(client.from('profiles').select('username,role,status').eq('id',user.id).single());if(error)throw Error('暂时无法验证登录状态，请稍后重试');if(data?.role!=='admin'||data?.status!=='approved'){lock('仅已获准的管理员可查看。请返回内板登录。');throw Error('管理员身份验证失败');}return data;}
 async function openDB(){return new Promise((resolve,reject)=>{const req=indexedDB.open('training-journal-local',1);req.onupgradeneeded=()=>req.result.createObjectStore('operations',{keyPath:'id'});req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(Error('无法打开本地储存，请检查浏览器设置'));});}
 async function dbRead(){return new Promise((resolve,reject)=>{const req=localDB.transaction('operations').objectStore('operations').getAll();req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});}
 async function dbWrite(items){return new Promise((resolve,reject)=>{const tx=localDB.transaction('operations','readwrite');for(const item of items)tx.objectStore('operations').put(item);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||Error('本地储存失败'));});}
 async function sync(){
- if(syncing||!active)return;syncing=true;
+ if(syncing||!active)return;syncing=true;const before=operations.size;
  try{
   if(local){for(const op of await dbRead())operations.set(op.id,op);}
   else{
    await checkAdmin();let marker='';
    do{const page=await gateway('fitness-list',{marker});if(!active)return;const missing=page.keys.filter(key=>!known.has(key));for(let i=0;i<missing.length;i+=50){const keys=missing.slice(i,i+50),data=await gateway('fitness-read',{keys});if(!active)return;for(const op of data.operations)operations.set(op.id,op);keys.forEach(key=>known.add(key));}marker=page.marker;}while(marker);
   }
-  rebuild();status(preferenceDirty?'配色或字号尚未保存，请点击同步重试':`${local?'已储存到本机':'COS 已同步'} · ${new Date().toLocaleTimeString('zh-CN')}`);
+  if(operations.size!==before)rebuild();status(preferenceDirty?'配色或字号尚未保存，请点击同步重试':`${local?'已储存到本机':'COS 已同步'} · ${new Date().toLocaleTimeString('zh-CN')}`);
  }catch(error){status('同步失败：'+error.message+'。未保存的编辑仍保留，请重试。',true);}finally{syncing=false;}
 }
 async function append(kind,value,entity=crypto.randomUUID(),parents=[],deleted=false,id=crypto.randomUUID()){
@@ -106,16 +108,22 @@ function renderDetail(){
 function openDetail(who,when,type){detailContext={person:who,date:when,type};selectDate(when);renderDetail();$('training-detail').showModal();}
 function typeSuggestions(){const form=$('edit-form'),who=form.elements.person.value||editing.person,when=form.elements.date?.value||date;
  const titles=records.filter(r=>!r.conflict&&!r.current.deleted&&r.current.kind==='plan'&&r.current.value.person===who&&occurs(r.current.value,when)).map(r=>r.current.value.title);
- $('training-types').innerHTML=[...new Set([...titles,...catalogue(records).categories.map(c=>c+'训练')])].map(title=>`<option value="${esc(title)}"></option>`).join('');
+ $('training-types').innerHTML=[...new Set([...titles,...availableCatalogue().categories.map(c=>c+'训练')])].map(title=>`<option value="${esc(title)}"></option>`).join('');
 }
 function field(name,label,type,value,extra=''){return `<label>${label}<input name="${name}" type="${type}" value="${esc(value)}" ${extra}></label>`;}
 function choices(name,label,values,value){return `<label>${label}<select name="${name}">${values.map(x=>`<option value="${esc(x)}" ${x===value?'selected':''}>${esc(x)}</option>`).join('')}</select></label>`;}
 function picker(name,label,value){return `<div class="catalog-picker" data-picker="${name}"><span id="${name}-label">${label}</span><input type="hidden" name="${name}" value="${esc(value)}"><button type="button" class="catalog-trigger" aria-labelledby="${name}-label ${name}-chosen" aria-expanded="false" aria-controls="${name}-menu"><span id="${name}-chosen"></span><span>⌄</span></button><div id="${name}-menu" class="catalog-menu" hidden><div class="catalog-options"></div><div class="catalog-create" hidden><label>自定义${label}<input class="catalog-name" maxlength="100" placeholder="输入名称"></label><div class="row"><button type="button" data-catalog-save>添加</button><button type="button" data-catalog-cancel>取消</button></div></div></div></div>`;}
+function availableCatalogue(){
+ const base=catalogue(records),changes=$('editor').open?editing?.catalogChanges:undefined,categories=new Set(base.categories);
+ for(const change of changes?.values()||[])if(change.role==='category'){if(change.deleted)categories.delete(change.category);else categories.add(change.category);}
+ return {categories:[...categories],exercises:category=>{const names=new Set(base.exercises(category));for(const change of changes?.values()||[])if(change.role==='exercise'&&change.category===category){if(change.deleted)names.delete(change.name);else names.add(change.name);}return [...names];}};
+}
 function refreshPickers(){
- const cat=catalogue(records),form=$('edit-form');
+ const cat=availableCatalogue(),form=$('edit-form');
  form.querySelectorAll('[data-picker]').forEach(box=>{
   const key=box.dataset.picker,options=key==='category'?cat.categories:cat.exercises(form.elements.category.value),selected=form.elements[key].value;
   box.querySelector('.catalog-trigger span').textContent=selected||'请选择';
+  const signature=JSON.stringify([options,selected]);if(box.dataset.signature===signature)return;box.dataset.signature=signature;
   box.querySelector('.catalog-options').innerHTML=options.map(name=>`<div class="catalog-option"><button type="button" data-catalog-select="${esc(name)}" aria-pressed="${name===selected}">${esc(name)}</button><button type="button" class="catalog-delete" data-catalog-delete="${esc(name)}" aria-label="永久删除${esc(name)}选项" title="永久移除此选项">×</button></div>`).join('')+'<button type="button" class="catalog-custom" data-catalog-custom>＋ 自定义</button>';
  });
 }
@@ -126,7 +134,7 @@ async function saveOption(role,category,name,deleted=false){
 }
 function selectOption(key,name){
  const form=$('edit-form');form.elements[key].value=name;
- if(key==='category'&&form.elements.exercise)form.elements.exercise.value=catalogue(records).exercises(name)[0]||'';
+ if(key==='category'&&form.elements.exercise)form.elements.exercise.value=availableCatalogue().exercises(name)[0]||'';
  refreshPickers();if(editing.kind==='log')typeSuggestions();
 }
 $('fields').addEventListener('click',async event=>{
@@ -139,17 +147,19 @@ $('fields').addEventListener('click',async event=>{
  const deleting=button.hasAttribute('data-catalog-delete');if(!deleting&&!button.hasAttribute('data-catalog-save'))return;
  const name=(deleting?button.dataset.catalogDelete:box.querySelector('.catalog-name').value).trim(),category=key==='category'?name:form.elements.category.value;
  if(!name||!category){$('form-error').textContent='请先填写名称并选择身体部位。';return;}
- if(deleting&&!confirm(`永久从两人的选项中移除“${name}”？已有训练记录会保留。`))return;
- busy=true;$('save').disabled=true;$('form-error').textContent='';
- try{await saveOption(key,category,name,deleting);if(!deleting){selectOption(key,name);box.querySelector('.catalog-name').value='';box.querySelector('.catalog-create').hidden=true;menu.hidden=true;trigger.setAttribute('aria-expanded','false');}else if(form.elements[key].value===name){selectOption(key,'');}await sync();}
- catch(error){$('form-error').textContent=error.message+'；选项未确认保存，请重试。';}
- finally{busy=false;$('save').disabled=false;}
+ const optionKey=JSON.stringify([key,category,name]);
+ editing.catalogChanges.set(optionKey,{role:key,category,name,deleted:deleting,id:crypto.randomUUID()});
+ if(!deleting){selectOption(key,name);box.querySelector('.catalog-name').value='';box.querySelector('.catalog-create').hidden=true;menu.hidden=true;trigger.setAttribute('aria-expanded','false');}else refreshPickers();
+ $('form-error').textContent='选项变更尚未保存：点击“保存记录”生效，点击“取消”全部放弃。';
+
 });
 $('fields').addEventListener('keydown',event=>{const box=event.target.closest('[data-picker]');if(!box)return;if(event.key==='Escape'&&!box.querySelector('.catalog-menu').hidden){event.preventDefault();event.stopPropagation();box.querySelector('.catalog-menu').hidden=true;box.querySelector('.catalog-trigger').setAttribute('aria-expanded','false');box.querySelector('.catalog-trigger').focus();}if(event.key==='Enter'&&event.target.matches('.catalog-name')){event.preventDefault();box.querySelector('[data-catalog-save]').click();}});
 function openEditor(kind,record=null,initial=null){
- const cat=catalogue(records),defaultCategory=cat.categories[0]||'';
+ if(busy){status('保存仍在处理，请稍候；可使用关闭按钮收起弹窗。');return;}
+ if(!$('draft-notice').hidden&&editing){$('editor').showModal();refreshPickers();return;}
+ const cat=availableCatalogue(),defaultCategory=cat.categories[0]||'';
  const value=initial||record?.current.value||{person:viewer,date,title:'',interval:0,end:'',category:defaultCategory,exercise:cat.exercises(defaultCategory)[0]||'',sets:3,reps:10,weight:0,unit:'kg',name:''};
- editing={kind,entity:record?.id||crypto.randomUUID(),parents:record?.heads.map(x=>x.id)||[],person:value.person,id:crypto.randomUUID(),bases:new Map(records.map(r=>[r.id,r.heads.map(x=>x.id)]))};
+ editing={catalogChanges:new Map(),kind,entity:record?.id||crypto.randomUUID(),parents:record?.heads.map(x=>x.id)||[],person:value.person,id:crypto.randomUUID(),bases:new Map(records.map(r=>[r.id,r.heads.map(x=>x.id)]))};
  $('dialog-title').textContent=({plan:'训练计划',log:'训练动作',exercise:'自定义动作',best:'修正个人最佳',settings:'显示设置'})[kind];
  let html=kind==='settings'?`<p class="wide muted">${PEOPLE[value.person]} 的显示设置</p>`:`<fieldset class="wide person-picker"><legend>谁的训练</legend>${Object.keys(PEOPLE).map(p=>`<label data-person="${p}"><input type="radio" name="person" value="${p}" ${p===value.person?'checked':''} ${record&&kind==='best'?'disabled':''}>${personBadge(p)}</label>`).join('')}</fieldset>`;
  if(kind==='plan')html+=field('title','训练项目','text',value.title,'required maxlength="200"')+field('date','开始日期','date',value.date,'required')+field('interval','每隔多少天一次（0 = 仅当天）','number',value.interval,'min="0" max="3650" step="1" required')+field('end','结束日期（可不填）','date',value.end||'')+'<p class="wide muted">例如每隔 2 天：9 月 1 日、3 日、5 日。编辑会修改整个重复系列。</p>';
@@ -160,11 +170,11 @@ function openEditor(kind,record=null,initial=null){
   else {html+=picker('exercise','动作名称',value.exercise)+field('date','日期','date',value.date,'required');if(kind==='log')html+=field('sets','组数','number',value.sets,'min="1" max="1000" step="1" required');html+=field('reps','每组次数','number',value.reps,'min="1" max="10000" step="1" required')+field('weight','重量','number',value.weight,'min="0" max="5000" step="0.01" required')+choices('unit','重量单位',['kg','lb'],value.unit);}
  }
  if(kind==='log')html+=field('trainingType','训练类型（可选择当天计划或自填）','text',value.trainingType||'', 'list="training-types" maxlength="200" placeholder="留空按身体部位匹配，如背部训练"')+'<datalist id="training-types"></datalist>';
- $('fields').innerHTML=html;$('form-error').textContent='';$('editor').showModal();
+ $('fields').innerHTML=html;$('form-error').textContent='';$('draft-notice').hidden=true;$('editor').showModal();
  if(kind==='log'){typeSuggestions();$('edit-form').elements.date.onchange=typeSuggestions;$('edit-form').querySelectorAll('[name=person]').forEach(input=>input.onchange=typeSuggestions);}
  refreshPickers();const category=$('edit-form').elements.category;if(category)category.onchange=()=>selectOption('category',category.value);
 }
-async function submit(event){event.preventDefault();if(busy)return;busy=true;$('save').disabled=true;$('form-error').textContent='';
+async function submit(event){event.preventDefault();if(busy)return;busy=true;$('save').disabled=true;$('save').textContent='正在保存…';$('fields').inert=true;$('form-error').textContent='';
  try{const values=Object.fromEntries(new FormData($('edit-form')));values.person=values.person||editing.person;for(const key of ['interval','sets','reps','weight','font','theme'])if(key in values)values[key]=Number(values[key]);
   if(editing.kind==='best'){
    const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify([values.person,values.category,values.exercise])));
@@ -173,10 +183,26 @@ async function submit(event){event.preventDefault();if(busy)return;busy=true;$('
    editing.parents=editing.bases.get(editing.entity)||[];
   }
   const payload=JSON.stringify(values);if(editing.lastPayload&&editing.lastPayload!==payload)editing.id=crypto.randomUUID();editing.lastPayload=payload;
-  if(editing.kind==='exercise')await saveOption('exercise',values.category,values.name.trim());else await append(editing.kind,values,editing.entity,editing.parents,false,editing.id);$('editor').close();await sync();
- }catch(error){$('form-error').textContent=error.message+'；内容仍保留，可重试。';}finally{busy=false;$('save').disabled=false;}
+  if(editing.kind==='exercise')await saveOption('exercise',values.category,values.name.trim());else await append(editing.kind,values,editing.entity,editing.parents,false,editing.id);
+  for(const [key,change] of editing.catalogChanges){
+   if(!change.entity){change.entity=await catalogEntity(change.role,change.category,change.name);change.parents=getRecord(change.entity)?.heads.map(x=>x.id)||[];}
+   await append('exercise',{person:viewer,category:change.category,name:change.name,catalogRole:change.role},change.entity,change.parents,change.deleted,change.id);editing.catalogChanges.delete(key);
+  }
+  $('editor').close();$('draft-notice').hidden=true;void sync();
+ }catch(error){$('form-error').textContent=error.message+'；内容仍保留，可重试。';status(error.message,true);}finally{busy=false;$('save').disabled=false;$('save').textContent='保存记录';$('fields').inert=false;}
 }
-async function mutateButton(button,task){if(busy)return;busy=true;button.disabled=true;try{await task();await sync();}catch(error){status(error.message,true);}finally{busy=false;button.disabled=false;}}
+let confirmationResolve=null;
+function askConfirmation(message){
+ if(confirmationResolve||busy)return Promise.resolve(false);
+ $('confirmation-message').textContent=message;$('action-confirm').showModal();
+ return new Promise(resolve=>{confirmationResolve=resolve;});
+}
+function finishConfirmation(accepted){const resolve=confirmationResolve;confirmationResolve=null;$('action-confirm').close();resolve?.(accepted);}
+$('confirm-yes').onclick=()=>finishConfirmation(true);$('confirm-no').onclick=()=>finishConfirmation(false);
+$('action-confirm').addEventListener('cancel',event=>{event.preventDefault();finishConfirmation(false);});
+const mutationAttempts=new Map();
+async function changeRecord(record,value,deleted){const parents=record.heads.map(x=>x.id),key=JSON.stringify([record.id,parents,value,deleted]);if(!mutationAttempts.has(key))mutationAttempts.set(key,crypto.randomUUID());const result=await append(record.current.kind,value,record.id,parents,deleted,mutationAttempts.get(key));mutationAttempts.delete(key);return result;}
+async function mutateButton(button,task){if(busy)return;busy=true;button.disabled=true;try{status('正在保存更改…');await task();void sync();}catch(error){status(error.message,true);}finally{busy=false;button.disabled=false;}}
 async function savePreferences(){
  if(!preferenceDirty||!active||preferenceSaving)return;const serial=preferenceSerial;preferenceSaving=true;
  const value={person:viewer,theme:Number($('theme').value),font:Number($('font').value),fontFamily:$('font-family').value,fontColor:$('font-color').value,cnFontVersion:1,appearanceVersion:2};const record=getRecord(settingsId(viewer));
@@ -195,14 +221,21 @@ document.querySelectorAll('[data-tab]').forEach(button=>button.onclick=()=>switc
 $('prev').onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()-1,1);render();};$('next').onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()+1,1);render();};$('today').onclick=()=>{month=new Date(new Date().getFullYear(),new Date().getMonth(),1);selectDate(today);};
 $('day').onchange=()=>{if($('day').value)selectDate($('day').value);};
 $('open-daily').onclick=()=>switchTab('daily');$('add-plan').onclick=()=>openEditor('plan');$('add-log').onclick=()=>openEditor('log');$('add-exercise').onclick=()=>openEditor('exercise');$('add-best').onclick=()=>openEditor('best');
-$('close-dialog').onclick=$('cancel').onclick=()=>{if(!busy)$('editor').close();};$('editor').addEventListener('cancel',event=>{if(busy)event.preventDefault();});$('edit-form').onsubmit=submit;
+function closeEditor(){
+ $('editor').close();
+ if(busy){$('draft-notice').hidden=false;status('弹窗已收起，保存结果仍待确认；可打开草稿查看。');}
+ else{editing=null;$('draft-notice').hidden=true;}
+}
+$('close-dialog').onclick=$('cancel').onclick=closeEditor;
+$('editor').addEventListener('cancel',event=>{event.preventDefault();closeEditor();});
+$('resume-draft').onclick=()=>{if(editing){$('editor').showModal();refreshPickers();}};$('edit-form').onsubmit=submit;
 $('refresh').onclick=async()=>{await savePreferences();await sync();};$('export').onclick=exportBackup;
 for(const id of ['theme','font','font-family','font-color'])$(id).oninput=()=>{preferenceDirty=true;preferenceSerial++;applyPreferences(Number($('theme').value),Number($('font').value),$('font-family').value,$('font-color').value);clearTimeout(preferenceTimer);preferenceTimer=setTimeout(savePreferences,700);};
 $('close-detail').onclick=()=>$('training-detail').close();
 $('detail-daily').onclick=()=>{$('training-detail').close();selectDate(detailContext.date);switchTab('daily');};
 $('detail-add').onclick=()=>{const v=detailContext,cat=catalogue(records),category=cat.categories.find(c=>sameTrainingType(c,v.type))||cat.categories[0]||'';$('training-detail').close();openEditor('log',null,{person:v.person,date:v.date,trainingType:v.type,category,exercise:cat.exercises(category)[0]||'',sets:3,reps:10,weight:0,unit:'kg'});};
 $('more-history').onclick=()=>{historyLimit+=60;render();};
-document.addEventListener('click',event=>{
+document.addEventListener('click',async event=>{
  const button=event.target.closest('button');if(!button)return;
  if(button.dataset.selectDate)selectDate(button.dataset.selectDate);
  if(button.dataset.detailType){openDetail(button.dataset.person,button.dataset.detailDate,button.dataset.detailType);return;}
@@ -210,8 +243,8 @@ document.addEventListener('click',event=>{
  if(button.dataset.best){const v=personalBests(records,button.dataset.bestPerson).find(v=>v.category+' / '+v.exercise===button.dataset.best);openEditor('best',v.entity?getRecord(v.entity):null,v);}
  if(button.dataset.action){const action=button.dataset.action;
   if(action==='edit')openEditor(getRecord(button.dataset.id).current.kind,getRecord(button.dataset.id));
-  if(action==='delete'){const r=getRecord(button.dataset.id);if(confirm(r.current.kind==='best'?'取消手动修正，恢复自动计算？':'删除此记录？重复计划将删除整个系列，历史仍保留。'))mutateButton(button,()=>append(r.current.kind,r.current.value,r.id,r.heads.map(x=>x.id),true));}
-  if(action==='restore'){const op=operations.get(button.dataset.id);if(confirm('将此历史内容恢复为新版本？')){const r=getRecord(op.entity);mutateButton(button,()=>append(op.kind,op.value,op.entity,r.heads.map(x=>x.id),false));}}
+  if(action==='delete'){const r=getRecord(button.dataset.id);if(await askConfirmation(r.current.kind==='best'?'取消手动修正，恢复自动计算？':'删除此记录？重复计划将删除整个系列，历史仍保留。'))mutateButton(button,()=>changeRecord(r,r.current.value,true));}
+  if(action==='restore'){const op=operations.get(button.dataset.id);if(await askConfirmation('将此历史内容恢复为新版本？')){const r=getRecord(op.entity);mutateButton(button,()=>changeRecord(r,op.value,false));}}
  }
  if(button.dataset.resolve){const r=getRecord(button.dataset.entity),op=operations.get(button.dataset.resolve);mutateButton(button,()=>append(op.kind,op.value,r.id,r.heads.map(x=>x.id),op.deleted));}
 });
