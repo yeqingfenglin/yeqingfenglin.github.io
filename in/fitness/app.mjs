@@ -1,4 +1,4 @@
-import {PEOPLE,EXERCISES,THEMES,validateOperation,materialize,occurs,personalBests,normalizeBackup,trainingType,sameTrainingType,matchingTraining,catalogue} from './core.mjs?v=20260915-7';
+import {PEOPLE,EXERCISES,THEMES,validateOperation,materialize,occurs,personalBests,normalizeBackup,trainingType,sameTrainingType,matchingTraining,catalogue} from './core.mjs?v=20260915-8';
 const $=id=>document.getElementById(id), local=window.FITNESS_LOCAL===true;
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dateString=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -13,10 +13,12 @@ const getRecord=id=>records.find(r=>r.id===id);
 const settingsId=p=>p==='dengjie'?'00000000-0000-4000-8000-000000000001':'00000000-0000-4000-8000-000000000002';
 const PERSON_PALETTES=[['#50765a','#a7617b'],['#487da0','#966892'],['#a85c40','#698052'],['#8664a3','#538783'],['#af627c','#678462'],['#927637','#a16672'],['#3f8774','#92719d'],['#637e95','#977257'],['#94bcec','#d6a9cc'],['#ddbd76','#9bc6b1']];
 const FONTS={round:'JournalChinese, "YouYuan", "幼圆", "STYuanti", "Yuanti SC", "Microsoft YaHei", sans-serif',hand:'"KaiTi", "STKaiti", "楷体", cursive',sans:'"Microsoft YaHei", "PingFang SC", sans-serif',serif:'"Songti SC", "SimSun", serif'};
-function applyPreferences(theme,font,fontFamily='round',fontColor='ink'){
+function applyPreferences(theme,font,fontFamily='sans',fontColor='ink'){
  const palette=THEMES[theme]||THEMES[0],pair=PERSON_PALETTES[theme]||PERSON_PALETTES[0],style=document.documentElement.style;
  ['--bg','--paper','--ink','--accent'].forEach((key,i)=>style.setProperty(key,palette[i+1]));
  pair.forEach((color,i)=>style.setProperty('--person-'+(i+1),color));
+ const accents=[['#17241f','#cce86d'],['#192d40','#b4daf5'],['#35251f','#f1c78c'],['#292239','#d6c2f3'],['#35212c','#f1bad0'],['#30291e','#e9d294'],['#17352d','#ade6c6'],['#202b36','#bfd1e3'],['#101823','#a9caf5'],['#171612','#e5c780']];
+ style.setProperty('--nav',accents[theme]?.[0]||accents[0][0]);style.setProperty('--highlight',accents[theme]?.[1]||accents[0][1]);style.setProperty('--on-accent',theme>=8?'#17211d':'#fff');
  style.setProperty('--font-family',FONTS[fontFamily]||FONTS.round);
  style.setProperty('--text',fontColor==='primary'?'color-mix(in srgb,var(--ink) 72%,var(--person-1))':fontColor==='secondary'?'color-mix(in srgb,var(--ink) 72%,var(--person-2))':'var(--ink)');
  style.fontSize='16px';style.setProperty('--reading-size',font+'px');style.colorScheme=theme>=8?'dark':'light';
@@ -24,7 +26,7 @@ function applyPreferences(theme,font,fontFamily='round',fontColor='ink'){
 }
 function personBadge(p){return `<span class="person-badge" data-person="${p}">${p==='dengjie'?'●':'◆'} ${PEOPLE[p]}</span>`;}
 function allBests(){return Object.keys(PEOPLE).flatMap(p=>personalBests(records,p));}
-function rebuild(){records=materialize([...operations.values()]);if(!preferenceDirty){const setting=getRecord(settingsId(viewer));if(setting&&!setting.current.deleted)applyPreferences(setting.current.value.theme,setting.current.value.font,setting.current.value.cnFontVersion?setting.current.value.fontFamily:'round',setting.current.value.fontColor);}render();}
+function rebuild(){records=materialize([...operations.values()]);if(!preferenceDirty){const setting=getRecord(settingsId(viewer));if(setting&&!setting.current.deleted)applyPreferences(setting.current.value.theme,setting.current.value.font,setting.current.value.appearanceVersion===2?setting.current.value.fontFamily:(setting.current.value.fontFamily==='round'?'sans':setting.current.value.fontFamily||'sans'),setting.current.value.fontColor);}render();}
 async function gateway(action,payload={}) {
  const {data:{session}}=await client.auth.getSession();
  if(!session) {lock('登录已失效，请返回内板重新登录。');throw Error('登录已失效');}
@@ -54,13 +56,21 @@ async function append(kind,value,entity=crypto.randomUUID(),parents=[],deleted=f
  else {const result=await gateway('fitness-append',{operation});saved=result.operation;known.add(result.key);}
  if(!active)throw Error('登录已失效');operations.set(saved.id,saved);rebuild();status(local?'已保存到本机':'已保存到 COS');return saved;
 }
-function switchTab(id){document.querySelectorAll('.panel').forEach(x=>x.hidden=x.id!==id);document.querySelectorAll('[data-tab]').forEach(x=>x.setAttribute('aria-selected',String(x.dataset.tab===id)));}
+function switchTab(id){const meta={calendar:['TRAINING CALENDAR','训练日历'],daily:['DAILY WORKOUT','每日训练'],bests:['PERSONAL BESTS','最佳成绩'],history:['REVISION HISTORY','修改历史']}[id];$('page-eyebrow').textContent=meta[0];$('page-title').textContent=meta[1];document.querySelectorAll('.panel').forEach(x=>x.hidden=x.id!==id);document.querySelectorAll('[data-tab]').forEach(x=>x.setAttribute('aria-selected',String(x.dataset.tab===id)));}
 function selectDate(value){date=value;$('day').value=date;render();}
 function description(op){const v=op.value;return `${PEOPLE[v.person]} · ${v.title||v.exercise||v.name||(op.kind==='settings'?'显示设置':'记录')}${v.date?' · '+v.date:''}${op.deleted?' · 已删除':''}`;}
 function actionButton(text,action,id){return `<button data-action="${action}" data-id="${id}">${text}</button>`;}
 function render(){
  $('month-title').textContent=`${month.getFullYear()}年 ${month.getMonth()+1}月`;$('selected-label').textContent=date+' · 训练计划';
  const plans=currentRecords('plan'),logs=currentRecords('log');
+ const chosen=new Date(date+'T12:00:00'),dailyStats=logs.filter(r=>r.current.value.date===date),monthPrefix=dateString(month).slice(0,7),monthLogs=logs.filter(r=>r.current.value.date.startsWith(monthPrefix));
+ const monthDays=new Set(monthLogs.map(r=>r.current.value.date)).size;
+ $('today-stamp').textContent=new Date(today+'T12:00:00').toLocaleDateString('zh-CN',{month:'long',day:'numeric'});
+ $('selected-month').textContent=(chosen.getMonth()+1)+'月';$('selected-day').textContent=chosen.getDate();$('selected-weekday').textContent=chosen.toLocaleDateString('zh-CN',{weekday:'long'});
+ $('month-days').innerHTML=monthDays+' <small>天</small>';$('month-progress').style.width=(monthDays/new Date(month.getFullYear(),month.getMonth()+1,0).getDate()*100)+'%';$('month-summary').textContent=`${month.getMonth()+1}月 · 两人共 ${monthLogs.length} 条动作记录`;
+ $('stat-actions').textContent=dailyStats.length;$('stat-sets').textContent=dailyStats.reduce((n,r)=>n+r.current.value.sets,0);
+ $('stat-volume').innerHTML=new Intl.NumberFormat('zh-CN',{maximumFractionDigits:1}).format(dailyStats.reduce((n,r)=>{const v=r.current.value;return n+v.sets*v.reps*v.weight*(v.unit==='lb'?.45359237:1);},0))+' <small>kg</small>';
+ $('stat-people').textContent=new Set(dailyStats.map(r=>r.current.value.person)).size;
  const offset=(new Date(month.getFullYear(),month.getMonth(),1).getDay()+6)%7,total=new Date(month.getFullYear(),month.getMonth()+1,0).getDate();
  let html='<div class="day-blank" aria-hidden="true"></div>'.repeat(offset);
  for(let d=1;d<=total;d++){
@@ -169,7 +179,7 @@ async function submit(event){event.preventDefault();if(busy)return;busy=true;$('
 async function mutateButton(button,task){if(busy)return;busy=true;button.disabled=true;try{await task();await sync();}catch(error){status(error.message,true);}finally{busy=false;button.disabled=false;}}
 async function savePreferences(){
  if(!preferenceDirty||!active||preferenceSaving)return;const serial=preferenceSerial;preferenceSaving=true;
- const value={person:viewer,theme:Number($('theme').value),font:Number($('font').value),fontFamily:$('font-family').value,fontColor:$('font-color').value,cnFontVersion:1};const record=getRecord(settingsId(viewer));
+ const value={person:viewer,theme:Number($('theme').value),font:Number($('font').value),fontFamily:$('font-family').value,fontColor:$('font-color').value,cnFontVersion:1,appearanceVersion:2};const record=getRecord(settingsId(viewer));
  try{await append('settings',value,settingsId(viewer),record?.heads.map(x=>x.id)||[]);if(serial===preferenceSerial)preferenceDirty=false;}catch(error){status('显示设置尚未保存：'+error.message+'；点击同步重试。',true);}finally{preferenceSaving=false;if(serial!==preferenceSerial)savePreferences();}
 }
 function exportBackup(){const blob=new Blob([JSON.stringify({format:'training-journal',version:1,operations:[...operations.values()]},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='training-journal-'+today+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}

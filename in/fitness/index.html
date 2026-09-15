@@ -3,33 +3,33 @@
 <head>
  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
  <meta name="robots" content="noindex,nofollow"><title>运动记录本 · Training Journal</title>
- <link rel="stylesheet" href="fitness.css?v=20260915-7">
+ <link rel="stylesheet" href="fitness.css?v=20260915-8">
  <script src="../../supabase-config.js"></script><script src="../../content-config.js"></script>
  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
- <script type="module" src="app.mjs?v=20260915-7"></script>
+ <script type="module" src="app.mjs?v=20260915-8"></script>
 </head>
 <body>
  <div id="gate" role="status">正在验证管理员身份…</div>
  <div id="app" hidden>
  <header><div class="header-links"><a id="back" href="../">← 返回内板</a><button class="history-link" data-tab="history">修改历史</button><button class="history-link" id="refresh">同步</button><button class="history-link" id="export">导出备份</button></div><div class="preferences"><label>配色 <select id="theme" aria-label="整体配色"></select></label><label>字体 <select id="font-family" aria-label="字体"><option value="round">站酷快乐体</option><option value="hand">手写日记</option><option value="sans">清爽黑体</option><option value="serif">温柔宋体</option></select></label><label>字色 <select id="font-color" aria-label="字体颜色"><option value="ink">主题墨色</option><option value="primary">一号柔彩</option><option value="secondary">二号柔彩</option></select></label><label>字号 <input id="font" type="range" min="14" max="22" value="16"><output id="font-value">16</output></label></div></header>
- <main>
+<div class="app-shell"><aside class="sidebar"><div class="brand"><div class="brand-mark" aria-hidden="true"><i></i><b></b><i></i></div><div><strong>动力簿</strong><small>WORKOUT NOTEBOOK</small></div></div><nav class="tabs" aria-label="记录本栏目"><button data-tab="calendar" aria-selected="true"><span class="nav-symbol">▦</span><span>训练日历<small>CALENDAR</small></span></button><button data-tab="daily"><span class="nav-symbol">✦</span><span>每日训练<small>DAILY WORKOUT</small></span></button><button data-tab="bests"><span class="nav-symbol">☆</span><span>个人最佳<small>PERSONAL BESTS</small></span></button></nav><div class="sidebar-card"><span>本月训练天数</span><strong id="month-days">0 <small>天</small></strong><div class="mini-progress"><i id="month-progress"></i></div><small id="month-summary">一起记录训练的每一天</small></div><div class="sidebar-bottom"><span class="connection-dot"></span> 管理员共享记录<small>JIE DENG &amp; BONING WANG</small></div></aside><main><div class="page-heading"><div><p class="eyebrow" id="page-eyebrow">TRAINING CALENDAR</p><h1 id="page-title">训练日历</h1></div><div class="today-chip"><span>今天</span><strong id="today-stamp"></strong></div></div>
  <div class="toolbar"><div class="people-legend" aria-label="两人记录颜色"><span class="person-badge" data-person="dengjie">● Jie Deng</span><span class="person-badge" data-person="wangboning">◆ Boning Wang</span><small>一起记录，各自闪光</small></div><span id="status" role="status" aria-live="polite">正在读取…</span><label class="button" id="import-label" hidden>导入备份<input id="import" type="file" accept="application/json,.json" hidden></label></div>
  <div id="conflicts" class="notice" hidden></div>
- <div class="journal-layout"><nav class="tabs" aria-label="记录本栏目"><button data-tab="calendar" aria-selected="true"><span class="nav-symbol">▦</span><span>月历计划<small>OUR CALENDAR</small></span></button><button data-tab="daily"><span class="nav-symbol">✦</span><span>每日训练<small>DAILY MOVEMENT</small></span></button><button data-tab="bests"><span class="nav-symbol">☆</span><span>个人最佳<small>PERSONAL BESTS</small></span></button></nav><div class="journal-content">
- <section id="calendar" class="panel">
-  <div class="section-top"><div><p class="eyebrow">MAKE ROOM FOR MOVEMENT</p><h2 id="month-title"></h2></div><div class="row"><button id="prev" aria-label="上个月">←</button><button id="today">今天</button><button id="next" aria-label="下个月">→</button><button class="primary" id="add-plan">＋ 添加计划</button></div></div>
-  <div class="weekdays"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div><div id="month-grid" class="month-grid"></div>
-  <div class="section-top"><h3 id="selected-label"></h3><button id="open-daily">记录当天训练 ↗</button></div><div id="plans"></div>
+
+ <div class="journal-content"><section id="calendar" class="panel calendar-layout"><article class="calendar-card">
+  <div class="section-top"><div><p class="eyebrow">MONTHLY PLAN</p><h2 id="month-title"></h2></div><div class="row"><button id="prev" aria-label="上个月">←</button><button id="today">今天</button><button id="next" aria-label="下个月">→</button></div></div>
+  <div class="weekdays"><span>周一</span><span>周二</span><span>周三</span><span>周四</span><span>周五</span><span>周六</span><span>周日</span></div><div id="month-grid" class="month-grid"></div>
+  </article><aside class="day-plan-card"><div class="selected-date-heading"><div class="date-tile"><small id="selected-month"></small><strong id="selected-day"></strong></div><div><p id="selected-weekday"></p><h2>当天计划</h2></div></div><h3 id="selected-label" class="sr-only"></h3><button class="primary full-width" id="add-plan">＋ 添加计划</button><div id="plans"></div><button id="open-daily" class="text-button full-width">记录当天训练 ↗</button></aside>
  </section>
  <section id="daily" class="panel" hidden>
-  <div class="section-top"><div><p class="eyebrow">SHOW UP. WRITE IT DOWN.</p><h2>今日的积累</h2></div><div class="row"><label>日期 <input id="day" type="date"></label><button class="primary" id="add-log">＋ 添加动作</button><button id="add-exercise">自定义动作</button></div></div>
+  <div class="section-top"><div><p class="eyebrow">DAILY WORKOUT</p><h2>每日训练明细</h2></div><div class="row"><label>日期 <input id="day" type="date"></label><button class="primary" id="add-log">＋ 添加动作</button><button id="add-exercise">自定义动作</button></div></div>
   <p class="muted">两人的训练放在同一张表中，按姓名与颜色区分。每一横栏记录一个动作；若各组次数或重量不同，请分别添加横栏。</p>
-  <div class="table-wrap"><table><thead><tr><th>训练者</th><th>训练类型</th><th>身体部位</th><th>动作</th><th>组数</th><th>每组次数</th><th>重量</th><th>操作</th></tr></thead><tbody id="logs"></tbody></table></div>
+  <div class="detail-stats"><div><span>训练动作</span><strong id="stat-actions">0</strong></div><div><span>总组数</span><strong id="stat-sets">0</strong></div><div><span>训练容量</span><strong id="stat-volume">0 <small>kg</small></strong></div><div><span>训练人数</span><strong id="stat-people">0</strong></div></div><div class="table-wrap"><table><thead><tr><th>训练者</th><th>训练类型</th><th>身体部位</th><th>动作</th><th>组数</th><th>每组次数</th><th>重量</th><th>操作</th></tr></thead><tbody id="logs"></tbody></table></div>
  </section>
  <section id="bests" class="panel" hidden><div class="section-top"><div><p class="eyebrow">YOUR OWN BENCHMARK</p><h2>个人最佳成绩</h2></div><button id="add-best">＋ 手动设置最佳</button></div><p class="muted">按单组最大重量自动计算，同重量取次数更多的一组；kg / lb 自动换算比较。手动修正优先，取消修正即可恢复自动结果。有冲突的记录暂不参与计算。</p><div id="best-list" class="best-grid"></div></section>
  <section id="history" class="panel" hidden><h2>每一次修改，都有迹可循</h2><p class="muted">保留两位管理员的修改与删除历史。恢复将新增一个版本。</p><div id="history-list"></div><button id="more-history" hidden>显示更多历史</button></section>
- </div></div><footer>小小的坚持 · 长长的进步 <span id="mode-label">管理员共享记录 · COS 云端储存</span></footer>
- </main></div>
+ </div><footer>动力簿 · WORKOUT NOTEBOOK <span id="mode-label">管理员共享记录 · COS 云端储存</span></footer>
+ </main></div></div>
  <dialog id="editor"><form id="edit-form"><div class="section-top"><h2 id="dialog-title"></h2><button type="button" id="close-dialog" aria-label="关闭">×</button></div><div id="fields"></div><p id="form-error" class="error" role="alert"></p><div class="dialog-actions"><button type="button" id="cancel">取消</button><button class="primary" id="save" type="submit">保存记录</button></div></form></dialog>
 <dialog id="training-detail" aria-labelledby="detail-title"><div class="section-top"><div><div id="detail-person"></div><h2 id="detail-title"></h2><p id="detail-date" class="muted"></p></div><button id="close-detail" aria-label="关闭训练详情">×</button></div><div id="detail-content"></div><div class="dialog-actions"><button id="detail-daily">前往每日训练</button><button id="detail-add" class="primary">＋ 登记动作</button></div></dialog>
 </body></html>

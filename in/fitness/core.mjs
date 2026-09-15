@@ -15,11 +15,11 @@ export function catalogue(records){
  return {categories:[...categories],exercises:c=>[...(items.get(c)||[])]};
 }
 export const THEMES = [
- ['苔绿','#eef2e9','#ffffff','#193b30','#496c43'],['海盐蓝','#edf3f8','#ffffff','#203849','#306d96'],
- ['赤陶','#f8eee6','#fffcf8','#4f342b','#ad5337'],['薰衣草','#f2eef8','#ffffff','#403253','#7961a5'],
- ['玫瑰','#faedf1','#fffafb','#54323e','#a94c70'],['暖沙','#f6f1e4','#fffdf7','#443e29','#866b28'],
- ['薄荷','#eaf7f2','#ffffff','#22483e','#277b63'],['石墨','#eceff2','#ffffff','#303940','#526372'],
- ['午夜','#141f2c','#203043','#eef5ff','#90bff1'],['黑金','#211f1a','#302d26','#fff3d5','#e2bd64']
+ ['森林青柠','#f2f5f3','#ffffff','#17211d','#2f7956'],['海盐晴空','#f0f4f8','#ffffff','#1d2e41','#326b97'],
+ ['陶土奶油','#f7f2eb','#fffdf9','#3b2a22','#a55536'],['鸢尾紫','#f3f1f8','#ffffff','#302540','#76609c'],
+ ['玫瑰雾','#f8f1f3','#fffdfd','#402731','#a25271'],['燕麦琥珀','#f6f3ea','#fffefa','#393124','#88672f'],
+ ['薄荷玉','#eef6f3','#fcfffd','#17392f','#287763'],['雾蓝灰','#f1f3f5','#ffffff','#283440','#526e87'],
+ ['午夜蓝','#111a25','#1c2938','#e9f1fc','#93b7e3'],['曜石金','#1c1b18','#292720','#f6efdf','#dabb73']
 ];
 export function dayNumber(date) { return Date.parse(date+'T00:00:00Z')/86400000; }
 export function validDate(date) { return typeof date==='string' && /^\d{4}-\d{2}-\d{2}$/.test(date) && Number.isFinite(dayNumber(date)) && new Date(dayNumber(date)*86400000).toISOString().slice(0,10)===date; }
